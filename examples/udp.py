@@ -10,7 +10,7 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.kernels import Config
+from bigtalk.configs import Config
 from bigtalk.objects import Object
 from bigtalk.threads import Threads
 

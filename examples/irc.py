@@ -14,7 +14,7 @@ import time
 from bigtalk.brokers import Broker
 from bigtalk.clients import Output
 from bigtalk.command import Commands
-from bigtalk.kernels import Config as Main
+from bigtalk.configs import Config as Main
 from bigtalk.message import Message
 from bigtalk.methods import Methods
 from bigtalk.persist import Disk, Locater

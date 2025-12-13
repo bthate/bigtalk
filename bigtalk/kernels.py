@@ -16,17 +16,6 @@ from .utility import Utils
 from .workdir import Workdir
 
 
-class Config(Default):
-
-    debug = False
-    init = ""
-    level = "info"
-    name = ""
-    opts = ""
-    sets = Default()
-    version = 0
-
-
 class Kernel:
 
     @staticmethod
@@ -60,6 +49,5 @@ class Kernel:
 
 def __dir__():
     return (
-        'Config',
         'Kernel'
     )

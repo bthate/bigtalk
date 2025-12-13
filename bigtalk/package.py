@@ -52,19 +52,19 @@ class Mods:
     def list():
         mods = []
         for name, path in Mods.dirs.items():
-            if name in Utils.spl(Config.ignore):
-                continue
             if not os.path.exists(path):
                 continue
             mods.extend([
                 x[:-3] for x in os.listdir(path)
-                if x.endswith(".py") and not x.startswith("__")
+                if x.endswith(".py") 
+                and not x.startswith("__")
+                and name not in Utils.spl(Config.ignore)
             ])
         return ",".join(sorted(mods)).strip()
 
     @staticmethod
     def mods(names):
-        return [Mods.get(x) for x in sorted(Utils.spl(names))]
+        return [Mods.get(x) for x in sorted(Utils.spl(names)) if x not in Utils.spl(Config.ignore)]
 
 
 def __dir__():

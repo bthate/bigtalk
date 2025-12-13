@@ -14,7 +14,8 @@ sys.path.insert(0, os.getcwd())
 
 from bigtalk.clients import CLI
 from bigtalk.command import Commands
-from bigtalk.kernels import Config, Kernel
+from bigtalk.configs import Config
+from bigtalk.kernels import Kernel
 from bigtalk.loggers import Logging
 from bigtalk.message import Message
 from bigtalk.methods import Methods
@@ -146,6 +147,7 @@ class Scripts:
     def console():
         import readline
         Methods.parse(Config, " ".join(sys.argv[1:]))
+        Config.ignore = Config.sets.ignore or Config.ignore
         Logging.level(Config.sets.level or Config.level or "info")
         if "v" in Config.opts:
             Runtime.banner()

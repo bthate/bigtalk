@@ -10,7 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.kernels import Config
+from bigtalk.configs import Config
 from bigtalk.objects import Object
 from bigtalk.package import Mods
 from bigtalk.threads import Threads

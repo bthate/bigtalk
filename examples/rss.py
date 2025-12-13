@@ -20,7 +20,7 @@ from urllib.parse import quote_plus, urlencode
 
 
 from bigtalk.brokers import Broker
-from bigtalk.kernels import Config
+from bigtalk.configs import Config
 from bigtalk.methods import Methods
 from bigtalk.objects import Object
 from bigtalk.persist import Disk, Locater
