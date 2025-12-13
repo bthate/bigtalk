@@ -2,6 +2,7 @@
 # This file is placed in the Public Domain.
 
 
+import logging
 import os
 import sys
 import threading
@@ -14,6 +15,7 @@ sys.path.insert(0, os.getcwd())
 from bigtalk.clients import CLI
 from bigtalk.command import Commands
 from bigtalk.kernels import Config, Kernel
+from bigtalk.loggers import Logging
 from bigtalk.message import Message
 from bigtalk.methods import Methods
 from bigtalk.package import Mods
@@ -22,10 +24,20 @@ from bigtalk.utility import Utils
 from bigtalk.workdir import Workdir
 
 
+import bigtalk.modules as MODS
+
+
 Config.ignore = "wsd,udp"
 Config.level = "info"
 Config.name = "bigtalk" 
 Config.version = 3
+
+
+Mods.add("mods", "examples")
+Mods.addpkg(MODS)
+
+
+Workdir.wdr = os.path.expanduser(f"~/.{Config.name}")
 
 
 class CLI(CLI):
@@ -133,13 +145,15 @@ class Scripts:
     @staticmethod
     def console():
         import readline
-        Runtime.banner()
         Methods.parse(Config, " ".join(sys.argv[1:]))
+        Logging.level(Config.sets.level or Config.level or "info")
+        if "v" in Config.opts:
+            Runtime.banner()
         if "a" in Config.opts:
             Config.init = Mods.list()
         else:
             Config.init = Config.sets.init or Config.init
-        Kernel.scanner(Config.init)
+        Kernel.scanner(Mods.list())
         Commands.add(Cmds.cmd, Cmds.ver)
         Kernel.init(Config.init, "w" in Config.opts)
         csl = Console()
@@ -165,6 +179,7 @@ class Scripts:
     def service():
         Runtime.privileges()
         Workdir.pidfile(Utils.pidname(Config.name))
+        Logging.level(Config.level)
         Kernel.scanner(Config.init or "irc,rss")
         Commands.add(Cmds.cmd, Cmds.ver)
         Kernel.init(Config.init or "irc,rss")
@@ -189,8 +204,8 @@ class Cmds:
 
 
 def main():
+    Workdir.skel()
     check = Runtime.check
-    Kernel.configure(check("m"), check("n"))
     if check("b"):
         threading.excepthook = threadhook
     if check('z'):

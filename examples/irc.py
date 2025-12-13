@@ -15,10 +15,9 @@ from bigtalk.brokers import Broker
 from bigtalk.clients import Output
 from bigtalk.command import Commands
 from bigtalk.kernels import Config as Main
-from bigtalk.locater import Locater
 from bigtalk.message import Message
 from bigtalk.methods import Methods
-from bigtalk.persist import Disk
+from bigtalk.persist import Disk, Locater
 from bigtalk.objects import Object
 from bigtalk.threads import Threads
 from bigtalk.workdir import Workdir

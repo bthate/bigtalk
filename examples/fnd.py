@@ -4,8 +4,8 @@
 import time
 
 
-from bigtalk.locater import Locater
 from bigtalk.methods import Methods
+from bigtalk.persist import Locater
 from bigtalk.utility import Utils
 from bigtalk.workdir import Workdir
 

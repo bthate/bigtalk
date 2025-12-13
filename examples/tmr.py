@@ -7,10 +7,9 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.locater import Locater
 from bigtalk.objects import Object
 from bigtalk.repeats import Timed
-from bigtalk.persist import Disk
+from bigtalk.persist import Disk, Locater
 from bigtalk.utility import NoDate, Time, Utils
 from bigtalk.workdir import Workdir
 

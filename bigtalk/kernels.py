@@ -30,13 +30,6 @@ class Config(Default):
 class Kernel:
 
     @staticmethod
-    def configure(local=False, network=False):
-        assert Config.name
-        Logging.level(Config.sets.level or "info")
-        Workdir.configure(Config.name)
-        Mods.configure(local, network)
-
-    @staticmethod
     def forever():
         while True:
             try:
@@ -46,15 +39,18 @@ class Kernel:
 
     @staticmethod
     def init(names, wait=False):
+        mods = []
         thrs = []
         for name in Utils.spl(names):
             mod = Mods.get(name)
             if "init" not in dir(mod):
                 continue
             thrs.append(Threads.launch(mod.init))
+            mods.append(name)
         if wait:
             for thr in thrs:
                 thr.join()
+        return mods
 
     @staticmethod
     def scanner(names):

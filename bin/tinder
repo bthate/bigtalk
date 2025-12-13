@@ -13,21 +13,21 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Client, Output
-from bigtalk.command import Commands
-from bigtalk.kernels import Config, Kernel
-from bigtalk.message import Message
-from bigtalk.methods import Methods
-from bigtalk.package import Mods
-from bigtalk.threads import Threads
-from bigtalk.utility import Utils
-from bigtalk.workdir import Workdir
+from tob.clients import Client, Output
+from tob.command import Commands
+from tob.kernels import Config, Kernel
+from tob.message import Message
+from tob.methods import Methods
+from tob.package import Mods
+from tob.threads import Threads
+from tob.utility import Utils
+from tob.workdir import Workdir
 
 
 Config.debug = True
-Config.name = "bigtalk"
+Config.name = "tob"
 Config.opts = "m"
-Config.version = 2
+Config.version = 150
 
 
 Workdir.wdr = ".test"

@@ -4,9 +4,8 @@
 import time
 
 
-from bigtalk.locater import Locater
 from bigtalk.objects import Object
-from bigtalk.persist import Disk
+from bigtalk.persist import Disk, Locater
 from bigtalk.utility import Utils
 
 

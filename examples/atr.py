@@ -4,7 +4,7 @@
 "fields"
 
 
-from bigtalk.locater import Locater
+from bigtalk.persist import Locater
 from bigtalk.workdir import Workdir
 
 

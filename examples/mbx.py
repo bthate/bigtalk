@@ -6,10 +6,9 @@ import os
 import time
 
 
-from bigtalk.locater import Locater
 from bigtalk.methods import Methods
 from bigtalk.objects import Object
-from bigtalk.persist import Disk
+from bigtalk.persist import Disk, Locater
 from bigtalk.statics import MONTH
 from bigtalk.utility import Utils
 
