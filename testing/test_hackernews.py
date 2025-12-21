@@ -4,7 +4,7 @@
 import unittest
 
 
-from examples.rss import Parser
+from bigtalk.modules.rss import Parser
 
 
 class TestParse(unittest.TestCase):

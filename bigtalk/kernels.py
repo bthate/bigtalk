@@ -29,8 +29,8 @@ class Kernel:
         Workdir.skel()
         Kernel.parse(Config, txt)
         Log.level(Config.sets.level or Config.level or "info")
-        Mods.add("examples", "examples")
-        Mods.add("modules", Workdir.moddir())
+        #Mods.add("examples", "examples")
+        #Mods.add("modules", Workdir.moddir())
         Mods.add("bigtalk.modules", os.path.join(Mods.path, "modules"))
         if "0" in Config.opts:
             Config.ignore = Mods.list()
