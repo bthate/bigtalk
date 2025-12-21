@@ -6,22 +6,18 @@ import random
 import time
 
 
-from bigtalk.brokers import Broker
-from bigtalk.objects import Object
-from bigtalk.repeats import Timed
-from bigtalk.persist import Disk, Locater
-from bigtalk.utility import NoDate, Time, Utils
-from bigtalk.workdir import Workdir
+from bigtalk.classes import Broker, Dict, Disk, Locate, Object
+from bigtalk.classes import Time, Timed, Utils, Workdir
+from bigtalk.utility import NoDate
 
 
-items = Object.items
-rand  = random.SystemRandom()
+rand = random.SystemRandom()
 
 
 def init():
-    Timers.path = Locater.last(Timers.timers) or Workdir.path(Timers.timers)
+    Timers.path = Locate.last(Timers.timers) or Workdir.path(Timers.timers)
     remove = []
-    for tme, args in items(Timers.timers):
+    for tme, args in Dict.items(Timers.timers):
         if not args:
             continue
         orig, channel, txt = args
@@ -65,7 +61,7 @@ def tmr(event):
     result = ""
     if not event.rest:
         nmr = 0
-        for tme, txt in items(Timers.timers):
+        for tme, txt in Dict.items(Timers.timers):
             lap = float(tme) - time.time()
             if lap > 0:
                 event.reply(f'{nmr} {" ".join(txt)} {Utils.elapsed(lap)}')

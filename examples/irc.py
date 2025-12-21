@@ -11,21 +11,11 @@ import threading
 import time
 
 
-from bigtalk.brokers import Broker
-from bigtalk.clients import Output
-from bigtalk.command import Commands
+from bigtalk.classes import Broker, Commands, Dict, Disk, Locate, Message
+from bigtalk.classes import Method, Object, Output, Thread, Workdir
 from bigtalk.configs import Config as Main
-from bigtalk.message import Message
-from bigtalk.methods import Methods
-from bigtalk.persist import Disk, Locater
-from bigtalk.objects import Object
-from bigtalk.threads import Threads
-from bigtalk.workdir import Workdir
 
 
-fmt  = Methods.fmt
-get  = Broker.get
-keys = Object.keys
 lock = threading.RLock()
 
 
@@ -34,7 +24,7 @@ def init():
     irc.start()
     irc.events.joined.wait(30.0)
     if irc.events.joined.is_set():
-        logging.warning(fmt(irc.cfg, skip=["name", "password", "realname", "username"]))
+        logging.warning(Method.fmt(irc.cfg, skip=["name", "word", "realname", "username"]))
     else:
         irc.stop()
     return irc
@@ -93,7 +83,7 @@ class Event(Message):
         self.text = ""
 
     def dosay(self, txt):
-        bot = get(self.orig)
+        bot = Broker.get(self.orig)
         bot.dosay(self.channel, txt)
 
 
@@ -454,7 +444,7 @@ class IRC(Output):
         self.state.keeprunning = False
         self.state.stopkeep = True
         self.stop()
-        Threads.launch(init)
+        Thread.launch(init)
 
     def size(self, chan):
         if chan in self.cache:
@@ -482,7 +472,7 @@ class IRC(Output):
         self.state.lastline = splitted[-1]
 
     def start(self):
-        Locater.last(self.cfg)
+        Locate.last(self.cfg)
         if self.cfg.channel not in self.channels:
             self.channels.append(self.cfg.channel)
         self.events.ready.clear()
@@ -490,8 +480,8 @@ class IRC(Output):
         self.events.joined.clear()
         Output.start(self)
         if not self.state.keeprunning:
-            Threads.launch(self.keep)
-        Threads.launch(
+            Thread.launch(self.keep)
+        Thread.launch(
             self.doconnect,
             self.cfg.server or "localhost",
             self.cfg.nick,
@@ -510,12 +500,12 @@ class IRC(Output):
 
 
 def cb_auth(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     bot.docommand(f"AUTHENTICATE {bot.cfg.word or bot.cfg.password}")
 
 
 def cb_cap(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     if (bot.cfg.word or bot.cfg.password) and "ACK" in evt.arguments:
         bot.direct("AUTHENTICATE PLAIN")
     else:
@@ -523,20 +513,20 @@ def cb_cap(evt):
 
 
 def cb_error(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     bot.state.nrerror += 1
     bot.state.error = evt.text
-    logging.debug(fmt(evt))
+    logging.debug(Method.fmt(evt))
 
 
 def cb_h903(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     bot.direct("CAP END")
     bot.events.authed.set()
 
 
 def cb_h904(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     bot.direct("CAP END")
     bot.events.authed.set()
 
@@ -550,24 +540,24 @@ def cb_log(evt):
 
 
 def cb_ready(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     bot.events.ready.set()
 
 
 def cb_001(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     bot.events.logon.set()
 
 
 def cb_notice(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     if evt.text.startswith("VERSION"):
         txt = f"\001VERSION {Config.name.upper()} {Config.version} - {bot.cfg.username}\001"
         bot.docommand("NOTICE", evt.channel, txt)
 
 
 def cb_privmsg(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     if not bot.cfg.commands:
         return
     if evt.text:
@@ -582,11 +572,11 @@ def cb_privmsg(evt):
         if evt.text:
             evt.text = evt.text[0].lower() + evt.text[1:]
         if evt.text:
-            Threads.launch(Commands.command, evt)
+            Thread.launch(Commands.command, evt)
 
 
 def cb_quit(evt):
-    bot = get(evt.orig)
+    bot = Broker.get(evt.orig)
     logging.debug("quit from %s", bot.cfg.server)
     bot.state.nrerror += 1
     bot.state.error = evt.text
@@ -599,17 +589,17 @@ def cb_quit(evt):
 
 def cfg(event):
     config = Config()
-    fnm = Locater.last(config)
+    fnm = Locate.last(config)
     if not event.sets:
         event.reply(
-            fmt(
+            Method.fmt(
                 config,
-                keys(config),
+                Dict.keys(config),
                 skip="control,name,word,realname,sleep,username".split(",")
             )
         )
     else:
-        Methods.edit(config, event.sets)
+        Method.edit(config, event.sets)
         Disk.write(config, fnm or Workdir.path(config))
         event.reply("ok")
 
@@ -618,7 +608,7 @@ def mre(event):
     if not event.channel:
         event.reply("channel is not set.")
         return
-    bot = get(event.orig)
+    bot = Broker.get(event.orig)
     if "cache" not in dir(bot):
         event.reply("bot is missing cache")
         return

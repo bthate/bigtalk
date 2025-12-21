@@ -19,11 +19,6 @@ class Broker:
                yield obj
 
     @staticmethod
-    def display(evt):
-        bot = Broker.get(evt.orig)
-        bot.display(evt)
-
-    @staticmethod
     def get(origin):
         return Broker.objects.get(origin)
 

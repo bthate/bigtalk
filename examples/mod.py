@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-from bigtalk.package import Mods
+from bigtalk.classes import Mods
 
 
 def mod(event):

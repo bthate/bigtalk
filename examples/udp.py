@@ -9,10 +9,7 @@ import threading
 import time
 
 
-from bigtalk.brokers import Broker
-from bigtalk.configs import Config
-from bigtalk.objects import Object
-from bigtalk.threads import Threads
+from bigtalk.classes import Broker, Config, Object, Thread
 
 
 def init():
@@ -71,7 +68,7 @@ class UDP(Object):
                          )
 
     def start(self):
-        Threads.launch(self.loop)
+        Thread.launch(self.loop)
 
 
 def toudp(host, port, txt):

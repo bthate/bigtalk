@@ -4,8 +4,7 @@
 "fields"
 
 
-from bigtalk.persist import Locater
-from bigtalk.workdir import Workdir
+from bigtalk.classes import Locate, Workdir
 
 
 def atr(event):
@@ -16,7 +15,7 @@ def atr(event):
         else:
             event.reply("no types")
         return
-    items = Locater.attrs(event.args[0])
+    items = Locate.attrs(event.args[0])
     if not items:
         event.reply("no fields")
     else:

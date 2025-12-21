@@ -8,12 +8,14 @@ import datetime
 import importlib.util
 import inspect
 import os
+import pathlib
 import re
 import time
 
 
-from .objects import Object
-from .statics import MONTH, TIMES
+from .methods import Method
+from .objects import Dict
+from .statics import Static
 
 
 class NoDate(Exception):
@@ -22,6 +24,18 @@ class NoDate(Exception):
 
 
 class Time:
+
+    @staticmethod
+    def date(daystr):
+        daystr = daystr.encode('utf-8', 'replace').decode("utf-8")
+        res = time.time()
+        for fmat in Static.TIMES:
+            try:
+                res = time.mktime(time.strptime(daystr, fmat))
+                break
+            except ValueError:
+                pass
+        return res
 
     @staticmethod
     def day(daystr):
@@ -44,9 +58,79 @@ class Time:
             day = int(day)
             month = int(month)
             yea = int(yea)
-            date = f"{day} {MONTH[month]} {yea}"
+            date = f"{day} {Static.MONTH[month]} {yea}"
             return time.mktime(time.strptime(date, r"%d %b %Y"))
         raise NoDate(daystr)
+
+    @staticmethod
+    def elapsed(seconds, short=True):
+        txt = ""
+        nsec = float(seconds)
+        if nsec < 1:
+            return f"{nsec:.2f}s"
+        yea     = 365 * 24 * 60 * 60
+        week    = 7 * 24 * 60 * 60
+        nday    = 24 * 60 * 60
+        hour    = 60 * 60
+        minute  = 60
+        yeas    = int(nsec / yea)
+        nsec   -= yeas * yea
+        weeks   = int(nsec / week)
+        nsec   -= weeks * week
+        nrdays  = int(nsec / nday)
+        nsec   -= nrdays * nday
+        hours   = int(nsec / hour)
+        nsec   -= hours * hour
+        minutes = int(nsec / minute)
+        nsec   -= minutes * minute
+        sec     = int(nsec / 1)
+        nsec   -= nsec - sec
+        if yeas:
+            txt += f"{yeas}y"
+        if weeks:
+            nrdays += weeks * 7
+        if nrdays:
+            txt += f"{nrdays}d"
+        if hours:
+            txt += f"{hours}h"
+        if short and txt:
+            return txt.strip()
+        if minutes:
+            txt += f"{minutes}m"
+        if sec:
+            txt += f"{sec}s"
+        txt = txt.strip()
+        return txt
+
+    @staticmethod
+    def extract(daystr):
+        previous = ""
+        line = ""
+        daystr = str(daystr)
+        res = None
+        for word in daystr.split():
+            line = previous + " " + word
+            previous = word
+            try:
+                res = Utils.extractdate(line.strip())
+                break
+            except ValueError:
+                res = None
+            line = ""
+        return res
+
+    @staticmethod
+    def fntime(daystr):
+        datestr = " ".join(daystr.split(os.sep)[-2:])
+        datestr = datestr.replace("_", " ")
+        if "." in datestr:
+            datestr, rest = datestr.rsplit(".", 1)
+        else:
+            rest = ""
+        timed = time.mktime(time.strptime(datestr, "%Y-%m-%d %H:%M:%S"))
+        if rest:
+            timed += float("." + rest)
+        return float(timed)
 
     @staticmethod
     def hour(daystr):
@@ -103,23 +187,6 @@ class Time:
         return target
 
     @staticmethod
-    def extract(daystr):
-        previous = ""
-        line = ""
-        daystr = str(daystr)
-        res = None
-        for word in daystr.split():
-            line = previous + " " + word
-            previous = word
-            try:
-                res = Utils.extractdate(line.strip())
-                break
-            except ValueError:
-                res = None
-            line = ""
-        return res
-
-    @staticmethod
     def today():
         return str(datetime.datetime.today()).split()[0]
 
@@ -127,60 +194,23 @@ class Time:
 class Utils:
 
     @staticmethod
-    def elapsed(seconds, short=True):
-        txt = ""
-        nsec = float(seconds)
-        if nsec < 1:
-            return f"{nsec:.2f}s"
-        yea     = 365 * 24 * 60 * 60
-        week    = 7 * 24 * 60 * 60
-        nday    = 24 * 60 * 60
-        hour    = 60 * 60
-        minute  = 60
-        yeas    = int(nsec / yea)
-        nsec   -= yeas * yea
-        weeks   = int(nsec / week)
-        nsec   -= weeks * week
-        nrdays  = int(nsec / nday)
-        nsec   -= nrdays * nday
-        hours   = int(nsec / hour)
-        nsec   -= hours * hour
-        minutes = int(nsec / minute)
-        nsec   -= minutes * minute
-        sec     = int(nsec / 1)
-        nsec   -= nsec - sec
-        if yeas:
-            txt += f"{yeas}y"
-        if weeks:
-            nrdays += weeks * 7
-        if nrdays:
-            txt += f"{nrdays}d"
-        if hours:
-            txt += f"{hours}h"
-        if short and txt:
-            return txt.strip()
-        if minutes:
-            txt += f"{minutes}m"
-        if sec:
-            txt += f"{sec}s"
-        txt = txt.strip()
-        return txt
+    def cdir(path):
+        pth = pathlib.Path(path)
+        pth.parent.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
-    def extractdate(daystr):
-        daystr = daystr.encode('utf-8', 'replace').decode("utf-8")
-        res = time.time()
-        for fmat in TIMES:
-            try:
-                res = time.mktime(time.strptime(daystr, fmat))
-                break
-            except ValueError:
-                pass
-        return res
+    def expand(cls, keys=None):
+        #stack = inspect.stack(1)[1]
+        #context = stack.code_context[0]
+        #print(dir(stack.frame))
+        for key, value in Dict.items(cls):
+            if keys and key not in Utils.spl(keys):
+                continue
+            inspect.stack(1)[1].frame.f_globals[key] = value
 
     @staticmethod
     def ident(obj):
-        return os.path.join(Object.fqn(obj), *str(datetime.datetime.now()).split())
+        return os.path.join(Method.fqn(obj), *str(datetime.datetime.now()).split())
 
     @staticmethod
     def importer(name, pth=""):
@@ -214,13 +244,6 @@ class Utils:
     @staticmethod
     def where(obj):
         return os.path.dirname(inspect.getfile(obj))
-
-    @staticmethod
-    def wrapped(func):
-        try:
-            func()
-        except (KeyboardInterrupt, EOFError):
-            pass
 
 
 def __dir__():

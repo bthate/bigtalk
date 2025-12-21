@@ -7,9 +7,10 @@
 from .objects import Default
 
 
-class Config:
+class Config(Default):
 
     debug = False
+    gets = Default()
     ignore = ""
     init = ""
     level = "info"

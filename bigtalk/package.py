@@ -8,8 +8,10 @@ import os
 
 
 from .configs import Config
-from .workdir import Workdir
 from .utility import Utils
+
+
+spl = Utils.spl
 
 
 class Mods:
@@ -22,10 +24,6 @@ class Mods:
     @staticmethod
     def add(name, path):
         Mods.dirs[name] = path
-
-    @staticmethod
-    def addpkg(pkg):
-        Mods.add(pkg.__name__, pkg.__path__[0])
 
     @staticmethod
     def get(name):
@@ -49,22 +47,25 @@ class Mods:
         return mod
 
     @staticmethod
-    def list():
+    def list(ignore=""):
         mods = []
         for name, path in Mods.dirs.items():
+            if name in spl(ignore):
+                continue
             if not os.path.exists(path):
                 continue
             mods.extend([
                 x[:-3] for x in os.listdir(path)
-                if x.endswith(".py") 
-                and not x.startswith("__")
-                and name not in Utils.spl(Config.ignore)
+                if x.endswith(".py") and not x.startswith("__")
             ])
         return ",".join(sorted(mods)).strip()
 
     @staticmethod
     def mods(names):
-        return [Mods.get(x) for x in sorted(Utils.spl(names)) if x not in Utils.spl(Config.ignore)]
+        return [
+                Mods.get(x) for x in sorted(spl(names))
+                if x not in spl(Config.ignore)
+                or x in spl(Config.sets.init)]
 
 
 def __dir__():

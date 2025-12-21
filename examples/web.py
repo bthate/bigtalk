@@ -10,10 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.configs import Config
-from bigtalk.objects import Object
-from bigtalk.package import Mods
-from bigtalk.threads import Threads
+from bigtalk.classes import Config, Mods, Object, Thread
 
 
 def init():
@@ -56,7 +53,7 @@ class HTTP(HTTPServer, Object):
         self.shutdown()
 
     def start(self):
-        Threads.launch(self.serve_forever)
+        Thread.launch(self.serve_forever)
         self._status = "ok"
 
     def request(self):

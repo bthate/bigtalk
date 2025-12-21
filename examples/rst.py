@@ -10,10 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.configs import Config
-from bigtalk.objects import Object
-from bigtalk.threads import Threads
-from bigtalk.workdir import Workdir
+from bigtalk.classes import Config, Object, Thread, Workdir
 
 
 def init():
@@ -52,7 +49,7 @@ class REST(HTTPServer, Object):
 
     def start(self):
         self._status = "ok"
-        Threads.launch(self.serve_forever)
+        Thread.launch(self.serve_forever)
 
     def request(self):
         self._last = time.time()

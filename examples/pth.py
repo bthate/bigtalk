@@ -4,7 +4,7 @@
 import os
 
 
-from bigtalk.package import Mods
+from bigtalk.classes import Mods
 
 
 def pth(event):

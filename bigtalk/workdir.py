@@ -16,11 +16,6 @@ class Workdir:
     wdr = ""
 
     @staticmethod
-    def cdir(path):
-        pth = pathlib.Path(path)
-        pth.parent.mkdir(parents=True, exist_ok=True)
-
-    @staticmethod
     def path(obj):
         return Workdir.store(Utils.ident(obj))
 
@@ -37,15 +32,6 @@ class Workdir:
     @staticmethod
     def moddir(modname: str = ""):
         return os.path.join(Workdir.wdr, modname or "mods")
-
-    @staticmethod
-    def pidfile(filename):
-        if os.path.exists(filename):
-            os.unlink(filename)
-        path2 = pathlib.Path(filename)
-        path2.parent.mkdir(parents=True, exist_ok=True)
-        with open(filename, "w", encoding="utf-8") as fds:
-            fds.write(str(os.getpid()))
 
     @staticmethod
     def pidname(name: str):

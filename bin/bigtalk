@@ -2,8 +2,8 @@
 # This file is placed in the Public Domain.
 
 
-import logging
 import os
+import pathlib
 import sys
 import threading
 import time
@@ -12,33 +12,23 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import CLI
-from bigtalk.command import Commands
-from bigtalk.configs import Config
-from bigtalk.kernels import Kernel
-from bigtalk.loggers import Logging
-from bigtalk.message import Message
-from bigtalk.methods import Methods
-from bigtalk.package import Mods
-from bigtalk.statics import SYSTEMD
-from bigtalk.utility import Utils
-from bigtalk.workdir import Workdir
+from bigtalk.classes import CLI, Commands, Config, Dict, Kernel, Message, Method
+from bigtalk.classes import Log, Mods, Static, Thread, Utils, Workdir
 
 
-import bigtalk.modules as MODS
+"defines"
 
 
 Config.ignore = "wsd,udp"
 Config.level = "info"
 Config.name = "bigtalk" 
-Config.version = 3
+Config.version = 440
 
 
-Mods.add("mods", "examples")
-Mods.addpkg(MODS)
+expand = Utils.expand
 
 
-Workdir.wdr = os.path.expanduser(f"~/.{Config.name}")
+"clients"
 
 
 class CLI(CLI):
@@ -62,14 +52,18 @@ class Console(CLI):
         return evt
 
 
+"runtime"
+
+
 class Runtime:
 
     @staticmethod
     def banner():
         tme = time.ctime(time.time()).replace("  ", " ")
-        print("%s %s since %s (%s)" % (
+        print("%s %s %s since %s (%s)" % (
                                        Config.name.upper(),
                                        Config.version,
+                                       Config.opts.upper(),
                                        tme,
                                        Config.level.upper()
                                       ))
@@ -109,6 +103,24 @@ class Runtime:
         os.nice(10)
 
     @staticmethod
+    def forever():
+        while True:
+            try:
+                time.sleep(0.1)
+            except (KeyboardInterrupt, EOFError):
+                break
+
+    @staticmethod
+    def pidfile(filename):
+        if os.path.exists(filename):
+            os.unlink(filename)
+        path2 = pathlib.Path(filename)
+        path2.parent.mkdir(parents=True, exist_ok=True)
+        with open(filename, "w", encoding="utf-8") as fds:
+            fds.write(str(os.getpid()))
+
+
+    @staticmethod
     def privileges():
         import getpass
         import pwd
@@ -125,67 +137,75 @@ class Runtime:
         except termios.error:
             pass
         try:
-            Utils.wrapped(func)
+            Runtime.wrapped(func)
         finally:
-            if old:
-                termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
+            pass
+        if old:
+            termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
+
+    @staticmethod
+    def wrapped(func):
+        try:
+            func()
+        except (KeyboardInterrupt, EOFError):
+            pass
+
+
+"scripts"
 
 
 class Scripts:
 
+    TXT = " ".join(sys.argv[1:])
+
     @staticmethod
     def background():
-        Runtime.daemon(check("v"), check("m"))
-        Runtime.privileges()
-        Workdir.pidfile(Workdir.pidname(Config.name))
-        Commands.add(Cmds.cmd, Cmds.ver)
-        Kernel.scanner(Mods.list() or "irc,rss")
-        Kernel.init(Mods.list() or "irc,rss")
-        Kernel.forever()
+        daemon(Runtime.check("v"), Runtime.check("m"))
+        privileges()
+        pidfile(Workdir.pidname(Config.name))
+        boot(Scripts.TXT)
+        scanner(Cmds.cmd, Cmds.ver)
+        init()
+        forever()
 
     @staticmethod
     def console():
         import readline
-        Methods.parse(Config, " ".join(sys.argv[1:]))
-        Config.ignore = Config.sets.ignore or Config.ignore
-        Logging.level(Config.sets.level or Config.level or "info")
-        if "v" in Config.opts:
-            Runtime.banner()
-        if "a" in Config.opts:
-            Config.init = Mods.list()
-        else:
-            Config.init = Config.sets.init or Config.init
-        Kernel.scanner(Mods.list())
-        Commands.add(Cmds.cmd, Cmds.ver)
-        Kernel.init(Config.init, "w" in Config.opts)
+        banner()
+        if check("0"):
+            Config.ignore = Mods.list()
+        boot(Scripts.TXT)
+        scanner(Cmds.cmd, Cmds.ver)
+        init("w" in Config.opts)
         csl = Console()
         csl.start()
-        Kernel.forever()
+        forever()
 
     @staticmethod
     def control():
         if len(sys.argv) == 1:
             return
-        Kernel.scanner(Mods.list())
-        Commands.add(Cmds.cmd, Cmds.srv, Cmds.ver)
-        csl = CLI()
-        csl.silent = False
+        boot(Scripts.TXT)
+        scanner(*Dict.values(Cmds))
+        cli = CLI()
         evt = Message()
-        evt.orig = repr(csl)
+        evt.orig = repr(cli)
         evt.text = " ".join(sys.argv[1:])
         evt.type = "command"
-        Commands.command(evt)
+        command(evt)
         evt.wait()
 
     @staticmethod
     def service():
-        Runtime.privileges()
-        Workdir.pidfile(Utils.pidname(Config.name))
-        Logging.level(Config.level)
-        Kernel.scanner(Config.init or "irc,rss")
-        Commands.add(Cmds.cmd, Cmds.ver)
-        Kernel.init(Config.init or "irc,rss")
-        Kernel.forever()
+        privileges()
+        pidfile(Workdir.pidname(Config.name))
+        boot(Scripts.TXT)
+        scanner(Cmds.cmd, Cmds.ver)
+        init()
+        forever()
+
+
+"commands"
 
 
 class Cmds:
@@ -194,32 +214,55 @@ class Cmds:
     def cmd(event):
         event.reply(",".join(sorted(Commands.names or Commands.cmds)))
 
+    def cpy(event):
+        import shutil
+        path = os.path.join(
+                            Mods.path.rsplit("nixt")[-3],
+                            "nixt",
+                            "share",
+                            "nixt",
+                            "examples"
+                           ) 
+        if not os.path.exists(path):
+            event.reply(f"{path} doesn't exist.")
+            return
+        event.reply(f"using {path}")
+        shutil.copytree(path, Workdir.moddir(), dirs_exist_ok=True)
+        event.reply("done")
+
     @staticmethod
     def srv(event):
         import getpass
         name = getpass.getuser()
-        event.reply(SYSTEMD % (Config.name.upper(), name, name, name, Config.name))
+        event.reply(Static.SYSTEMD % (Config.name.upper(), name, name, name, Config.name))
 
     @staticmethod
     def ver(event):
-        event.reply(f"{Config.name.upper()} {Config.version}")
+        event.reply(f"{Config.name.upper()} {Config.version} {Config.opts}")
+
+
+"namespace"
+
+
+expand(Kernel)
+expand(Runtime)
+expand(Commands, "command")
+
+
+"runtime"
 
 
 def main():
-    Workdir.skel()
-    check = Runtime.check
-    if check("b"):
-        threading.excepthook = threadhook
     if check('z'):
         Config.debug = True
     if check("c"):
-        Runtime.wrap(Scripts.console)
+        wrap(Scripts.console)
     elif check("d"):
         Scripts.background()
-    elif check("s"):
-        Utils.wrapped(Scripts.service)
+    elif Runtime.check("s"):
+        wrapped(Scripts.service)
     else:
-        Utils.wrapped(Scripts.control)
+        wrapped(Scripts.control)
 
 
 if __name__ == "__main__":

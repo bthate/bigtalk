@@ -223,7 +223,7 @@ opml
 |
 """
 
-from bigtalk.configs import Config
+from bigtalk.classes import Config
 
 
 def man(event):

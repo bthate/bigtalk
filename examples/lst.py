@@ -1,7 +1,7 @@
 # This file is been placed in the Public Domain.
 
 
-from bigtalk.workdir import Workdir
+from bigtalk.classes import Workdir
 
 
 def lst(event):

@@ -4,9 +4,7 @@
 import time
 
 
-from bigtalk.objects import Object
-from bigtalk.persist import Disk, Locater
-from bigtalk.utility import Utils
+from bigtalk.classes import Disk, Locate, Object, Time
 
 
 class Log(Object):
@@ -19,8 +17,8 @@ class Log(Object):
 def log(event):
     if not event.rest:
         nmr = 0
-        for fnm, obj in Locater.find('log', event.gets):
-            lap = Utils.elapsed(time.time() - Locater.fntime(fnm))
+        for fnm, obj in Locate.find('log', event.gets):
+            lap = Time.elapsed(time.time() - Time.fntime(fnm))
             event.reply(f'{nmr} {obj.txt} {lap}')
             nmr += 1
         if not nmr:

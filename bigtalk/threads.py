@@ -18,7 +18,7 @@ class Task(threading.Thread):
     def __init__(self, func, *args, daemon=True, **kwargs):
         super().__init__(None, self.run, None, (), daemon=daemon)
         self.event = None
-        self.name = kwargs.get("name", Threads.name(func))
+        self.name = kwargs.get("name", Thread.name(func))
         self.queue = queue.Queue()
         self.result = None
         self.starttime = time.time()
@@ -53,10 +53,11 @@ class Task(threading.Thread):
         except Exception as ex:
             if self.event:
                 self.event.ready()
-            raise ex
+            logging.exception(ex)
+            _thread.interrupt_main()
 
 
-class Threads:
+class Thread:
 
     @staticmethod
     def launch(func, *args, **kwargs):
@@ -75,18 +76,9 @@ class Threads:
            return repr(obj).split()[1]
         return repr(obj)
 
-    @staticmethod
-    def threadhook(args):
-        kind, value, trace, thr = args
-        exc = value.with_traceback(trace)
-        if kind not in (KeyboardInterrupt, EOFError):
-            logging.exception(exc)
-        thr.event and thr.event.ready()
-        os._exit(0)
-
 
 def __dir__():
     return (
-        'Threads',
+        'Thread',
     )
  

@@ -7,9 +7,7 @@ import logging
 from random import SystemRandom
 
 
-from bigtalk.brokers import Broker
-from bigtalk.message import Message
-from bigtalk.repeats import Repeater
+from bigtalk.classes import Broker, Message, Repeater
 
 
 rand = SystemRandom()
