@@ -16,6 +16,9 @@ from bigtalk.classes import CLI, Commands, Config, Dict, Kernel, Log, Message
 from bigtalk.classes import Method, Mods, Static, Thread, Utils, Workdir
 
 
+TXT = " ".join(sys.argv[1:])
+
+
 Config.ignore = "wsd,udp"
 Config.level = "info"
 Config.name = "bigtalk" 
@@ -141,14 +144,12 @@ class Runtime:
 
 class Scripts:
 
-    TXT = " ".join(sys.argv[1:])
 
     @staticmethod
     def background():
         daemon(Runtime.check("v"), Runtime.check("m"))
         privileges()
-        pidfile(Workdir.pidname(Config.name))
-        boot(Scripts.TXT)
+        boot(TXT)
         scanner(Cmds.cmd, Cmds.ver)
         init()
         forever()
@@ -159,7 +160,7 @@ class Scripts:
         banner()
         if check("0"):
             Config.ignore = Mods.list()
-        boot(Scripts.TXT)
+        boot(TXT)
         scanner(Cmds.cmd, Cmds.ver)
         init("w" in Config.opts)
         csl = Console()
@@ -170,7 +171,7 @@ class Scripts:
     def control():
         if len(sys.argv) == 1:
             return
-        boot(Scripts.TXT)
+        boot(TXT)
         scanner(*Dict.values(Cmds))
         cli = CLI()
         evt = Message()
@@ -183,8 +184,7 @@ class Scripts:
     @staticmethod
     def service():
         privileges()
-        pidfile(Workdir.pidname(Config.name))
-        boot(Scripts.TXT)
+        boot(TXT)
         scanner(Cmds.cmd, Cmds.ver)
         init()
         forever()

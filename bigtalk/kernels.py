@@ -5,6 +5,7 @@
 
 
 import os
+import pathlib
 import time
 
 
@@ -26,11 +27,10 @@ class Kernel:
     @staticmethod
     def boot(txt):
         Workdir.wdr = Workdir.wdr or os.path.expanduser(f"~/.{Config.name}")
+        Kernel.pidfile(Workdir.pidname(Config.name))
         Workdir.skel()
         Kernel.parse(Config, txt)
         Log.level(Config.sets.level or Config.level or "info")
-        #Mods.add("examples", "examples")
-        #Mods.add("modules", Workdir.moddir())
         Mods.add("bigtalk.modules", os.path.join(Mods.path, "modules"))
         if "0" in Config.opts:
             Config.ignore = Mods.list()
@@ -109,6 +109,15 @@ class Kernel:
             obj.text  = obj.cmd + " " + obj.rest
         else:
             obj.text = obj.cmd or ""
+
+    @staticmethod
+    def pidfile(filename):
+        if os.path.exists(filename):
+            os.unlink(filename)
+        path2 = pathlib.Path(filename)
+        path2.parent.mkdir(parents=True, exist_ok=True)
+        with open(filename, "w", encoding="utf-8") as fds:
+            fds.write(str(os.getpid()))
 
     @staticmethod
     def scanner(*cmds):
