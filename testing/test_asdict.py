@@ -4,16 +4,15 @@
 import unittest
 
 
-from bigtalk.methods import Methods
-from bigtalk.objects import Object
+from bigtalk.methods import Method
+from bigtalk.objects import Dict, Object
+from bigtalk.utility import Utils
 
 
-fqn    = Object.fqn
-items  = Object.items
-keys   = Object.keys
-update = Object.update
-values = Object.values
-fmt    = Methods.fmt
+expand = Utils.expand
+
+expand(Dict)
+expand(Method, "fmt,fqn")
 
 
 VALIDJSON = '{"test": "bla"}'

@@ -7,7 +7,7 @@
 import unittest
 
 
-from bigtalk.clients import Client
+from bigtalk.handler import Client
 from bigtalk.message import Message
 
 
