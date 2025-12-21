@@ -12,23 +12,14 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.classes import CLI, Commands, Config, Dict, Kernel, Message, Method
-from bigtalk.classes import Log, Mods, Static, Thread, Utils, Workdir
-
-
-"defines"
+from bigtalk.classes import CLI, Commands, Config, Dict, Kernel, Log, Message
+from bigtalk.classes import Method, Mods, Static, Thread, Utils, Workdir
 
 
 Config.ignore = "wsd,udp"
 Config.level = "info"
 Config.name = "bigtalk" 
 Config.version = 440
-
-
-expand = Utils.expand
-
-
-"clients"
 
 
 class CLI(CLI):
@@ -50,9 +41,6 @@ class Console(CLI):
         evt.text = input("> ")
         evt.kind = "command"
         return evt
-
-
-"runtime"
 
 
 class Runtime:
@@ -151,9 +139,6 @@ class Runtime:
             pass
 
 
-"scripts"
-
-
 class Scripts:
 
     TXT = " ".join(sys.argv[1:])
@@ -205,9 +190,6 @@ class Scripts:
         forever()
 
 
-"commands"
-
-
 class Cmds:
 
     @staticmethod
@@ -242,6 +224,9 @@ class Cmds:
 
 
 "namespace"
+
+
+expand = Utils.expand
 
 
 expand(Kernel)
