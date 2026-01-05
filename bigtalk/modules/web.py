@@ -10,11 +10,14 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.classes import Config, Mods, Object, Thread
+from bigtalk.configs import Config
+from bigtalk.objects import Object
+from bigtalk.threads import launch
+from bigtalk.utility import where
 
 
 def init():
-    Cfg.path = os.path.join(Mods.path, "network", "html")
+    Cfg.path = where(Config)
     if not os.path.exists(os.path.join(Cfg.path, 'index.html')):
         logging.warning("no index.html")
         return
@@ -24,7 +27,7 @@ def init():
         logging.warning("http://%s:%s", Cfg.hostname, Cfg.port)
         return server
     except OSError as ex:
-        logging.warning(str(ex))
+        logging.warning("%s", str(ex))
 
 
 class Cfg:
@@ -53,7 +56,7 @@ class HTTP(HTTPServer, Object):
         self.shutdown()
 
     def start(self):
-        Thread.launch(self.serve_forever)
+        launch(self.serve_forever)
         self._status = "ok"
 
     def request(self):
@@ -94,7 +97,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if "favicon" in self.path:
             return
-        if Config.debug:
+        if getattr(Config, 'debug', False):
             return
         if self.path == "/":
             self.path = "index.html"

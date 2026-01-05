@@ -35,9 +35,15 @@ packages = [
     'bigtalk.modules',
     'bigtalk.network',
     'bigtalk.nucleus'
+    'bigtalk.nucleus.pdf',
+    'bigtalk.nucleus._static',
+    'bigtalk.nucleus._images'
 ]
 include-package-data = true
 
 
 [tool.setuptools.package-data]
-"bigtalk.nucleus" = ["*"]
+"bigtalk.nucleus"         = ["*"]
+"bigtalk.nucleus.pdf"     = ["*"]
+"bigtalk.nucleus._images" = ["*"]
+"bigtalk.nucleus._static" = ["*"]

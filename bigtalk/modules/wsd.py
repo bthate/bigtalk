@@ -7,7 +7,9 @@ import logging
 from random import SystemRandom
 
 
-from bigtalk.classes import Broker, Message, Repeater
+from bigtalk.brokers import objs
+from bigtalk.message import Message
+from bigtalk.threads import Repeater
 
 
 rand = SystemRandom()
@@ -21,7 +23,7 @@ def init():
 
 
 def wsd(event):
-    for bot in Broker.all("announce"):
+    for bot in objs("announce"):
         bot.announce(rand.choice(TXT.split("\n")).strip()[2:])
 
 

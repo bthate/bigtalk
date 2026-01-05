@@ -1,16 +1,17 @@
 # This file is placed in the Public Domain.
 
 
-from bigtalk.classes import Broker, Method, Thread
+from bigtalk.brokers import objs
+from bigtalk.threads import name
 
 
 def flt(event):
-    clts = Broker.all("announce")
+    clts = list(objs("announce"))
     if event.args:
         index = int(event.args[0])
         if index < len(clts):
-            event.reply(Method.fmt(list(clts)[index]), empty=True)
+            event.reply(str(type((clts[index]))))
         else:
-            event.reply(f"only {len(clts)} clients in fleet.")
+            event.reply("no matching client in fleet.")
         return
-    event.reply(' | '.join([Thread.name(o) for o in clts]))
+    event.reply(' | '.join([name(o) for o in clts]))

@@ -4,9 +4,10 @@
 import os
 
 
-from bigtalk.classes import Mods
+from bigtalk.configs import Config
+from bigtalk.utility import where
 
 
 def pth(event):
-    path = os.path.join(Mods.path, 'network', 'html', "index.html")
+    path = os.path.join(where(where), "nucleus", "index.html")
     event.reply(f"file://{path}")

@@ -4,12 +4,15 @@
 import time
 
 
-from bigtalk.classes import Locate, Method, Time, Workdir
+from bigtalk.locater import find
+from bigtalk.methods import fmt
+from bigtalk.timings import elapsed, fntime
+from bigtalk.workdir import kinds
 
 
 def fnd(event):
     if not event.rest:
-        res = sorted([x.split('.')[-1].lower() for x in Workdir.types()])
+        res = sorted([x.split('.')[-1].lower() for x in kinds()])
         if res:
             event.reply(",".join(res))
         else:
@@ -17,8 +20,8 @@ def fnd(event):
         return
     otype = event.args[0]
     nmr = 0
-    for fnm, obj in sorted(Locate.find(otype, event.gets), key=lambda x: Time.fntime(x[0])):
-        event.reply(f"{nmr} {Method.fmt(obj)} {Time.elapsed(time.time()-Time.fntime(fnm))}")
+    for fnm, obj in sorted(find(otype, event.gets), key=lambda x: fntime(x[0])):
+        event.reply(f"{nmr} {fmt(obj)} {elapsed(time.time()-fntime(fnm))}")
         nmr += 1
     if not nmr:
         event.reply("no result")

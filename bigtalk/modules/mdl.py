@@ -1,28 +1,35 @@
 # This file is placed in the Public Domain.
 
 
+"Genocide model of the Netherlands since 4 March 2019."
+
+
 import datetime
 import logging
 import time
 
 
-from bigtalk.classes import Broker, Dict, Message, Object, Repeater, Time
+from bigtalk.brokers import objs
+from bigtalk.message import Message
+from bigtalk.objects import Object, construct, keys
+from bigtalk.threads import Repeater
+from bigtalk.timings import elapsed
 
 
 def init():
-    for key in Dict.keys(oorzaken):
+    for key in keys(oorzaken):
         if "Psych" not in key:
             continue
         val = getattr(oorzaken, key, None)
         if val and int(val) > 10000:
             evt = Message()
-            evt.text = ""
+            evt.txt = ""
             evt.rest = key
             sec = seconds(val)
             name = aliases.get(key)
             repeater = Repeater(sec, cbstats, evt, thrname=name)
             repeater.start()
-            logging.warning("since %s", Time.elapsed(time.time()-STARTTIME))
+            logging.warning("since %s", elapsed(time.time()-STARTTIME))
 
 
 "defines"
@@ -30,7 +37,7 @@ def init():
 
 DAY = 24*60*60
 YEAR = 365*DAY
-SOURCE = "https://github.com/bthate/genocide"
+SOURCE = "https://github.com/bthate/bigtalk"
 STARTDATE = "2019-03-04 00:00:00"
 STARTTIME = time.mktime(time.strptime(STARTDATE, "%Y-%m-%d %H:%M:%S"))
 
@@ -55,11 +62,11 @@ aliases["Zwangerschap"] = "pregnancy"
 aliases["Suicide"] = "suicide"
 
 
-demo = {}
-demo["gehandicapten"] = 2000000
-demo["ggz"] = 800000
-demo["population"] = 17440000
-demo["part"] = int(7000000000 / demo["population"])
+demo = Object()
+demo.gehandicapten = 2000000
+demo.ggz = 800000
+demo.population = 17440000
+demo.part = 7000000000 / demo.population
 
 
 jaar = {}
@@ -81,6 +88,7 @@ def getalias(txt):
             break
     return result
 
+
 def getday():
     day = datetime.datetime.now()
     day = day.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -88,7 +96,7 @@ def getday():
 
 
 def getnr(nme):
-    for k in Dict.keys(oorzaken):
+    for k in keys(oorzaken):
         if nme.lower() in k.lower():
             return int(getattr(oorzaken, k))
     return 0
@@ -126,15 +134,15 @@ def hourly():
 
 def cbnow(_evt):
     delta = time.time() - STARTTIME
-    txt = Time.elapsed(delta) + " "
-    for nme in sorted(Dict.keys(oorzaken), key=lambda x: seconds(getnr(x))):
+    txt = elapsed(delta) + " "
+    for nme in sorted(keys(oorzaken), key=lambda x: seconds(getnr(x))):
         needed = seconds(getnr(nme))
         if needed > 60*60:
             continue
         nrtimes = int(delta/needed)
         txt += f"{getalias(nme)} {nrtimes} | "
-    txt += "https://pypi.org/project/genocide"
-    for bot in Broker.all("announce"):
+    txt += "https://pypi.org/project/bigtalk"
+    for bot in objs("announce"):
         bot.announce(txt)
 
 
@@ -149,15 +157,15 @@ def cbstats(evt):
         delta2 = time.time() - getday()
         thisday = int(delta2/needed)
         txt = "%s %s #%s (%s/%s/%s) every %s" % (
-            Time.elapsed(delta),
+            elapsed(delta),
             getalias(nme).upper(),
             nrtimes,
             thisday,
             nrday,
             nryear,
-            Time.elapsed(needed)
+            elapsed(needed)
         )
-        for bot in Broker.all("announce"):
+        for bot in objs("announce"):
             bot.announce(txt)
 
 
@@ -166,14 +174,14 @@ def cbstats(evt):
 
 def dis(event):
     delta = time.time() - STARTTIME
-    txt = Time.elapsed(delta) + " "
-    for nme in sorted(Dict.keys(oorzaken), key=lambda x: seconds(getnr(x))):
+    txt = elapsed(delta) + " "
+    for nme in sorted(keys(oorzaken), key=lambda x: seconds(getnr(x))):
         needed = seconds(getnr(nme))
         if needed > 60*60:
             continue
         nrtimes = int(delta/needed)
         txt += f"{getalias(nme)} {nrtimes} | "
-    txt += "https://pypi.org/project/genocide"
+    txt += "https://pypi.org/project/bigtalk"
     event.reply(txt)
 
 
@@ -187,13 +195,13 @@ def now(event):
         nrday = int(DAY/needed)
         thisday = int(DAY % needed)
         txt = "%s %s #%s (%s/%s/%s) every %s" % (
-            Time.elapsed(delta),
-            getalias(nme),
+            elapsed(delta),
+            getalias(nme).upper(),
             nrtimes,
             thisday,
             nrday,
             nryear,
-            Time.elapsed(needed)
+            elapsed(needed)
         )
         event.reply(txt)
 
@@ -203,7 +211,7 @@ def now(event):
 
 oor = """"Totaal onderliggende doodsoorzaken (aantal)";
          "1 Infectieuze en parasitaire ziekten/Totaal infectieuze en parasitaire zktn (aantal)";
-         "1 Infectieuze en parasitaire ziekten/1.1 Tubercubigtalke (aantal)";
+         "1 Infectieuze en parasitaire ziekten/1.1 Tuberculose (aantal)";
          "1 Infectieuze en parasitaire ziekten/1.2 Meningokokkeninfecties (aantal)";
          "1 Infectieuze en parasitaire ziekten/1.3 Virale hepatitis (aantal)";
          "1 Infectieuze en parasitaire ziekten/1.4 AIDS (aantal)";
@@ -401,13 +409,13 @@ aantal = """
 
 
 oorzaak = Object()
-Dict.construct(oorzaak, zip(oor, aantal))
+construct(oorzaak, zip(oor, aantal))
 oorzaken = Object()
 
 
 def boot():
     _nr = -1
-    for key in Dict.keys(oorzaak):
+    for key in keys(oorzaak):
         _nr += 1
         if _nr == 0:
             continue

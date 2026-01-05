@@ -1,22 +1,20 @@
 # This file is placed in the Public Domain.
 
 
-"fields"
-
-
-from bigtalk.classes import Locate, Workdir
+from bigtalk.locater import attrs
+from bigtalk.workdir import kinds
 
 
 def atr(event):
     if not event.rest:
-        res = sorted([x.split('.')[-1].lower() for x in Workdir.types()])
+        res = sorted({x.split('.')[-1].lower() for x in kinds()})
         if res:
             event.reply(",".join(res))
         else:
             event.reply("no types")
         return
-    items = Locate.attrs(event.args[0])
-    if not items:
-        event.reply("no fields")
+    itms = attrs(event.args[0])
+    if not itms:
+        event.reply("no attributes")
     else:
-        event.reply(",".join(items))
+        event.reply(",".join(itms))
