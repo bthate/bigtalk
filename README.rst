@@ -1,64 +1,53 @@
-B I G T A L K
-=============
-
-
-**NAME**
-
-
-|
-| ``bigtalk`` - Big Talk
+| **Information and Evidence Unit**
+| **Office of the Prosecutor**
+| **Post Office Box 19519**
+| **2500 CM The Hague**
+| **The Netherlands** 
 |
 
 
-**SYNOPSIS**
+Hello Office of the Prosecutor, 
 
-::
+i write you in the context of communications and claims under art.15 of 
+the Rome Statute. i want to inform the prosecutor that the king of the 
+netherlands and his government are commiting 3 of the 5 crimes defined 
+in the Rome Statute. 
 
-    >>> from bigtalk.objects import Object
-    >>> from bigtalk.serials import Json
-    >>> o = Object()
-    >>> o.a = "b"
-    >>> print(Json.loads(Json.dumps(o)))
-    {'a': 'b'}
+The dutch government has introduced three new forced care laws, the Wfz 
+(wet forensische zorg) for criminals, the WvGGZ (Wet verplichte GGZ) for 
+the disturbed and addicted and the Wzd (Wet zorg en dwang) for the 
+handicapped.
 
+Both the chamber suggesting these laws to the king and the king himself 
+have been informed about the fact the the substances administered under 
+these laws are proven to be poison.
+ 
+There is proof the medication used in forced treatments in the 
+netherlands are poison, see copies of the ECHA <`European Chemical Agency`>
+website for:
 
-**DESCRIPTION**
+(1) ``haldol``
+(2) ``clozapine``
+(3) ``zyprexa``
+(4) ``abilify``
 
-BigTalk has all you need to program a unix cli program, such as disk
-perisistence for configuration files, event handler to handle the
-client/server connection, etc.
+With the mass scale torture with poison the king of the netherlands and 
+his chamber:
 
-BiGTalk contains python3 code to program objects in a functional
-way. it provides an “clean namespace” Object class that only has
-dunder methods, so the namespace is not cluttered with method names.
-This makes storing and reading to/from json possible.
+(1) kills
+(2) does grave bodily and mental harm
+(3) makes impotent
 
+on the following victim groups here in the Netherlands:
 
-**INSTALL**
+(1) verslaafden (addicts)
+(2) bejaarden (elderly)
+(3) ggz patienten (psychiatric patients)
+(4) criminelen (criminials)
+(5) gehandicapten (handicapped)
 
-installation is done with pip
-
-|
-| ``$ pip install bigtalk``
-|
-
-**FILES**
-
-|
-| ``~/.bigtalk``
-| ``~/.local/bin/bigtalk``
-| ``~/.local/share/pipx/venvs/bigtalk/*``
-|
-
-
-**AUTHOR**
-
-|
-| Bart Thate <``bthate@dds.nl``>
-|
-
-**COPYRIGHT**
-
-|
-| ``BigTalk`` is Public Domain.
-|
+Since the members of the chamber and the king were aware that these medicine
+are poison at the time they voted for this law and the day the Wfz law took
+effect (1-1-2019), i ask the prosecutor to prosecute the king for making the
+commiting of the above mentioned crimes (killing, torture and impotent making)
+possible.
