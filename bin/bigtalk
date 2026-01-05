@@ -87,11 +87,10 @@ def boot(cfg):
     skel()
     parse(cfg, TXT)
     level(cfg.sets.level or cfg.level or "info")
-    adddir("modules", os.path.join(where(Config), "modules"))
-    #if "e" in Config.opts:
-    #    adddir("modules", "examples")
-    #else:
-    #    adddir("modules", moddir())
+    adddir(f"{Config.name}.modules", os.path.join(where(Config), "modules"))
+    adddir("modules", moddir())
+    if "m" in Config.opts:
+        adddir("mods", "mods")
 
 
 def daemon(verbose=False, nochdir=False):

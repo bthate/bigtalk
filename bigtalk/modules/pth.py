@@ -4,7 +4,6 @@
 import os
 
 
-from bigtalk.configs import Config
 from bigtalk.utility import where
 
 
