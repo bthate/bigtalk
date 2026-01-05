@@ -7,15 +7,10 @@
 import unittest
 
 
-from bigtalk.methods import Method
-from bigtalk.objects import Dict, Object
-from bigtalk.utility import Utils
+from bigtalk.objects import Object, items, keys, update, values
 
 
 import bigtalk.objects
-
-expand = Utils.expand
-expand(Dict)
 
 
 OBJECT = Object()
@@ -107,7 +102,7 @@ class TestObject(unittest.TestCase):
 
     def test_fmt(self):
         obj = Object()
-        self.assertEqual(Method.fmt(obj), "{}")
+        self.assertEqual(format(obj), "{}")
 
     def test_format(self):
         obj = Object()

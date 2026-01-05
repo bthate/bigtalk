@@ -16,6 +16,7 @@ sys.path.insert(0, os.getcwd())
 
 import bigtalk
 import bigtalk.brokers
+import bigtalk.clients
 import bigtalk.command
 import bigtalk.handler
 import bigtalk.message
@@ -23,9 +24,10 @@ import bigtalk.methods
 import bigtalk.objects
 import bigtalk.package
 import bigtalk.persist
-import bigtalk.repeats
 import bigtalk.threads
+import bigtalk.timings
 import bigtalk.utility
+import bigtalk.workdir
 
 
 from bigtalk.objects import *
@@ -33,6 +35,7 @@ from bigtalk.objects import *
 
 PACKAGE = [
     'brokers',
+    'clients',
     'command',
     'handler',
     'message',
@@ -40,9 +43,10 @@ PACKAGE = [
     'objects',
     'package',
     'persist',
-    'repeats',
     'threads',
-    'utility'
+    'timings',
+    'utility',
+    'workdir'
 ]
 
 

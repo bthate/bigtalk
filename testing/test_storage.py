@@ -10,7 +10,7 @@ sys.path.insert(0, ".")
 
 
 from bigtalk.objects import Object
-from bigtalk.persist import Cache, Disk
+from bigtalk.persist import Cache, write
 from bigtalk.workdir import Workdir
 
 
@@ -22,8 +22,11 @@ Workdir.wdr = '.test'
 
 ATTRS1 = (
     'Cache',
-    'Disk',
-    'Locate'
+    'cache',
+    'put',
+    'read',
+    'sync',
+    'write'
 )
 
 
@@ -49,5 +52,6 @@ class TestStorage(unittest.TestCase):
 
     def test_save(self):
         obj = Object()
-        opath = Disk.write(obj)
+        opath = write(obj)
+        print(opath)
         self.assertTrue(os.path.exists(opath))

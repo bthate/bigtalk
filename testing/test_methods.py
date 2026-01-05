@@ -7,7 +7,7 @@
 import unittest
 
 
-from bigtalk.methods import Method
+from bigtalk.methods import fmt
 from bigtalk.objects import Object
 
 
@@ -16,4 +16,4 @@ class TestMethods(unittest.TestCase):
     def testformat(self):
         o = Object()
         o.a = "b"
-        self.assertEqual(Method.fmt(o), 'a="b"')
+        self.assertEqual(fmt(o), 'a="b"')
