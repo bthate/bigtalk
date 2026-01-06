@@ -28,7 +28,7 @@ class Handler:
     def loop(self):
         "event loop."
         while True:
-            event = self.queue.get()
+            event = self.poll()
             if not event:
                 break
             event.orig = repr(self)
@@ -46,7 +46,7 @@ class Handler:
         "register callback."
         self.cbs[kind] = callback
 
-    def start(self, daemon=False):
+    def start(self, daemon=True):
         "start event handler loop."
         launch(self.loop, daemon=daemon)
 

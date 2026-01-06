@@ -213,13 +213,13 @@ def main():
         thrs.append(launch(payload, post))
     for thr in thrs:
         thr.join()
-    launch(consume, daemon=False)
+    launch(consume)
     nrevents = events.qsize()
     try:
         events.join()
     except (KeyboardInterrupt, EOFError):
         pass
-    shutdown()
+    #shutdown()
     endtime = time.time()
     lap = elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents

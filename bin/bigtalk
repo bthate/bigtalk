@@ -52,31 +52,20 @@ class Line(CLI):
 
 class Console(Line):
 
-    stopped = threading.Event()
-
     def callback(self, event):
         "wait for callback result."
         if not event.text:
             return
         super().callback(event)
-        #event.wait()
+        event.wait()
 
-    def scan(self):
-        "poll for inpput."
-        while not self.stopped.is_set():
-            evt = Message()
-            evt.text = input("> ")
-            evt.kind = "command"
-            self.put(evt)
-            evt.wait()
+    def poll(self):
+        "poll for an event."
+        evt = Message()
+        evt.text = input("> ")
+        evt.kind = "command"
+        return evt
 
-    def start(self):
-        super().start()
-        launch(self.scan)
-
-    def stop(self):
-        self.stopped.set()
-        super().stop()
 
 "utility"
 
@@ -260,6 +249,7 @@ def main():
         wrapped(service)
     else:
         wrapped(control)
+
 
 if __name__ == "__main__":
     main()

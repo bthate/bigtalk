@@ -4,6 +4,9 @@
 "an object for a string"
 
 
+import _thread
+
+
 class Brokers:
 
     objects = {}
@@ -33,9 +36,10 @@ class Broker:
 
 
 def shutdown():
-    for obj in Broker.objs("stop"):
+    for obj in Broker.objs("announce"):
         print(f"stopping {obj}")
         obj.stop()
+        print("stopped")
 
 
 def __dir__():
