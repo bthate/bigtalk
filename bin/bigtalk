@@ -7,12 +7,14 @@
 
 import os
 import sys
+import threading
 import time
 
 
 sys.path.insert(0, os.getcwd())
 
 
+from bigtalk.brokers import shutdown
 from bigtalk.clients import CLI
 from bigtalk.command import Commands, Command, command
 from bigtalk.configs import Config
@@ -63,6 +65,9 @@ class Console(Line):
         evt.text = input("> ")
         evt.kind = "command"
         return evt
+
+    def start(self):
+        super().start(daemon=True)
 
 
 "utility"
@@ -153,6 +158,7 @@ def background():
     scanner(modules(Config.ignore))
     init(modules(Config.ignore))
     forever()
+    shutdown()
 
 
 def console():
@@ -171,7 +177,7 @@ def console():
     csl = Console()
     csl.start()
     forever()
-
+    #shutdown()
 
 def control():
     "cli script."
@@ -199,6 +205,7 @@ def service():
     scanner(modules(Config.ignore))
     init(modules(Config.ignore))
     forever()
+    shutdown()
 
 
 "commands"
@@ -248,7 +255,6 @@ def main():
         wrapped(service)
     else:
         wrapped(control)
-
 
 if __name__ == "__main__":
     main()

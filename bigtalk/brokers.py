@@ -4,6 +4,9 @@
 "an object for a string"
 
 
+import time
+
+
 class Brokers:
 
     objects = {}
@@ -32,7 +35,16 @@ class Broker:
                 yield orig
 
 
+def shutdown():
+    for obj in Broker.objs("announce"):
+        try:
+            obj.stop()
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
+
+
 def __dir__():
     return (
         'Broker',
+        'shutdown'
     )

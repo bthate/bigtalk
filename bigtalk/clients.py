@@ -22,6 +22,7 @@ class Client(Handler):
         super().__init__()
         self.olock = threading.RLock()
         self.oqueue = queue.Queue()
+        self.stopped = threading.Event()
         self.silent = True
         Broker.add(self)
 
@@ -49,14 +50,6 @@ class Client(Handler):
         "say text in channel."
         self.raw(text)
 
-    def wait(self):
-        "wait for output to finish."
-        try:
-            self.oqueue.join()
-        except Exception as ex:
-            logging.exception(ex)
-            _thread.interrupt_main()
-
 
 class CLI(Client):
 
@@ -77,15 +70,25 @@ class Output(Client):
             self.display(event)
             self.oqueue.task_done()
 
-    def start(self):
-        "start loop."
-        launch(self.output)
-        super().start()
+    def start(self, daemon=False):
+        "start output."
+        launch(self.output, daemon=daemon)
+        super().start(daemon=daemon)
 
     def stop(self):
-        "stop loop."
+        "stop output."
         self.oqueue.put(None)
         super().stop()
+
+    def wait(self):
+        "wait for output to finish."
+        try:
+            self.oqueue.join()
+        except (KeyboardInterrupt, EOFError):
+            _thread.interrupt_main()
+        except Exception as ex:
+            logging.exception(ex)
+            _thread.interrupt_main()
 
 
 def __dir__():

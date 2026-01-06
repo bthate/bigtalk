@@ -46,9 +46,9 @@ class Handler:
         "register callback."
         self.cbs[kind] = callback
 
-    def start(self):
+    def start(self, daemon=False):
         "start event handler loop."
-        launch(self.loop)
+        launch(self.loop, daemon=daemon)
 
     def stop(self):
         "stop event handler loop."
