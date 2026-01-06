@@ -202,17 +202,11 @@ def main():
     thrs = []
     nrs = Config.index or 1
     for _x in range(nrs):
-        thrs.append(launch(payload, pre))
-    for thr in thrs:
-        thr.join()
+        payload(pre)
     for _x in range(nrs):
-        thrs.append(launch(payload, examples))
-    for thr in thrs:
-        thr.join()
+        payload(examples)
     for _x in range(nrs):
-        thrs.append(launch(payload, post))
-    for thr in thrs:
-        thr.join()
+        payload(post)
     launch(consume)
     nrevents = events.qsize()
     try:

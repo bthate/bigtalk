@@ -3,6 +3,7 @@
 
 import logging
 import random
+import threading
 import time
 
 
@@ -51,14 +52,17 @@ class Timers(Object):
 
     path = ""
     timers = Timer()
-
+    lock = threading.RLock()
+    
     @staticmethod
     def add(tme, orig, channel,  txt):
-        setattr(Timers.timers, str(tme), (orig, channel, txt))
+        with Timers.lock:
+            setattr(Timers.timers, str(tme), (orig, channel, txt))
 
     @staticmethod
     def delete(tme):
-         delattr(Timers.timers, str(tme))
+        with Timers.lock:
+            delattr(Timers.timers, str(tme))
 
 
 def tmr(event):
