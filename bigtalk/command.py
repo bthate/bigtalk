@@ -42,6 +42,7 @@ def command(evt):
     evt.ready()
 
 
+
 def scan(module):
     "scan a module for functions with event as first argument."
     for key, cmdz in inspect.getmembers(module, inspect.isfunction):
@@ -52,6 +53,7 @@ def scan(module):
 
 def __dir__():
     return (
+        'Commands',
         'Command',
         'command',
         'scan'

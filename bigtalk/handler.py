@@ -28,7 +28,7 @@ class Handler:
     def loop(self):
         "event loop."
         while True:
-            event = self.poll()
+            event = self.queue.get()
             if not event:
                 break
             event.orig = repr(self)

@@ -66,8 +66,7 @@ def last(obj, selector={}):
 
 def __dir__():
     return (
-       'attrs',
-       'find',
-       'fns',
-       'last'
+        'find',
+        'fns',
+        'last'
     )

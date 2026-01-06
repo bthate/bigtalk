@@ -21,8 +21,8 @@ class Client(Handler):
     def __init__(self):
         super().__init__()
         self.olock = threading.RLock()
+        self.iqueue = queue.Queue()
         self.oqueue = queue.Queue()
-        self.stopped = threading.Event()
         self.silent = True
         Broker.add(self)
 
@@ -42,6 +42,13 @@ class Client(Handler):
         "say called by display."
         self.say(channel, text)
 
+    def input(self):
+        while True:
+            event = self.iqueue.get()
+            if not event:
+                break
+            self.put(event)
+
     def raw(self, text):
         "raw output."
         raise NotImplementedError("raw")
@@ -49,6 +56,14 @@ class Client(Handler):
     def say(self, channel, text):
         "say text in channel."
         self.raw(text)
+
+    def start(self):
+        super().start()
+        launch(self.input)
+
+    def stop(self):
+        self.iqueue.put(None)
+        super().stop()
 
 
 class CLI(Client):
@@ -70,13 +85,13 @@ class Output(Client):
             self.display(event)
             self.oqueue.task_done()
 
-    def start(self, daemon=False):
-        "start output."
-        launch(self.output, daemon=daemon)
-        super().start(daemon=daemon)
+    def start(self):
+        "start loop."
+        launch(self.output)
+        super().start()
 
     def stop(self):
-        "stop output."
+        "stop loop."
         self.oqueue.put(None)
         super().stop()
 
@@ -84,8 +99,6 @@ class Output(Client):
         "wait for output to finish."
         try:
             self.oqueue.join()
-        except (KeyboardInterrupt, EOFError):
-            _thread.interrupt_main()
         except Exception as ex:
             logging.exception(ex)
             _thread.interrupt_main()

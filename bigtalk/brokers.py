@@ -4,9 +4,6 @@
 "an object for a string"
 
 
-import time
-
-
 class Brokers:
 
     objects = {}
@@ -36,11 +33,9 @@ class Broker:
 
 
 def shutdown():
-    for obj in Broker.objs("announce"):
-        try:
-            obj.stop()
-        except (KeyboardInterrupt, EOFError):
-            _thread.interrupt_main()
+    for obj in Broker.objs("stop"):
+        print(f"stopping {obj}")
+        obj.stop()
 
 
 def __dir__():

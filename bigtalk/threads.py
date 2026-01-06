@@ -12,9 +12,6 @@ import time
 import _thread
 
 
-lock = threading.RLock()
-
-
 class Thread(threading.Thread):
 
     def __init__(self, func, *args, daemon=True, **kwargs):
@@ -55,9 +52,9 @@ class Thread(threading.Thread):
                 self.event.ready()
             _thread.interrupt_main()
         except Exception as ex:
-            logging.exception(ex)
             if self.event:
                 self.event.ready()
+            logging.exception(ex)
             _thread.interrupt_main()
 
 
@@ -111,11 +108,13 @@ class Repeater(Timed):
 
 
 def launch(func, *args, **kwargs):
-    "run a function non-blocking"
-    with lock:
+    "run function in a thread."
+    try:
         thread = Thread(func, *args, **kwargs)
         thread.start()
         return thread
+    except (KeyboardInterrupt, EOFError):
+        _thread.interrupt_main()
 
 
 def name(obj):
