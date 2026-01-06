@@ -7,6 +7,7 @@
 import inspect
 
 
+from .brokers import Broker
 from .methods import parse
 
 
@@ -16,27 +17,29 @@ class Commands:
     names = {}
 
 
-def getcmd(cmd):
-    "command by string."
-    return Commands.cmds.get(cmd, None)
+class Command:
+
+    def add(*args):
+        "add functions to commands."
+        for func in args:
+            name = func.__name__
+            Commands.cmds[name] = func
+            Commands.names[name] = func.__module__.split(".")[-1]
+
+    def get(cmd):
+        "command by string."
+        return Commands.cmds.get(cmd, None)
 
 
 def command(evt):
     "command callback."
     parse(evt, evt.text)
-    func = getcmd(evt.cmd)
+    func = Command.get(evt.cmd)
     if func:
         func(evt)
-        evt.display()
+        bot = Broker.get(evt.orig)
+        bot.display(evt)
     evt.ready()
-
-
-def enable(*args):
-    "add functions to commands."
-    for func in args:
-        name = func.__name__
-        Commands.cmds[name] = func
-        Commands.names[name] = func.__module__.split(".")[-1]
 
 
 def scan(module):
@@ -44,14 +47,12 @@ def scan(module):
     for key, cmdz in inspect.getmembers(module, inspect.isfunction):
         if 'event' not in inspect.signature(cmdz).parameters:
             continue
-        enable(cmdz)
+        Command.add(cmdz)
 
 
 def __dir__():
     return (
-        'Commands',
+        'Command',
         'command',
-        'enable',
-        'getcmd',
         'scan'
     )

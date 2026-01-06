@@ -10,7 +10,7 @@ import threading
 import _thread
 
 
-from .brokers import addobj
+from .brokers import Broker
 from .command import command
 from .handler import Handler
 from .threads import launch
@@ -23,7 +23,7 @@ class Client(Handler):
         self.olock = threading.RLock()
         self.oqueue = queue.Queue()
         self.silent = True
-        addobj(self)
+        Broker.add(self)
 
     def announce(self, text):
         "announce text to all channels."

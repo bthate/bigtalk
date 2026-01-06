@@ -9,7 +9,7 @@ import os
 
 from .methods import deleted, fqn, search
 from .objects import Object, keys, update
-from .persist import cache, put, read
+from .persist import Cache, read
 from .timings import fntime
 from .workdir import getstore, long
 
@@ -26,11 +26,11 @@ def find(kind, selector={}, removed=False, matching=False):
     "locate objects by matching atributes."
     fullname = long(kind)
     for pth in fns(fullname):
-        obj = cache(pth)
+        obj = Cache.get(pth)
         if not obj:
             obj = Object()
             read(obj, pth)
-            put(pth, obj)
+            Cache.add(pth, obj)
         if not removed and deleted(obj):
             continue
         if selector and not search(obj, selector, matching):
@@ -66,7 +66,8 @@ def last(obj, selector={}):
 
 def __dir__():
     return (
-        'find',
-        'fns',
-        'last'
+       'attrs',
+       'find',
+       'fns',
+       'last'
     )

@@ -14,7 +14,7 @@ sys.path.insert(0, os.getcwd())
 
 
 from bigtalk.clients import CLI
-from bigtalk.command import Commands, command, enable
+from bigtalk.command import Commands, Command, command
 from bigtalk.configs import Config
 from bigtalk.loggers import level
 from bigtalk.message import Message
@@ -149,7 +149,7 @@ def background():
     privileges()
     boot(Config)
     pidfile(pidname(Config.name))
-    enable(cmd, mod, ver)
+    Command.add(cmd, mod, ver)
     scanner(modules(Config.ignore))
     init(modules(Config.ignore))
     forever()
@@ -163,7 +163,7 @@ def console():
     if "v" in Config.opts:
         banner()
     scanner(modules(Config.ignore))
-    enable(cmd, mod, ver)
+    Command.add(cmd, mod, ver)
     mds = Config.sets.init
     if not mds and "a" in Config.opts:
         mds = modules(Config.ignore)
@@ -179,7 +179,7 @@ def control():
         return
     boot(Config)
     scanner(modules(Config.ignore))
-    enable(cmd, exa, mod, srv, ver)
+    Command.add(cmd, exa, mod, srv, ver)
     cli = Line()
     evt = Message()
     evt.orig = repr(cli)
@@ -195,7 +195,7 @@ def service():
     boot(Config)
     banner()
     pidfile(pidname(Config.name))
-    enable(cmd, mod, ver)
+    Command.add(cmd, mod, ver)
     scanner(modules(Config.ignore))
     init(modules(Config.ignore))
     forever()

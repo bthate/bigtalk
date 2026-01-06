@@ -9,7 +9,7 @@ import logging
 import time
 
 
-from bigtalk.brokers import objs
+from bigtalk.brokers import Broker
 from bigtalk.message import Message
 from bigtalk.objects import Object, construct, keys
 from bigtalk.threads import Repeater
@@ -142,7 +142,7 @@ def cbnow(_evt):
         nrtimes = int(delta/needed)
         txt += f"{getalias(nme)} {nrtimes} | "
     txt += "https://pypi.org/project/bigtalk"
-    for bot in objs("announce"):
+    for bot in Broker.objs("announce"):
         bot.announce(txt)
 
 
@@ -165,7 +165,7 @@ def cbstats(evt):
             nryear,
             elapsed(needed)
         )
-        for bot in objs("announce"):
+        for bot in Broker.objs("announce"):
             bot.announce(txt)
 
 

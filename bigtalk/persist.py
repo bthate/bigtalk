@@ -17,19 +17,27 @@ from .workdir import getpath
 lock = threading.RLock()
 
 
-class Cache:
+class Caches:
 
     objects = {}
 
 
-def cache(path):
-    "get object from cache."
-    return Cache.objects.get(path, None)
+class Cache:
 
+    def add(path, obj):
+        "put object into cache."
+        Caches.objects[path] = obj
 
-def put(path, obj):
-    "put object into cache."
-    Cache.objects[path] = obj
+    def get(path):
+        "get object from cache."
+        return Caches.objects.get(path, None)
+
+    def sync(path, obj):
+        "update cached object."
+        try:
+            update(Caches.objects[path], obj)
+        except KeyError:
+            Cache.add(path, obj)
 
 
 def read(obj, path):
@@ -43,14 +51,6 @@ def read(obj, path):
                 raise ex
 
 
-def sync(path, obj):
-    "update cached object."
-    try:
-        update(Cache.objects[path], obj)
-    except KeyError:
-        put(path, obj)
-
-
 def write(obj, path=""):
     "write object to disk."
     with lock:
@@ -59,16 +59,13 @@ def write(obj, path=""):
         cdir(path)
         with open(path, "w", encoding="utf-8") as fpt:
             dump(obj, fpt, indent=4)
-        sync(path, obj)
+        Cache.sync(path, obj)
         return path
 
 
 def __dir__():
     return (
         'Cache',
-        'cache',
-        'put',
         'read',
-        'sync',
         'write'
     )

@@ -19,7 +19,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.brokers import objs
+from bigtalk.brokers import Broker
 from bigtalk.configs import Config
 from bigtalk.locater import find, last
 from bigtalk.methods import fmt
@@ -132,7 +132,7 @@ class Fetcher(Object):
             txt = f"[{feedname}] "
         for obj in result:
             txt2 = txt + self.display(obj)
-            for bot in objs("announce"):
+            for bot in Broker.objs("announce"):
                 bot.announce(txt2)
         return counter
 
