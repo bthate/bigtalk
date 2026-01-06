@@ -24,14 +24,17 @@ class Caches:
 
 class Cache:
 
+    @staticmethod
     def add(path, obj):
         "put object into cache."
         Caches.objects[path] = obj
 
+    @staticmethod
     def get(path):
         "get object from cache."
         return Caches.objects.get(path, None)
 
+    @staticmethod
     def sync(path, obj):
         "update cached object."
         try:

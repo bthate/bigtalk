@@ -2,7 +2,7 @@
 
 
 from bigtalk.brokers import Broker
-from bigtalk.threads import name
+from bigtalk.methods import fqn
 
 
 def flt(event):
@@ -10,8 +10,8 @@ def flt(event):
     if event.args:
         index = int(event.args[0])
         if index < len(clts):
-            event.reply(str(type((clts[index]))))
+            event.reply(str(clts[index]))
         else:
             event.reply("no matching client in fleet.")
         return
-    event.reply(' | '.join([name(o) for o in clts]))
+    event.reply(' | '.join([fqn(o).split(".")[-1] for o in clts]))

@@ -7,7 +7,6 @@
 
 import os
 import sys
-import threading
 import time
 
 
@@ -20,9 +19,8 @@ from bigtalk.configs import Config
 from bigtalk.loggers import level
 from bigtalk.message import Message
 from bigtalk.methods import parse
-from bigtalk.package import adddir, init, modules, scanner
+from bigtalk.package import Mod, init, modules, scanner
 from bigtalk.statics import SYSTEMD
-from bigtalk.threads import launch
 from bigtalk.utility import check, forever, pipxdir, where, wrapped
 from bigtalk.workdir import Workdir, moddir, pidfile, pidname, skel
 
@@ -89,10 +87,10 @@ def boot(cfg):
     skel()
     parse(cfg, TXT)
     level(cfg.sets.level or cfg.level or "info")
-    adddir(f"{Config.name}.modules", os.path.join(where(Config), "modules"))
-    adddir("modules", moddir())
+    Mod.dir(f"{Config.name}.modules", os.path.join(where(Config), "modules"))
+    Mod.dir("modules", moddir())
     if "m" in Config.opts:
-        adddir("mods", "mods")
+        Mod.dir("mods", "mods")
 
 
 def daemon(verbose=False, nochdir=False):

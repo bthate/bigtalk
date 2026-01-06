@@ -13,7 +13,6 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.brokers import shutdown
 from bigtalk.clients import Output
 from bigtalk.command import command
 from bigtalk.configs import Config
@@ -199,7 +198,6 @@ def main():
     else:
         Pool.init(CLI, 1)
     starttime = time.time()
-    thrs = []
     nrs = Config.index or 1
     for _x in range(nrs):
         payload(pre)
@@ -213,7 +211,6 @@ def main():
         events.join()
     except (KeyboardInterrupt, EOFError):
         pass
-    #shutdown()
     endtime = time.time()
     lap = elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents

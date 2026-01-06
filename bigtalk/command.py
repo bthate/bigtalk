@@ -19,6 +19,7 @@ class Commands:
 
 class Command:
 
+    @staticmethod
     def add(*args):
         "add functions to commands."
         for func in args:
@@ -26,6 +27,7 @@ class Command:
             Commands.cmds[name] = func
             Commands.names[name] = func.__module__.split(".")[-1]
 
+    @staticmethod
     def get(cmd):
         "command by string."
         return Commands.cmds.get(cmd, None)

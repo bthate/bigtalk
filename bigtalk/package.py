@@ -19,30 +19,31 @@ class Mods:
     modules = {}
 
 
-def adddir(name, path):
-    "add module directory."
-    Mods.dirs[name] = path
+class Mod:
+
+    def dir(name, path):
+        "add module directory."
+        Mods.dirs[name] = path
+
+    def pkg(*pkgs):
+        "register package directory."
+        for pkg in pkgs:
+            adddir(pkg.__name__, pkg.__path__[0])
 
 
-def addpkg(*pkgs):
-    "register package directory."
-    for pkg in pkgs:
-        adddir(pkg.__name__, pkg.__path__[0])
-
-
-def getmod(name):
-    "import module by name." 
-    if name in Mods.modules:
-        return Mods.modules[name]
-    mname = ""
-    pth = ""
-    for packname, path in Mods.dirs.items():
-        modpath = os.path.join(path, name + ".py")
-        if os.path.exists(modpath):
-            pth = modpath
-            mname = f"{packname}.{name}"
-            break
-    return importer(mname, pth)
+    def get(name):
+        "import module by name." 
+        if name in Mods.modules:
+            return Mods.modules[name]
+        mname = ""
+        pth = ""
+        for packname, path in Mods.dirs.items():
+            modpath = os.path.join(path, name + ".py")
+            if os.path.exists(modpath):
+                pth = modpath
+                mname = f"{packname}.{name}"
+                break
+        return importer(mname, pth)
 
 
 def importer(name, pth=""):
@@ -67,7 +68,7 @@ def init(names=None, wait=False):
         names = modules()
     mods = []
     for name in spl(names):
-        module = getmod(name)
+        module = Mod.get(name)
         if not module:
             continue
         if "init" in dir(module):
@@ -81,7 +82,7 @@ def init(names=None, wait=False):
 
 def mods(names):
     "list of named modules."
-    return [getmod(x) for x in sorted(spl(names))]
+    return [Mod.get(x) for x in sorted(spl(names))]
 
 
 def modules(ignore=""):
@@ -103,7 +104,7 @@ def scanner(names):
     "scan named modules for commands."
     mods = []
     for name in spl(names):
-        module = getmod(name)
+        module = Mod.get(name)
         if not module:
             continue
         scan(module)
@@ -113,9 +114,7 @@ def scanner(names):
 def __dir__():
     return (
         'Mods',
-        'adddir',
-        'addpkg',
-        'getmod',
+        'Mod',
         'importer',
         'init',
         'mods',
