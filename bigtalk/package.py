@@ -18,19 +18,18 @@ class Mods:
     dirs = {}
     modules = {}
 
-
-class Mod:
-
+    @staticmethod
     def dir(name, path):
         "add module directory."
         Mods.dirs[name] = path
 
+    @staticmethod
     def pkg(*pkgs):
         "register package directory."
         for pkg in pkgs:
             adddir(pkg.__name__, pkg.__path__[0])
 
-
+    @staticmethod
     def get(name):
         "import module by name." 
         if name in Mods.modules:
@@ -68,7 +67,7 @@ def init(names=None, wait=False):
         names = modules()
     mods = []
     for name in spl(names):
-        module = Mod.get(name)
+        module = Mods.get(name)
         if not module:
             continue
         if "init" in dir(module):
@@ -82,7 +81,7 @@ def init(names=None, wait=False):
 
 def mods(names):
     "list of named modules."
-    return [Mod.get(x) for x in sorted(spl(names))]
+    return [Mods.get(x) for x in sorted(spl(names))]
 
 
 def modules(ignore=""):
@@ -104,7 +103,7 @@ def scanner(names):
     "scan named modules for commands."
     mods = []
     for name in spl(names):
-        module = Mod.get(name)
+        module = Mods.get(name)
         if not module:
             continue
         scan(module)
@@ -114,7 +113,6 @@ def scanner(names):
 def __dir__():
     return (
         'Mods',
-        'Mod',
         'importer',
         'init',
         'mods',

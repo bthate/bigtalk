@@ -16,9 +16,6 @@ class Commands:
     cmds = {}
     names = {}
 
-
-class Command:
-
     @staticmethod
     def add(*args):
         "add functions to commands."
@@ -36,7 +33,7 @@ class Command:
 def command(evt):
     "command callback."
     parse(evt, evt.text)
-    func = Command.get(evt.cmd)
+    func = Commands.get(evt.cmd)
     if func:
         func(evt)
         bot = Broker.get(evt.orig)
@@ -50,7 +47,7 @@ def scan(module):
     for key, cmdz in inspect.getmembers(module, inspect.isfunction):
         if 'event' not in inspect.signature(cmdz).parameters:
             continue
-        Command.add(cmdz)
+        Commands.add(cmdz)
 
 
 def __dir__():

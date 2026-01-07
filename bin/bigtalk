@@ -14,12 +14,12 @@ sys.path.insert(0, os.getcwd())
 
 
 from bigtalk.clients import CLI
-from bigtalk.command import Commands, Command, command
+from bigtalk.command import Commands, command
 from bigtalk.configs import Config
 from bigtalk.loggers import level
 from bigtalk.message import Message
 from bigtalk.methods import parse
-from bigtalk.package import Mod, init, modules, scanner
+from bigtalk.package import Mods, init, modules, scanner
 from bigtalk.statics import SYSTEMD
 from bigtalk.utility import check, forever, pipxdir, where, wrapped
 from bigtalk.workdir import Workdir, moddir, pidfile, pidname, skel
@@ -87,10 +87,10 @@ def boot(cfg):
     skel()
     parse(cfg, TXT)
     level(cfg.sets.level or cfg.level or "info")
-    Mod.dir(f"{Config.name}.modules", os.path.join(where(Config), "modules"))
-    Mod.dir("modules", moddir())
+    Mods.dir(f"{Config.name}.modules", os.path.join(where(Config), "modules"))
+    Mods.dir("modules", moddir())
     if "m" in Config.opts:
-        Mod.dir("mods", "mods")
+        Mods.dir("mods", "mods")
 
 
 def daemon(verbose=False, nochdir=False):
@@ -149,7 +149,7 @@ def background():
     privileges()
     boot(Config)
     pidfile(pidname(Config.name))
-    Command.add(cmd, mod, ver)
+    Commands.add(cmd, mod, ver)
     scanner(modules(Config.ignore))
     init(modules(Config.ignore))
     forever()
@@ -163,7 +163,7 @@ def console():
     if "v" in Config.opts:
         banner()
     scanner(modules(Config.ignore))
-    Command.add(cmd, mod, ver)
+    Commands.add(cmd, mod, ver)
     mds = Config.sets.init
     if not mds and "a" in Config.opts:
         mds = modules(Config.ignore)
@@ -178,7 +178,7 @@ def control():
         return
     boot(Config)
     scanner(modules(Config.ignore))
-    Command.add(cmd, exa, mod, srv, ver)
+    Commands.add(cmd, exa, mod, srv, ver)
     cli = Line()
     evt = Message()
     evt.orig = repr(cli)
@@ -194,7 +194,7 @@ def service():
     boot(Config)
     banner()
     pidfile(pidname(Config.name))
-    Command.add(cmd, mod, ver)
+    Commands.add(cmd, mod, ver)
     scanner(modules(Config.ignore))
     init(modules(Config.ignore))
     forever()

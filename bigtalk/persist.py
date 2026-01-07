@@ -17,28 +17,25 @@ from .workdir import getpath
 lock = threading.RLock()
 
 
-class Caches:
+class Cache:
 
     objects = {}
-
-
-class Cache:
 
     @staticmethod
     def add(path, obj):
         "put object into cache."
-        Caches.objects[path] = obj
+        Cache.objects[path] = obj
 
     @staticmethod
     def get(path):
         "get object from cache."
-        return Caches.objects.get(path, None)
+        return Cache.objects.get(path, None)
 
     @staticmethod
     def sync(path, obj):
         "update cached object."
         try:
-            update(Caches.objects[path], obj)
+            update(Cache.objects[path], obj)
         except KeyError:
             Cache.add(path, obj)
 
