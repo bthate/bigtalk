@@ -18,7 +18,7 @@ from bigtalk.command import command
 from bigtalk.configs import Config
 from bigtalk.message import Message
 from bigtalk.methods import fmt, parse
-from bigtalk.package import adddir, modules, scanner
+from bigtalk.package import Mods, modules, scanner
 from bigtalk.threads import launch
 from bigtalk.timings import elapsed
 from bigtalk.utility import where, wrapped
@@ -189,7 +189,7 @@ def main():
         shutil.rmtree(Workdir.wdr)
     skel()
     parse(Config, " ".join(sys.argv[1:]))
-    adddir("modules", os.path.join(where(Config), "modules"))
+    Mods.dir("modules", os.path.join(where(Config), "modules"))
     scanner(modules())
     if "v" in Config.opts:
         banner(Config.name, Config.version)
