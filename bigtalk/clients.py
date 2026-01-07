@@ -31,14 +31,6 @@ class Client(Handler):
         if not self.silent:
             self.raw(text)
 
-    def input(self):
-        "event loop."
-        while True:
-            event = self.poll()
-            if not event or self.stopped.is_set():
-                break
-            self.put(event)
-
     def display(self, event):
         "display event results."
         with self.olock:
@@ -50,10 +42,6 @@ class Client(Handler):
         "say called by display."
         self.say(channel, text)
 
-    def poll(self):
-        "return event"
-        raise NotImplementedError("poll")
-
     def raw(self, text):
         "raw output."
         raise NotImplementedError("raw")
@@ -61,6 +49,21 @@ class Client(Handler):
     def say(self, channel, text):
         "say text in channel."
         self.raw(text)
+
+
+class Input(Client):
+
+    def input(self):
+        "event loop."
+        while True:
+            event = self.poll()
+            if not event or self.stopped.is_set():
+                break
+            self.put(event)
+
+    def poll(self):
+        "return event"
+        raise NotImplementedError("poll")
 
     def start(self):
         "start input loop and handler."

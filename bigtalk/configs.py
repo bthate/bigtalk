@@ -4,7 +4,9 @@
 "configuration"
 
 
+from .locater import last
 from .objects import Default
+from .utility import where
 
 
 class Config(Default):
@@ -13,6 +15,7 @@ class Config(Default):
 
 
 Cfg = Config()
+Cfg.name = Config.__module__.split(".")[0]
 
 
 def __dir__():

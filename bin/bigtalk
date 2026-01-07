@@ -35,11 +35,10 @@ TXT = " ".join(sys.argv[1:])
 "config"
 
 
-#Cfg.ignore = "rst,udp,web"
-#Cfg.level = "info"
-#Cfg.name = "bigtalk" 
-#Cfg.opts = ""
-#Cfg.version = 3
+Cfg.ignore = "rst,udp,web"
+Cfg.level = "info"
+Cfg.name = "bigtalk" 
+Cfg.version = 3
 
 
 "clients"
