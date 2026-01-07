@@ -10,7 +10,7 @@ import threading
 import _thread
 
 
-from .brokers import Broker
+from .brokers import addobj
 from .command import command
 from .handler import Handler
 from .threads import launch
@@ -24,7 +24,7 @@ class Client(Handler):
         self.iqueue = queue.Queue()
         self.oqueue = queue.Queue()
         self.silent = True
-        Broker.add(self)
+        addobj(self)
 
     def announce(self, text):
         "announce text to all channels."
@@ -42,13 +42,6 @@ class Client(Handler):
         "say called by display."
         self.say(channel, text)
 
-    def input(self):
-        while True:
-            event = self.iqueue.get()
-            if not event:
-                break
-            self.put(event)
-
     def raw(self, text):
         "raw output."
         raise NotImplementedError("raw")
@@ -56,14 +49,6 @@ class Client(Handler):
     def say(self, channel, text):
         "say text in channel."
         self.raw(text)
-
-    def start(self):
-        super().start()
-        launch(self.input)
-
-    def stop(self):
-        self.iqueue.put(None)
-        super().stop()
 
 
 class CLI(Client):

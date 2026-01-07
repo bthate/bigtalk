@@ -7,7 +7,7 @@
 import inspect
 
 
-from .brokers import Broker
+from .brokers import getobj
 from .methods import parse
 
 
@@ -36,7 +36,7 @@ def command(evt):
     func = Commands.get(evt.cmd)
     if func:
         func(evt)
-        bot = Broker.get(evt.orig)
+        bot = getobj(evt.orig)
         bot.display(evt)
     evt.ready()
 

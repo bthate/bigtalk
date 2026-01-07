@@ -1,12 +1,12 @@
 # This file is placed in the Public Domain.
 
 
-from bigtalk.brokers import Broker
+from bigtalk.brokers import objs
 from bigtalk.methods import fqn
 
 
 def flt(event):
-    clts = list(Broker.objs("announce"))
+    clts = list(objs("announce"))
     if event.args:
         index = int(event.args[0])
         if index < len(clts):

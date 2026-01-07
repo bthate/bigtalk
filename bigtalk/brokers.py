@@ -8,32 +8,33 @@ class Broker:
 
     objects = {}
 
-    @staticmethod
-    def add(obj):
-        "add object to the broker, key is repr(obj)."
-        Broker.objects[repr(obj)] = obj
 
-    @staticmethod
-    def get(origin):
-        "object by repr(obj)."
-        return Broker.objects.get(origin)
+def addobj(obj):
+    "add object to the broker, key is repr(obj)."
+    Broker.objects[repr(obj)] = obj
 
-    @staticmethod
-    def objs(attr):
-        "object with a certain attribute."
-        for obj in Broker.objects.values():
-            if attr in dir(obj):
-                yield obj
+def getobj(origin):
+    "object by repr(obj)."
+    return Broker.objects.get(origin)
 
-    @staticmethod
-    def like(txt):
-        "all keys with a substring in their key."
-        for orig in Broker.objects:
-            if orig.split()[0] in orig.split()[0]:
-                yield orig
+def objs(attr):
+    "object with a certain attribute."
+    for obj in Broker.objects.values():
+        if attr in dir(obj):
+            yield obj
+
+def like(txt):
+    "all keys with a substring in their key."
+    for orig in Broker.objects:
+        if orig.split()[0] in orig.split()[0]:
+            yield orig
 
 
 def __dir__():
     return (
         'Broker',
+        'addobj',
+        'getobj',
+        'objs',
+        'like'
     )

@@ -21,23 +21,23 @@ class Cache:
 
     objects = {}
 
-    @staticmethod
-    def add(path, obj):
-        "put object into cache."
-        Cache.objects[path] = obj
 
-    @staticmethod
-    def get(path):
-        "get object from cache."
-        return Cache.objects.get(path, None)
+def addcache(path, obj):
+    "put object into cache."
+    Cache.objects[path] = obj
 
-    @staticmethod
-    def sync(path, obj):
-        "update cached object."
-        try:
-            update(Cache.objects[path], obj)
-        except KeyError:
-            Cache.add(path, obj)
+
+def getcache(path):
+    "get object from cache."
+    return Cache.objects.get(path, None)
+
+
+def sync(path, obj):
+    "update cached object."
+    try:
+        update(Cache.objects[path], obj)
+    except KeyError:
+        addcache(path, obj)
 
 
 def read(obj, path):
@@ -59,13 +59,15 @@ def write(obj, path=""):
         cdir(path)
         with open(path, "w", encoding="utf-8") as fpt:
             dump(obj, fpt, indent=4)
-        Cache.sync(path, obj)
+        sync(path, obj)
         return path
 
 
 def __dir__():
     return (
         'Cache',
+        'addcache',
+        'getcache',
         'read',
         'write'
     )
