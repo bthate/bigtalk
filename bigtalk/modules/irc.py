@@ -14,7 +14,7 @@ import time
 from bigtalk.brokers import getobj
 from bigtalk.clients import Output
 from bigtalk.command import command
-from bigtalk.configs import Config as Main
+from bigtalk.configs import Cfg as Main
 from bigtalk.locater import last
 from bigtalk.message import Message
 from bigtalk.methods import edit, fmt

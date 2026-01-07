@@ -7,7 +7,7 @@ import threading
 import time
 
 
-from bigtalk.brokers import getobj, like
+from bigtalk.brokers import getobj, likeobj
 from bigtalk.locater import last
 from bigtalk.objects import Object, items
 from bigtalk.persist import write
@@ -25,7 +25,7 @@ def init():
         if not args:
             continue
         orig, channel, txt = args
-        for origin in like(orig):
+        for origin in likeobj(orig):
             if not origin:
                 continue
             diff = float(tme) - time.time()

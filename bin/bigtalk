@@ -7,6 +7,7 @@
 
 import os
 import sys
+import threading
 import time
 
 
@@ -15,7 +16,7 @@ sys.path.insert(0, os.getcwd())
 
 from bigtalk.clients import CLI
 from bigtalk.command import Commands, addcmd, command
-from bigtalk.configs import Config
+from bigtalk.configs import Cfg
 from bigtalk.loggers import level
 from bigtalk.message import Message
 from bigtalk.methods import parse
@@ -34,11 +35,11 @@ TXT = " ".join(sys.argv[1:])
 "config"
 
 
-Config.ignore = "rst,udp,web"
-Config.level = "info"
-Config.name = "bigtalk" 
-Config.opts = ""
-Config.version = 3
+#Cfg.ignore = "rst,udp,web"
+#Cfg.level = "info"
+#Cfg.name = "bigtalk" 
+#Cfg.opts = ""
+#Cfg.version = 3
 
 
 "clients"
@@ -53,15 +54,25 @@ class Line(CLI):
 
 class Console(Line):
 
+    def __init__(self):
+        super().__init__()
+        self.done = threading.Event()
+        self.done.set()
+
     def callback(self, event):
         "wait for callback result."
         if not event.text:
+            event.ready()
+            self.done.set()
             return
         super().callback(event)
         event.wait()
+        self.done.set()
 
     def poll(self):
         "poll for an event."
+        self.done.wait()
+        self.done.clear()
         evt = Message()
         evt.text = input("> ")
         evt.kind = "command"
@@ -75,11 +86,11 @@ def banner():
     "hello."
     tme = time.ctime(time.time()).replace("  ", " ")
     print("%s %s %s since %s (%s)" % (
-        Config.name.upper(),
-        Config.version,
-        Config.opts.strip().upper(),
+        Cfg.name.upper(),
+        Cfg.version,
+        Cfg.opts.strip().upper(),
         tme,
-        Config.level.upper()
+        Cfg.level.upper()
     ))
     sys.stdout.flush()
 
@@ -90,9 +101,9 @@ def boot(cfg):
     skel()
     parse(cfg, TXT)
     level(cfg.sets.level or cfg.level or "info")
-    adddir(f"{Config.name}.modules", os.path.join(where(Config), "modules"))
+    adddir(f"{Cfg.name}.modules", os.path.join(where(Message), "modules"))
     adddir("modules", moddir())
-    if "m" in Config.opts:
+    if "m" in Cfg.opts:
         adddir("mods", "mods")
 
 
@@ -146,15 +157,19 @@ def wrap(func):
 "scripts"
 
 
+def attr(obj, name, default=""):
+    return getattr(obj, name, default)
+
+
 def background():
     "background script."
     daemon(check("v", TXT), check("m", TXT))
     privileges()
-    boot(Config)
-    pidfile(pidname(Config.name))
+    boot(Cfg)
+    pidfile(pidname(Cfg.name))
     addcmd(cmd, mod, ver)
-    scanner(modules(Config.ignore))
-    init(modules(Config.ignore))
+    scanner(modules(Cfg.ignore))
+    init(modules(Cfg.ignore))
     forever()
 
 
@@ -162,15 +177,15 @@ def console():
     "console script."
     import readline
     readline.redisplay()
-    boot(Config)
-    if "v" in Config.opts:
+    boot(Cfg)
+    if "v" in Cfg.opts:
         banner()
-    scanner(modules(Config.ignore))
+    scanner(modules(getattr(Cfg, "ignore", "")))
     addcmd(cmd, mod, ver)
-    mds = Config.sets.init
-    if not mds and "a" in Config.opts:
-        mds = modules(Config.ignore)
-    init(mds, "w" in Config.opts)
+    mds = Cfg.sets.init
+    if not mds and "a" in Cfg.opts:
+        mds = modules(Cfg.ignore)
+    init(mds, "w" in Cfg.opts)
     csl = Console()
     csl.start()
     forever()
@@ -179,8 +194,8 @@ def control():
     "cli script."
     if len(sys.argv) == 1:
         return
-    boot(Config)
-    scanner(modules(Config.ignore))
+    boot(Cfg)
+    scanner(modules(Cfg.ignore))
     addcmd(cmd, exa, mod, srv, ver)
     cli = Line()
     evt = Message()
@@ -194,12 +209,12 @@ def control():
 def service():
     "service script."
     privileges()
-    boot(Config)
+    boot(Cfg)
     banner()
-    pidfile(pidname(Config.name))
+    pidfile(pidname(Cfg.name))
     addcmd(cmd, mod, ver)
-    scanner(modules(Config.ignore))
-    init(modules(Config.ignore))
+    scanner(modules(Cfg.ignore))
+    init(modules(Cfg.ignore))
     forever()
 
 
@@ -213,7 +228,7 @@ def cmd(event):
 
 def exa(event):
     "location of examples."
-    path = pipxdir(Config.name)
+    path = pipxdir(Cfg.name)
     if not os.path.exists(os.path.expanduser(path)):
         event.reply("pipx examples directory is not there.")
         return
@@ -229,12 +244,12 @@ def srv(event):
     "generate systemd service file."
     import getpass
     name = getpass.getuser()
-    event.reply(SYSTEMD % (Config.name.upper(), name, name, name, Config.name))
+    event.reply(SYSTEMD % (Cfg.name.upper(), name, name, name, Cfg.name))
 
 
 def ver(event):
     "show version."
-    event.reply(f"{Config.name.upper()} {Config.version} {Config.opts.upper()}")
+    event.reply(f"{Cfg.name.upper()} {Cfg.version} {Cfg.opts.upper()}")
 
 
 "runtime"

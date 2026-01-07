@@ -28,15 +28,11 @@ class Handler:
     def loop(self):
         "event loop."
         while True:
-            event = self.poll()
+            event = self.queue.get()
             if not event:
                 break
             event.orig = repr(self)
             self.callback(event)
-
-    def poll(self):
-        "returns event to process."
-        return self.queue.get()
 
     def put(self, event):
         "put event on queue."

@@ -23,7 +23,7 @@ def objs(attr):
         if attr in dir(obj):
             yield obj
 
-def like(txt):
+def likeobj(txt):
     "all keys with a substring in their key."
     for orig in Broker.objects:
         if orig.split()[0] in orig.split()[0]:
@@ -36,5 +36,5 @@ def __dir__():
         'addobj',
         'getobj',
         'objs',
-        'like'
+        'likeobj'
     )

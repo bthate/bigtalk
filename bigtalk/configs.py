@@ -12,7 +12,10 @@ class Config(Default):
     pass
 
 
+Cfg = Config()
+
+
 def __dir__():
     return (
-        'Config',
+        'Cfg',
     )

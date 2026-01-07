@@ -69,7 +69,6 @@ class Repeater(Timed):
         super().run()
 
 
-
 def date(daystr):
     "date from string."
     daystr = daystr.encode('utf-8', 'replace').decode("utf-8")

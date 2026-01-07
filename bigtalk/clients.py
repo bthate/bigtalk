@@ -21,15 +21,23 @@ class Client(Handler):
     def __init__(self):
         super().__init__()
         self.olock = threading.RLock()
-        self.iqueue = queue.Queue()
         self.oqueue = queue.Queue()
         self.silent = True
+        self.stopped = threading.Event()
         addobj(self)
 
     def announce(self, text):
         "announce text to all channels."
         if not self.silent:
             self.raw(text)
+
+    def input(self):
+        "event loop."
+        while True:
+            event = self.poll()
+            if not event or self.stopped.is_set():
+                break
+            self.put(event)
 
     def display(self, event):
         "display event results."
@@ -42,6 +50,10 @@ class Client(Handler):
         "say called by display."
         self.say(channel, text)
 
+    def poll(self):
+        "return event"
+        raise NotImplementedError("poll")
+
     def raw(self, text):
         "raw output."
         raise NotImplementedError("raw")
@@ -49,6 +61,17 @@ class Client(Handler):
     def say(self, channel, text):
         "say text in channel."
         self.raw(text)
+
+    def start(self):
+        "start input loop and handler."
+        super().start()
+        self.stopped.clear()
+        launch(self.input)
+
+    def stop(self):
+        "stop input loop and handler."
+        self.stopped.set()       
+        super().stop()
 
 
 class CLI(Client):
