@@ -27,7 +27,7 @@ def adddir(name, path):
 def addpkg(*pkgs):
     "register package directory."
     for pkg in pkgs:
-        addmod(pkg.__name__, pkg.__path__[0])
+        adddir(pkg.__name__, pkg.__path__[0])
 
 
 def getmod(name):

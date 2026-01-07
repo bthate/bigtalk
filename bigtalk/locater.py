@@ -9,7 +9,7 @@ import os
 
 from .methods import deleted, fqn, search
 from .objects import Object, keys, update
-from .persist import Cache, addcache, getcache, read
+from .persist import addcache, getcache, read
 from .timings import fntime
 from .workdir import getstore, long
 

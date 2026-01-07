@@ -14,15 +14,18 @@ sys.path.insert(0, os.getcwd())
 
 
 from bigtalk.clients import CLI
-from bigtalk.command import addcmd, command
+from bigtalk.command import Commands, addcmd, command
 from bigtalk.configs import Config
 from bigtalk.loggers import level
 from bigtalk.message import Message
 from bigtalk.methods import parse
-from bigtalk.package import Mods, adddir, init, modules, scanner
+from bigtalk.package import adddir, init, modules, scanner
 from bigtalk.statics import SYSTEMD
 from bigtalk.utility import check, forever, pipxdir, where, wrapped
 from bigtalk.workdir import Workdir, moddir, pidfile, pidname, skel
+
+
+"defines"
 
 
 TXT = " ".join(sys.argv[1:])
