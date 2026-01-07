@@ -11,8 +11,7 @@ from bigtalk.brokers import getobj, like
 from bigtalk.locater import last
 from bigtalk.objects import Object, items
 from bigtalk.persist import write
-from bigtalk.threads import Timed
-from bigtalk.timings import NoDate, day, elapsed, extract, hour, today
+from bigtalk.timings import NoDate, Timed, day, elapsed, extract, hour, today
 from bigtalk.workdir import getpath
 
 

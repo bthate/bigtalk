@@ -25,8 +25,8 @@ from bigtalk.locater import find, last
 from bigtalk.methods import fmt
 from bigtalk.objects import Object, update
 from bigtalk.persist import write
-from bigtalk.threads import Repeater, launch
-from bigtalk.timings import elapsed, fntime
+from bigtalk.threads import launch
+from bigtalk.timings import Repeater, elapsed, fntime
 from bigtalk.utility import spl
 from bigtalk.workdir import getpath
 

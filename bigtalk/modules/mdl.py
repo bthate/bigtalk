@@ -12,8 +12,7 @@ import time
 from bigtalk.brokers import objs
 from bigtalk.message import Message
 from bigtalk.objects import Object, construct, keys
-from bigtalk.threads import Repeater
-from bigtalk.timings import elapsed
+from bigtalk.timings import Repeater, elapsed
 
 
 def init():

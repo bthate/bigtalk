@@ -9,7 +9,7 @@ from random import SystemRandom
 
 from bigtalk.brokers import objs
 from bigtalk.message import Message
-from bigtalk.threads import Repeater
+from bigtalk.timings import Repeater
 
 
 rand = SystemRandom()
