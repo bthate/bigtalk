@@ -110,7 +110,7 @@ class TextWrap(textwrap.TextWrapper):
 wrapper = TextWrap()
 
 
-class IRC(Client, Input, Output):
+class IRC(Input, Output, Client):
 
     def __init__(self):
         super().__init__()

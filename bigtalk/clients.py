@@ -21,9 +21,7 @@ class Client(Handler):
     def __init__(self):
         super().__init__()
         self.olock = threading.RLock()
-        self.oqueue = queue.Queue()
         self.silent = True
-        self.stopped = threading.Event()
         addobj(self)
 
     def announce(self, text):
@@ -60,6 +58,9 @@ class CLI(Client):
 
 class Input:
 
+    def __init__(self):
+        self.stopped = threading.Event()
+
     def input(self):
         "event loop."
         while True:
@@ -72,6 +73,10 @@ class Input:
         "return event"
         raise NotImplementedError("poll")
 
+    def put(self, event):
+        "send event to handler."
+        raise NotImplementedError        
+
     def start(self):
         "start input loop and handler."
         self.stopped.clear()
@@ -83,6 +88,13 @@ class Input:
 
 
 class Output:
+
+    def __init__(self):
+        self.oqueue = queue.Queue()
+
+    def display(self, event):
+        "display event result."
+        raise NotImplementedError
 
     def output(self):
         "output loop."
