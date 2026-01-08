@@ -13,7 +13,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Output
+from bigtalk.clients import Client, Output
 from bigtalk.command import command
 from bigtalk.configs import Cfg
 from bigtalk.message import Message
@@ -35,9 +35,10 @@ Workdir.wdr = ".test"
 events = queue.Queue()
 
 
-class CLI(Output):
+class CLI(Client, Output):
 
     def __init__(self):
+        Client.__init__(self)
         Output.__init__(self)
         self.register("command", command)
 
