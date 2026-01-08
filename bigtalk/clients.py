@@ -11,7 +11,6 @@ import _thread
 
 
 from .brokers import addobj
-from .command import command
 from .handler import Handler
 from .threads import launch
 
@@ -47,13 +46,6 @@ class Client(Handler):
     def say(self, channel, text):
         "say text in channel."
         self.raw(text)
-
-
-class CLI(Client):
-
-    def __init__(self):
-        super().__init__()
-        self.register("command", command)
 
 
 class Output(Client):
@@ -95,7 +87,6 @@ class Output(Client):
 
 def __dir__():
     return (
-        'CLI',
         'Client',
         'Output'
     )

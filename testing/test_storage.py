@@ -25,7 +25,7 @@ ATTRS1 = (
     'addcache',
     'getcache',
     'read',
-    'sync',
+    'synccache',
     'write'
 )
 

@@ -14,7 +14,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import CLI
+from bigtalk.clients import Client
 from bigtalk.command import Commands, addcmd, command
 from bigtalk.configs import Cfg
 from bigtalk.loggers import level
@@ -45,7 +45,11 @@ Cfg.version = 3
 "clients"
 
 
-class Line(CLI):
+class Line(Client):
+
+    def __init__(self):
+        super().__init__()
+        self.register("command", command)
 
     def raw(self, text):
         "write to console."

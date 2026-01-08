@@ -43,7 +43,7 @@ def read(obj, path):
                 raise ex
 
 
-def sync(path, obj):
+def synccache(path, obj):
     "update cached object."
     try:
         update(Cache.objects[path], obj)
@@ -59,7 +59,7 @@ def write(obj, path=""):
         cdir(path)
         with open(path, "w", encoding="utf-8") as fpt:
             dump(obj, fpt, indent=4)
-        sync(path, obj)
+        synccache(path, obj)
         return path
 
 
@@ -69,6 +69,6 @@ def __dir__():
         'addcache',
         'getcache',
         'read',
-        'sync',
+        'synccache',
         'write'
     )
