@@ -14,7 +14,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import CLI, Input
+from bigtalk.clients import CLI
 from bigtalk.command import Commands, addcmd, command
 from bigtalk.configs import Cfg
 from bigtalk.loggers import level
@@ -22,6 +22,7 @@ from bigtalk.message import Message
 from bigtalk.methods import parse
 from bigtalk.package import adddir, init, modules, scanner
 from bigtalk.statics import SYSTEMD
+from bigtalk.threads import launch
 from bigtalk.utility import check, forever, pipxdir, where, wrapped
 from bigtalk.workdir import Workdir, moddir, pidfile, pidname, skel
 
@@ -51,12 +52,22 @@ class Line(CLI):
         print(text.encode('utf-8', 'replace').decode("utf-8"))
 
 
-class Console(Input, Line):
+class Console(Line):
 
     def __init__(self):
         super().__init__()
         self.done = threading.Event()
         self.done.set()
+        self.stopped = threading.Event()
+
+    def input(self):
+        "event loop."
+        while True:
+            event = self.poll()
+            if not event or self.stopped.is_set():
+                break
+            self.put(event)
+
 
     def callback(self, event):
         "wait for callback result."
@@ -79,7 +90,7 @@ class Console(Input, Line):
 
     def start(self):
         "starting"
-        Input.start(self)
+        launch(self.input)
         Line.start(self)
 
 

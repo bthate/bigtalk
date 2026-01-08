@@ -56,40 +56,10 @@ class CLI(Client):
         self.register("command", command)
 
 
-class Input:
+class Output(Client):
 
     def __init__(self):
-        self.stopped = threading.Event()
-
-    def input(self):
-        "event loop."
-        while True:
-            event = self.poll()
-            if not event or self.stopped.is_set():
-                break
-            self.put(event)
-
-    def poll(self):
-        "return event"
-        raise NotImplementedError("poll")
-
-    def put(self, event):
-        "send event to handler."
-        raise NotImplementedError        
-
-    def start(self):
-        "start input loop and handler."
-        self.stopped.clear()
-        launch(self.input)
-
-    def stop(self):
-        "stop input loop and handler."
-        self.stopped.set()       
-
-
-class Output:
-
-    def __init__(self):
+        super().__init__()
         self.oqueue = queue.Queue()
 
     def display(self, event):
@@ -127,6 +97,5 @@ def __dir__():
     return (
         'CLI',
         'Client',
-        'Input',
         'Output'
     )
