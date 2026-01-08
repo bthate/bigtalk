@@ -32,14 +32,6 @@ def getcache(path):
     return Cache.objects.get(path, None)
 
 
-def sync(path, obj):
-    "update cached object."
-    try:
-        update(Cache.objects[path], obj)
-    except KeyError:
-        addcache(path, obj)
-
-
 def read(obj, path):
     "read object from path."
     with lock:
@@ -49,6 +41,14 @@ def read(obj, path):
             except json.decoder.JSONDecodeError as ex:
                 ex.add_note(path)
                 raise ex
+
+
+def sync(path, obj):
+    "update cached object."
+    try:
+        update(Cache.objects[path], obj)
+    except KeyError:
+        addcache(path, obj)
 
 
 def write(obj, path=""):
@@ -69,5 +69,6 @@ def __dir__():
         'addcache',
         'getcache',
         'read',
+        'sync',
         'write'
     )

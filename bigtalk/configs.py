@@ -4,9 +4,7 @@
 "configuration"
 
 
-from .locater import last
 from .objects import Default
-from .utility import where
 
 
 class Config(Default):

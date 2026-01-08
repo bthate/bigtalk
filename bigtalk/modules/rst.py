@@ -18,15 +18,15 @@ from bigtalk.workdir import getstore, kinds
 
 def init():
     try:
-        rest = REST((Cfg.hostname, int(Cfg.port)), RESTHandler)
+        rest = REST((Config.hostname, int(Config.port)), RESTHandler)
         rest.start()
-        logging.warning("http://%s:%s", Cfg.hostname, Cfg.port)
+        logging.warning("http://%s:%s", Config.hostname, Config.port)
         return rest
     except OSError as ex:
         logging.error(str(ex))
 
 
-class Cfg:
+class Config:
 
     hostname = "localhost"
     port     = 10102

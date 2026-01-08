@@ -14,7 +14,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import CLI
+from bigtalk.clients import CLI, Input
 from bigtalk.command import Commands, addcmd, command
 from bigtalk.configs import Cfg
 from bigtalk.loggers import level
@@ -51,7 +51,7 @@ class Line(CLI):
         print(text.encode('utf-8', 'replace').decode("utf-8"))
 
 
-class Console(Line):
+class Console(Input, Line):
 
     def __init__(self):
         super().__init__()
@@ -76,6 +76,11 @@ class Console(Line):
         evt.text = input("> ")
         evt.kind = "command"
         return evt
+
+    def start(self):
+        "starting"
+        Input.start(self)
+        Line.start(self)
 
 
 "utility"

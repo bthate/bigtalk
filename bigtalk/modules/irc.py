@@ -12,7 +12,7 @@ import time
 
 
 from bigtalk.brokers import getobj
-from bigtalk.clients import Output
+from bigtalk.clients import Client, Input, Output
 from bigtalk.command import command
 from bigtalk.configs import Cfg as Main
 from bigtalk.locater import last
@@ -110,10 +110,10 @@ class TextWrap(textwrap.TextWrapper):
 wrapper = TextWrap()
 
 
-class IRC(Output):
+class IRC(Client, Input, Output):
 
     def __init__(self):
-        Output.__init__(self)
+        super().__init__()
         self.buffer = []
         self.cache = {}
         self.cfg = Config()
@@ -486,6 +486,8 @@ class IRC(Output):
         self.events.ready.clear()
         self.events.connected.clear()
         self.events.joined.clear()
+        Client.start(self)
+        Input.start(self)
         Output.start(self)
         if not self.state.keeprunning:
             launch(self.keep)
@@ -498,6 +500,8 @@ class IRC(Output):
 
     def stop(self):
         self.state.stopkeep = True
+        Input.stop(self)
+        Client.stop(self)
         Output.stop(self)
 
     def wait(self):
