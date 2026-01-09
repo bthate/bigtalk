@@ -30,7 +30,7 @@ def init():
                 continue
             diff = float(tme) - time.time()
             if diff > 0:
-                bot = gebigtalkj(origin)
+                bot = getobj(origin)
                 timer = Timed(diff, bot.say, channel, txt)
                 timer.start()
             else:
@@ -105,7 +105,7 @@ def tmr(event):
     txt = " ".join(event.args[1:])
     Timers.add(target, event.orig, event.channel, txt)
     write(Timers.timers, Timers.path or getident(Timers.timers))
-    bot = gebigtalkj(event.orig)
+    bot = getobj(event.orig)
     timer = Timed(diff, bot.say, event.orig, event.channel, txt)
     timer.start()
     event.reply("ok " + elapsed(diff))
