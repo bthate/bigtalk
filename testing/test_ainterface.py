@@ -24,6 +24,8 @@ import bigtalk.methods
 import bigtalk.objects
 import bigtalk.package
 import bigtalk.persist
+import bigtalk.serials
+import bigtalk.statics
 import bigtalk.threads
 import bigtalk.timings
 import bigtalk.utility
@@ -43,6 +45,8 @@ PACKAGE = [
     'objects',
     'package',
     'persist',
+    'serials',
+    'statics',
     'threads',
     'timings',
     'utility',

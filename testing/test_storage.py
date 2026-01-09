@@ -22,10 +22,10 @@ Workdir.wdr = '.test'
 
 ATTRS1 = (
     'Cache',
-    'addcache',
-    'getcache',
+    'addpath',
+    'getpath',
     'read',
-    'synccache',
+    'syncpath',
     'write'
 )
 
