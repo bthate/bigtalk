@@ -12,14 +12,14 @@ from bigtalk.locater import last
 from bigtalk.objects import Object, items
 from bigtalk.persist import write
 from bigtalk.timings import NoDate, Timed, day, elapsed, extract, hour, today
-from bigtalk.workdir import getpath
+from bigtalk.workdir import getident
 
 
 rand = random.SystemRandom()
 
 
 def init():
-    Timers.path = last(Timers.timers) or getpath(Timers.timers)
+    Timers.path = last(Timers.timers) or getident(Timers.timers)
     remove = []
     for tme, args in items(Timers.timers):
         if not args:
@@ -30,7 +30,7 @@ def init():
                 continue
             diff = float(tme) - time.time()
             if diff > 0:
-                bot = getobj(origin)
+                bot = gebigtalkj(origin)
                 timer = Timed(diff, bot.say, channel, txt)
                 timer.start()
             else:
@@ -104,8 +104,8 @@ def tmr(event):
     diff = target - time.time()
     txt = " ".join(event.args[1:])
     Timers.add(target, event.orig, event.channel, txt)
-    write(Timers.timers, Timers.path or getpath(Timers.timers))
-    bot = getobj(event.orig)
+    write(Timers.timers, Timers.path or getident(Timers.timers))
+    bot = gebigtalkj(event.orig)
     timer = Timed(diff, bot.say, event.orig, event.channel, txt)
     timer.start()
     event.reply("ok " + elapsed(diff))

@@ -28,7 +28,7 @@ from bigtalk.persist import write
 from bigtalk.threads import launch
 from bigtalk.timings import Repeater, elapsed, fntime
 from bigtalk.utility import spl
-from bigtalk.workdir import getpath
+from bigtalk.workdir import getident
 
 
 def init():
@@ -122,7 +122,7 @@ class Fetcher(Object):
                 result.append(fed)
             setattr(self.seen, feed.rss, urls)
             if not self.seenfn:
-                self.seenfn = getpath(self.seen)
+                self.seenfn = getident(self.seen)
             write(self.seen, self.seenfn)
         if silent:
             return counter

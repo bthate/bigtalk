@@ -13,7 +13,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Client, Output
+from bigtalk.clients import Output
 from bigtalk.command import command
 from bigtalk.configs import Cfg
 from bigtalk.message import Message
@@ -21,7 +21,7 @@ from bigtalk.methods import fmt, parse
 from bigtalk.package import adddir, modules, scanner
 from bigtalk.threads import launch
 from bigtalk.timings import elapsed
-from bigtalk.utility import where, wrapped
+from bigtalk.utility import wrapped
 from bigtalk.workdir import Workdir, skel
 
 
@@ -35,10 +35,9 @@ Workdir.wdr = ".test"
 events = queue.Queue()
 
 
-class CLI(Client, Output):
+class CLI(Output):
 
     def __init__(self):
-        Client.__init__(self)
         Output.__init__(self)
         self.register("command", command)
 
@@ -190,7 +189,7 @@ def main():
         shutil.rmtree(Workdir.wdr)
     skel()
     parse(Cfg, " ".join(sys.argv[1:]))
-    adddir("modules", os.path.join(where(Message), "modules"))
+    adddir("modules", "examples")
     scanner(modules())
     if "v" in Cfg.opts:
         banner(Cfg.name, Cfg.version)

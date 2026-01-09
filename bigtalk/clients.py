@@ -19,8 +19,10 @@ class Client(Handler):
 
     def __init__(self):
         super().__init__()
+        self.iqueue = queue.Queue()
         self.olock = threading.RLock()
         self.silent = True
+        self.stopped = threading.Event()
         addobj(self)
 
     def announce(self, text):
@@ -39,6 +41,18 @@ class Client(Handler):
         "say called by display."
         self.say(channel, text)
 
+    def input(self):
+        "event loop."
+        while True:
+            event = self.poll()
+            if not event or self.stopped.is_set():
+                break
+            self.put(event)
+
+    def poll(self):
+        "return event."
+        return self.iqueue.get()
+
     def raw(self, text):
         "raw output."
         raise NotImplementedError("raw")
@@ -47,16 +61,20 @@ class Client(Handler):
         "say text in channel."
         self.raw(text)
 
+    def start(self):
+        super().start()
+        launch(self.input)
+
+    def stop(self):
+        self.stopped.set()
+        super().stop()
+
 
 class Output(Client):
 
     def __init__(self):
         super().__init__()
         self.oqueue = queue.Queue()
-
-    def display(self, event):
-        "display event result."
-        raise NotImplementedError
 
     def output(self):
         "output loop."
@@ -70,10 +88,12 @@ class Output(Client):
 
     def start(self):
         "start loop."
+        super().start()
         launch(self.output)
 
     def stop(self):
         "stop loop."
+        super().stop()
         self.oqueue.put(None)
 
     def wait(self):

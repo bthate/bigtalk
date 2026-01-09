@@ -22,8 +22,7 @@ from bigtalk.message import Message
 from bigtalk.methods import parse
 from bigtalk.package import adddir, init, modules, scanner
 from bigtalk.statics import SYSTEMD
-from bigtalk.threads import launch
-from bigtalk.utility import check, forever, pipxdir, where, wrapped
+from bigtalk.utility import forever, pipxdir, where, wrapped
 from bigtalk.workdir import Workdir, moddir, pidfile, pidname, skel
 
 
@@ -62,16 +61,6 @@ class Console(Line):
         super().__init__()
         self.done = threading.Event()
         self.done.set()
-        self.stopped = threading.Event()
-
-    def input(self):
-        "event loop."
-        while True:
-            event = self.poll()
-            if not event or self.stopped.is_set():
-                break
-            self.put(event)
-
 
     def callback(self, event):
         "wait for callback result."
@@ -91,11 +80,6 @@ class Console(Line):
         evt.text = input("> ")
         evt.kind = "command"
         return evt
-
-    def start(self):
-        "starting"
-        launch(self.input)
-        Line.start(self)
 
 
 "utility"
@@ -122,8 +106,25 @@ def boot(cfg):
     level(cfg.sets.level or cfg.level or "info")
     adddir(f"{Cfg.name}.modules", os.path.join(where(Message), "modules"))
     adddir("modules", moddir())
-    if "m" in Cfg.opts:
+    if os.path.exists('examples'):
+        adddir("mods", "examples")
+    elif os.path.exists('mods'):
         adddir("mods", "mods")
+    else:
+        path = pipxdir(Cfg.name)
+        if os.path.exists(path):
+            adddir("mods", path)
+
+ 
+def check(text):
+    "check for options."
+    for arg in TXT.split():
+        if not arg.startswith("-"):
+            continue
+        for char in text:
+               if char in arg:
+                   return True
+        return False
 
 
 def daemon(verbose=False, nochdir=False):
@@ -135,16 +136,14 @@ def daemon(verbose=False, nochdir=False):
     pid2 = os.fork()
     if pid2 != 0:
         os._exit(0)
-    if not verbose:
-        with open('/dev/null', 'r', encoding="utf-8") as sis:
-            os.dup2(sis.fileno(), sys.stdin.fileno())
-        with open('/dev/null', 'a+', encoding="utf-8") as sos:
-            os.dup2(sos.fileno(), sys.stdout.fileno())
-        with open('/dev/null', 'a+', encoding="utf-8") as ses:
-            os.dup2(ses.fileno(), sys.stderr.fileno())
-    if not nochdir:
-        os.umask(0)
-        os.chdir("/")
+    with open('/dev/null', 'r', encoding="utf-8") as sis:
+        os.dup2(sis.fileno(), sys.stdin.fileno())
+    with open('/dev/null', 'a+', encoding="utf-8") as sos:
+        os.dup2(sos.fileno(), sys.stdout.fileno())
+    with open('/dev/null', 'a+', encoding="utf-8") as ses:
+        os.dup2(ses.fileno(), sys.stderr.fileno())
+    os.umask(0)
+    os.chdir("/")
     os.nice(10)
 
 
@@ -176,13 +175,9 @@ def wrap(func):
 "scripts"
 
 
-def attr(obj, name, default=""):
-    return getattr(obj, name, default)
-
-
 def background():
     "background script."
-    daemon(check("v", TXT), check("m", TXT))
+    daemon()
     privileges()
     boot(Cfg)
     pidfile(pidname(Cfg.name))
@@ -199,7 +194,7 @@ def console():
     boot(Cfg)
     if "v" in Cfg.opts:
         banner()
-    scanner(modules(getattr(Cfg, "ignore", "")))
+    scanner(modules(Cfg.ignore))
     addcmd(cmd, mod, ver)
     mds = Cfg.sets.init
     if not mds and "a" in Cfg.opts:
@@ -208,6 +203,7 @@ def console():
     csl = Console()
     csl.start()
     forever()
+
 
 def control():
     "cli script."
@@ -276,11 +272,11 @@ def ver(event):
 
 def main():
     "main"
-    if check("d", TXT):
+    if check("d"):
         background()
-    elif check("c", TXT):
+    elif check("c"):
         wrap(console)
-    elif check("s", TXT):
+    elif check("s"):
         wrapped(service)
     else:
         wrapped(control)
