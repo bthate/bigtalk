@@ -13,32 +13,47 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Output
-from bigtalk.command import command
-from bigtalk.configs import Cfg
+from bigtalk.command import Commands, command
 from bigtalk.message import Message
 from bigtalk.methods import fmt, parse
-from bigtalk.package import adddir, modules, scanner
+from bigtalk.handler import Client
+from bigtalk.package import initmods, listmods, pkgname, scanner
+from bigtalk.persist import setwd
+from bigtalk.runtime import Cfg
 from bigtalk.threads import launch
-from bigtalk.timings import elapsed
-from bigtalk.utility import wrapped
-from bigtalk.workdir import Workdir, skel
+from bigtalk.utility import elapsed, wrapped
 
 
-Cfg.debug = True
-Cfg.level = "info"
-Cfg.name = "bigtalk"
-Cfg.version = 3
-Workdir.wdr = ".test"
+from bigtalk import modules as MODS
+
+
+try:
+    import mods as MODS2
+except ModuleNotFoundError:
+    MODS2 = None
 
 
 events = queue.Queue()
 
 
-class CLI(Output):
+"config"
+
+Cfg.debug = True
+Cfg.ignore = ""
+Cfg.level = "info"
+Cfg.name = pkgname(Commands)
+Cfg.txt = " ".join(sys.argv[1:])
+Cfg.version = 3
+Cfg.wdr = ".test"
+
+
+"clients"
+
+
+class CLI(Client):
 
     def __init__(self):
-        Output.__init__(self)
+        Client.__init__(self)
         self.register("command", command)
 
     def raw(self, txt):
@@ -78,9 +93,9 @@ class Pool:
 "utilities"
 
 
-def banner(name, version):
+def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{name.upper()} {version} since {tme} ({Cfg.level})")
+    print(f"{Cfg.name.upper()} {Cfg.version} since {tme} ({Cfg.level})")
     sys.stdout.flush()
 
 
@@ -115,7 +130,65 @@ def payload(todo):
             events.put(evt)
 
 
-"defines"
+"runtime"
+
+
+def wrap(func):
+    "restore console."
+    import termios
+    old = None
+    try:
+        old = termios.tcgetattr(sys.stdin.fileno())
+    except termios.error:
+        pass
+    try:
+        wrapped(func)
+    finally:
+        pass
+    if old:
+        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
+
+
+def main():
+    if "p" not in Cfg.opts and os.path.exists(Cfg.wdr):
+        shutil.rmtree(Cfg.wdr)
+    parse(Cfg, " ".join(sys.argv[1:]))
+    setwd(Cfg.wdr)
+    initmods("modules", MODS.__path__[0])
+    if MODS2:
+        initmods("mods", MODS2.__path__[0])
+    scanner(listmods())
+    if "v" in Cfg.opts:
+        banner()
+    if "z" in Cfg.opts:
+        Pool.init(CLI, os.cpu_count())
+    else:
+        Pool.init(CLI, 1)
+    starttime = time.time()
+    nrs = Cfg.index or 1
+    for _x in range(nrs):
+        payload(pre)
+    for _x in range(nrs):
+        payload(examples)
+    for _x in range(nrs):
+        payload(post)
+    launch(consume)
+    nrevents = events.qsize()
+    try:
+        events.join()
+    except (KeyboardInterrupt, EOFError):
+        pass
+    endtime = time.time()
+    lap = elapsed(endtime-starttime)
+    percall = (endtime-starttime)/nrevents
+    nrs = events.qsize()
+    if "v" in Cfg.opts:
+        print(f"{fmt(Cfg)}")
+        print(f"{nrs} events left.")
+        print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
+
+
+"date"
 
 
 examples = {
@@ -145,7 +218,6 @@ examples = {
     "thr": [""],
     "tmr": ["", "22:00 test"],
     "upt": [""],
-    "ver": [""],
     "wsd": [""]
 }
 
@@ -165,60 +237,7 @@ post = {
 }
 
 
-"runtime"
-
-
-def wrap(func):
-    "restore console."
-    import termios
-    old = None
-    try:
-        old = termios.tcgetattr(sys.stdin.fileno())
-    except termios.error:
-        pass
-    try:
-        wrapped(func)
-    finally:
-        pass
-    if old:
-        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
-
-
-def main():
-    if os.path.exists(Workdir.wdr):
-        shutil.rmtree(Workdir.wdr)
-    skel()
-    parse(Cfg, " ".join(sys.argv[1:]))
-    adddir("modules", "examples")
-    scanner(modules())
-    if "v" in Cfg.opts:
-        banner(Cfg.name, Cfg.version)
-    if "z" in Cfg.opts:
-        Pool.init(CLI, os.cpu_count())
-    else:
-        Pool.init(CLI, 1)
-    starttime = time.time()
-    nrs = Cfg.index or 1
-    for _x in range(nrs):
-        payload(pre)
-    for _x in range(nrs):
-        payload(examples)
-    for _x in range(nrs):
-        payload(post)
-    launch(consume)
-    nrevents = events.qsize()
-    try:
-        events.join()
-    except (KeyboardInterrupt, EOFError):
-        pass
-    endtime = time.time()
-    lap = elapsed(endtime-starttime)
-    percall = (endtime-starttime)/nrevents
-    nrs = events.qsize()
-    if "v" in Cfg.opts:
-        print(f"{fmt(Cfg)}")
-        print(f"{nrs} events left.")
-        print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
+"trampoline"
 
 
 if __name__ == "__main__":

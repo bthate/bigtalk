@@ -33,7 +33,6 @@ classifiers = [
 packages = [
     'bigtalk',
     'bigtalk.modules',
-    'bigtalk.network',
     'bigtalk.nucleus',
     'bigtalk.nucleus.pdf',
     'bigtalk.nucleus._static',

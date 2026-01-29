@@ -5,46 +5,37 @@
 "main program"
 
 
+import logging
 import os
 import sys
-import threading
 import time
 
 
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Client
-from bigtalk.command import Commands, addcmd, command
-from bigtalk.configs import Cfg
-from bigtalk.loggers import level
+from bigtalk.command import Commands, addcmd, command, docmd
+from bigtalk.handler import Console
 from bigtalk.message import Message
 from bigtalk.methods import parse
-from bigtalk.package import adddir, init, modules, scanner
-from bigtalk.statics import SYSTEMD
-from bigtalk.utility import forever, pipxdir, where, wrapped
-from bigtalk.workdir import Workdir, moddir, pidfile, pidname, skel
+from bigtalk.package import initmods, inits, listmods, pkgname, scanner
+from bigtalk.persist import pidfile, setwd, workdir
+from bigtalk.runtime import Cfg
+from bigtalk.utility import forever, level
 
 
-"defines"
-
-
-TXT = " ".join(sys.argv[1:])
-
-
-"config"
+from bigtalk import modules as MODS
 
 
 Cfg.ignore = "rst,udp,web"
 Cfg.level = "info"
-Cfg.name = "bigtalk" 
+Cfg.name = pkgname(Commands)
+Cfg.txt = " ".join(sys.argv[1:])
 Cfg.version = 3
+Cfg.wdr = os.path.expanduser(f"~/.{Cfg.name}")
 
 
-"clients"
-
-
-class Line(Client):
+class Line(Console):
 
     def __init__(self):
         super().__init__()
@@ -55,70 +46,136 @@ class Line(Client):
         print(text.encode('utf-8', 'replace').decode("utf-8"))
 
 
-class Console(Line):
-
-    def __init__(self):
-        super().__init__()
-        self.done = threading.Event()
-        self.done.set()
+class Term(Line):
 
     def callback(self, event):
         "wait for callback result."
         if not event.text:
             event.ready()
-            self.done.set()
             return
         super().callback(event)
         event.wait()
-        self.done.set()
 
     def poll(self):
         "poll for an event."
-        self.done.wait()
-        self.done.clear()
         evt = Message()
         evt.text = input("> ")
         evt.kind = "command"
         return evt
 
 
-"utility"
+def background():
+    "background script."
+    daemon()
+    privileges()
+    boot()
+    pidfile(Cfg.name)
+    scanner(Cfg.ignore)
+    addcmd(cmd, mod, ver)
+    inits(Cfg.default or "irc,mdl,rss,wsd", Cfg.ignore)
+    forever()
+
+
+def console():
+    "console script."
+    import readline
+    readline.redisplay()
+    boot()
+    scanner(listmods(), Cfg.ignore)
+    addcmd(cmd, mod, ver)
+    docmd(Cfg.txt)
+    inits(Cfg.init, Cfg.ignore, "w" in Cfg.opts)
+    csl = Term()
+    csl.start()
+    forever()
+
+
+def control():
+    "cli script."
+    if len(sys.argv) == 1:
+        return
+    boot()
+    scanner(listmods(), Cfg.ignore)
+    addcmd(cmd, mod, srv, ver)
+    evt = docmd(Cfg.txt)
+    for line in evt.result.values():
+        print(line)
+
+
+def service():
+    "service script."
+    privileges()
+    banner()
+    boot()
+    pidfile(Cfg.name)
+    scanner(listmods())
+    addcmd(cmd, mod, ver)
+    inits(Cfg.default or "irc,mdl,rss,wsd", Cfg.ignore)
+    forever()
+
+
+def cmd(event):
+    "list available commands."
+    event.reply(",".join(sorted(Commands.names or Commands.cmds)))
+
+
+def mod(event):
+    "list available commands."
+    mods = listmods(Cfg.ignore)
+    if not mods:
+        event.reply("no modules available")
+        return
+    event.reply(mods)
+
+
+def srv(event):
+    "generate systemd service file."
+    import getpass
+    name = getpass.getuser()
+    event.reply(SYSTEMD % (Cfg.name.upper(), name, name, name, Cfg.name))
+
+
+def ver(event):
+    "show verson."
+    event.reply(f"{Cfg.name.upper()} {Cfg.version}")
 
 
 def banner():
     "hello."
     tme = time.ctime(time.time()).replace("  ", " ")
-    print("%s %s %s since %s (%s)" % (
+    print("%s %s since %s (%s)" % (
         Cfg.name.upper(),
         Cfg.version,
-        Cfg.opts.strip().upper(),
         tme,
-        Cfg.level.upper()
+        Cfg.level.upper(),
     ))
     sys.stdout.flush()
 
 
-def boot(cfg):
+def boot(inits=""):
     "in the beginning."
-    Workdir.wdr = Workdir.wdr or os.path.expanduser(f"~/.{cfg.name}")
-    skel()
-    parse(cfg, TXT)
-    level(cfg.sets.level or cfg.level or "info")
-    adddir(f"{Cfg.name}.modules", os.path.join(where(Message), "modules"))
-    adddir("modules", moddir())
-    if os.path.exists('examples'):
-        adddir("mods", "examples")
-    elif os.path.exists('mods'):
-        adddir("mods", "mods")
-    else:
-        path = pipxdir(Cfg.name)
-        if os.path.exists(path):
-            adddir("mods", path)
+    parse(Cfg, Cfg.txt)
+    Cfg.ignore = Cfg.sets.ignore or Cfg.ignore or ""
+    Cfg.init = Cfg.sets.init or Cfg.init or ""
+    Cfg.level = Cfg.sets.level or Cfg.level or "info"
+    Cfg.wdr = Cfg.sets.wdr or Cfg.wdr or os.path.expanduser(f"~/.{pkgname(Cfg)}")
+    level(Cfg.level)
+    setwd(Cfg.wdr)
+    if Cfg.wdr:
+        initmods("modules", os.path.join(workdir(), "mods"))
+    if MODS:
+        initmods(MODS.__name__, MODS.__path__[0])
+    if "m" in Cfg.opts and os.path.exists("mods"):
+        initmods("mods", "mods")
+    if "v" in Cfg.opts:
+        banner()
+    if 'a' in Cfg.opts:
+        Cfg.init = listmods(Cfg.ignore)
 
- 
+
 def check(text):
     "check for options."
-    for arg in TXT.split():
+    for arg in Cfg.txt.split():
         if not arg.startswith("-"):
             continue
         for char in text:
@@ -165,109 +222,27 @@ def wrap(func):
     except termios.error:
         pass
     try:
-        wrapped(func)
-    finally:
+        func()
+    except (KeyboardInterrupt, EOFError):
         pass
+    except Exception as ex:
+        logging.exception(ex)
     if old:
         termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
 
 
-"scripts"
+SYSTEMD = """[Unit]
+Description=%s
+After=multi-user.target
 
+[Service]
+Type=simple
+User=%s
+Group=%s
+ExecStart=/home/%s/.local/bin/%s -s
 
-def background():
-    "background script."
-    daemon()
-    privileges()
-    boot(Cfg)
-    pidfile(pidname(Cfg.name))
-    addcmd(cmd, mod, ver)
-    scanner(modules(Cfg.ignore))
-    init(modules(Cfg.ignore))
-    forever()
-
-
-def console():
-    "console script."
-    import readline
-    readline.redisplay()
-    boot(Cfg)
-    if "v" in Cfg.opts:
-        banner()
-    scanner(modules(Cfg.ignore))
-    addcmd(cmd, mod, ver)
-    mds = Cfg.sets.init
-    if not mds and "a" in Cfg.opts:
-        mds = modules(Cfg.ignore)
-    init(mds, "w" in Cfg.opts)
-    csl = Console()
-    csl.start()
-    forever()
-
-
-def control():
-    "cli script."
-    if len(sys.argv) == 1:
-        return
-    boot(Cfg)
-    scanner(modules(Cfg.ignore))
-    addcmd(cmd, exa, mod, srv, ver)
-    cli = Line()
-    evt = Message()
-    evt.orig = repr(cli)
-    evt.text = " ".join(sys.argv[1:])
-    evt.type = "command"
-    command(evt)
-    evt.wait()
-
-
-def service():
-    "service script."
-    privileges()
-    boot(Cfg)
-    banner()
-    pidfile(pidname(Cfg.name))
-    addcmd(cmd, mod, ver)
-    scanner(modules(Cfg.ignore))
-    init(modules(Cfg.ignore))
-    forever()
-
-
-"commands"
-
-
-def cmd(event):
-    "list available commands."
-    event.reply(",".join(sorted(Commands.names or Commands.cmds)))
-
-
-def exa(event):
-    "location of examples."
-    path = pipxdir(Cfg.name)
-    if not os.path.exists(os.path.expanduser(path)):
-        event.reply("pipx examples directory is not there.")
-        return
-    event.reply(f"examples are at {path}")
-
-
-def mod(event):
-    "list available commands."
-    event.reply(modules())
-
-
-def srv(event):
-    "generate systemd service file."
-    import getpass
-    name = getpass.getuser()
-    event.reply(SYSTEMD % (Cfg.name.upper(), name, name, name, Cfg.name))
-
-
-def ver(event):
-    "show version."
-    event.reply(f"{Cfg.name.upper()} {Cfg.version} {Cfg.opts.upper()}")
-
-
-"runtime"
+[Install]
+WantedBy=multi-user.target"""
 
 
 def main():
@@ -277,9 +252,9 @@ def main():
     elif check("c"):
         wrap(console)
     elif check("s"):
-        wrapped(service)
+        wrap(service)
     else:
-        wrapped(control)
+        wrap(control)
 
 
 if __name__ == "__main__":
