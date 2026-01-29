@@ -1,8 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-from bigtalk.locater import attrs
-from bigtalk.workdir import kinds
+from bigtalk.persist import attrs, kinds
 
 
 def atr(event):

@@ -7,32 +7,12 @@
 from .objects import Default, items
 
 
-def deleted(obj):
-    "check whether obj had deleted flag set."
-    return "__deleted__" in dir(obj) and obj.__deleted__
-
-
 def edit(obj, setter={}, skip=False):
     "update object with dict."
     for key, val in items(setter):
         if skip and val == "":
             continue
-        try:
-            setattr(obj, key, int(val))
-            continue
-        except ValueError:
-            pass
-        try:
-            setattr(obj, key, float(val))
-            continue
-        except ValueError:
-            pass
-        if val in ["True", "true"]:
-            setattr(obj, key, True)
-        elif val in ["False", "false"]:
-            setattr(obj, key, False)
-        else:
-            setattr(obj, key, val)
+        typed(obj, key, val)
 
 
 def fmt(obj, args=[], skip=[], plain=False, empty=False):
@@ -52,10 +32,10 @@ def fmt(obj, args=[], skip=[], plain=False, empty=False):
             continue
         if plain:
             txt += f"{value} "
-        elif isinstance(value, str):
-            txt += f'{key}="{value}" '
         elif isinstance(value, (int, float, dict, bool, list)):
             txt += f"{key}={value} "
+        elif isinstance(value, str):
+            txt += f'{key}="{value}" '
         else:
             txt += f"{key}={fqn(value)}((value))"
     if txt == "":
@@ -67,8 +47,7 @@ def fqn(obj):
     "full qualified name."
     kin = str(type(obj)).split()[-1][1:-2]
     if kin == "type":
-        tpe = type(obj)
-        kin = f"{tpe.__module__}.{tpe.__name__}"
+        kin = f"{obj.__module__}.{obj.__name__}"
     return kin
 
 
@@ -100,16 +79,16 @@ def parse(obj, text):
             continue
         if "-=" in spli:
             key, value = spli.split("-=", maxsplit=1)
-            setattr(obj.silent, key, value)
-            setattr(obj.gets, key. value)
+            typed(obj.silent, key, value)
+            typed(obj.gets, key, value)
             continue
         if "==" in spli:
             key, value = spli.split("==", maxsplit=1)
-            setattr(obj.gets, key, value)
+            typed(obj.gets, key, value)
             continue
         if "=" in spli:
             key, value = spli.split("=", maxsplit=1)
-            setattr(obj.sets, key, value)
+            typed(obj.sets, key, value)
             continue
         nr += 1
         if nr == 0:
@@ -125,30 +104,49 @@ def parse(obj, text):
         obj.text = obj.cmd or ""
 
 
-def search(obj, selector={}, matching=False):
-    "check whether object matches search criteria."
-    res = False
-    for key, value in items(selector):
-        val = getattr(obj, key, None)
-        if not val:
-            res = False
-            break
-        if matching and value != val:
-            res = False
-            break
-        if str(value).lower() not in str(val).lower():
-            res = False
-            break
-        res = True
+def skip(obj, chars="_"):
+    "skip keys containing chars."
+    res = {}
+    for key, value in items(obj):
+        next = False
+        for char in chars:
+            if char in key:
+                next = True
+        if next:
+            continue
+        res[key] = value
     return res
+
+
+def typed(obj, key, val):
+    "assign proper types."
+    try:
+        setattr(obj, key, int(val))
+        return
+    except ValueError:
+        pass
+    try:
+        setattr(obj, key, float(val))
+        return
+    except ValueError:
+        pass
+    if val in ["True", "true", True]:
+        setattr(obj, key, True)
+    elif val in ["False", "false", False]:
+        setattr(obj, key, False)
+    else:
+        setattr(obj, key, val)
+
+
+"interface"
 
 
 def __dir__():
     return (
-        'deleted',
         'edit',
         'fmt',
         'fqn',
         'parse',
-        'search'
+        'skip',
+        'typed'
     )

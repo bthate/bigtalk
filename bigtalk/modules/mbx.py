@@ -6,12 +6,10 @@ import os
 import time
 
 
-from bigtalk.locater import find
 from bigtalk.methods import fmt
 from bigtalk.objects import Object, keys, update
-from bigtalk.persist import write
-from bigtalk.statics import MONTH
-from bigtalk.timings import date, elapsed
+from bigtalk.persist import find, write
+from bigtalk.utility import MONTH, date, elapsed
 
 
 class Email(Object):

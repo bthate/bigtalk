@@ -1,13 +1,14 @@
 # This file is placed in the Public Domain.
 
 
-"write your commands"
+"write your own commands"
 
 
 import inspect
 
 
 from .brokers import getobj
+from .message import Message
 from .methods import parse
 
 
@@ -26,8 +27,24 @@ def addcmd(*args):
 
 
 def getcmd(cmd):
-    "command by string."
+    "get function for command."
     return Commands.cmds.get(cmd, None)
+        
+
+def hascmd(cmd):
+    "whether cmd is registered."
+    return cmd in Commands.cmds
+
+
+def scancmd(module):
+    "scan a module for functions with event as argument."
+    for key, cmdz in inspect.getmembers(module, inspect.isfunction):
+        if 'event' not in inspect.signature(cmdz).parameters:
+            continue
+        addcmd(cmdz)
+
+
+"utility"
 
 
 def command(evt):
@@ -37,23 +54,32 @@ def command(evt):
     if func:
         func(evt)
         bot = getobj(evt.orig)
-        bot.display(evt)
+        if bot:
+            bot.display(evt)
     evt.ready()
 
 
-def scancmd(module):
-    "scan a module for functions with event as first argument."
-    for key, cmdz in inspect.getmembers(module, inspect.isfunction):
-        if 'event' not in inspect.signature(cmdz).parameters:
-            continue
-        addcmd(cmdz)
+def docmd(text):
+    "parse text for command and run it."
+    for txt in text.split(" ! "):
+        evt = Message()
+        evt.text = txt
+        evt.type = "command"
+        command(evt)
+        evt.wait()
+    return evt
+
+
+"interface"
 
 
 def __dir__():
     return (
+        'Config',
         'Commands',
         'addcmd',
         'command',
+        'docmd',
         'getcmd',
         'scancmd'
     )

@@ -10,8 +10,8 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.configs import Cfg
 from bigtalk.objects import Object
+from bigtalk.runtime import Cfg
 from bigtalk.threads import launch
 from bigtalk.utility import where
 

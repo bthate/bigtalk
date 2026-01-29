@@ -1,7 +1,7 @@
-# This file is placed in the Public Domain.
+# This file is put into the Public Domain.
 
 
-"configuration"
+"place your runtime code here"
 
 
 from .objects import Default
@@ -13,7 +13,9 @@ class Config(Default):
 
 
 Cfg = Config()
-Cfg.name = Config.__module__.split(".")[0]
+
+
+"interface"
 
 
 def __dir__():

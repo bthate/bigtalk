@@ -5,7 +5,7 @@ import threading
 import time
 
 
-from bigtalk.timings import elapsed
+from bigtalk.utility import elapsed
 
 
 STARTTIME = time.time()

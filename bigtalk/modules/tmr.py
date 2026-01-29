@@ -8,18 +8,16 @@ import time
 
 
 from bigtalk.brokers import getobj, likeobj
-from bigtalk.locater import last
 from bigtalk.objects import Object, items
-from bigtalk.persist import write
-from bigtalk.timings import NoDate, Timed, day, elapsed, extract, hour, today
-from bigtalk.workdir import getident
+from bigtalk.persist import ident, last, write
+from bigtalk.utility import NoDate, Timed, day, elapsed, extract, hour, today
 
 
 rand = random.SystemRandom()
 
 
 def init():
-    Timers.path = last(Timers.timers) or getident(Timers.timers)
+    Timers.path = last(Timers.timers) or ident(Timers.timers)
     remove = []
     for tme, args in items(Timers.timers):
         if not args:
@@ -104,7 +102,7 @@ def tmr(event):
     diff = target - time.time()
     txt = " ".join(event.args[1:])
     Timers.add(target, event.orig, event.channel, txt)
-    write(Timers.timers, Timers.path or getident(Timers.timers))
+    write(Timers.timers, Timers.path or ident(Timers.timers))
     bot = getobj(event.orig)
     timer = Timed(diff, bot.say, event.orig, event.channel, txt)
     timer.start()

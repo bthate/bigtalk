@@ -4,10 +4,9 @@
 import time
 
 
-from bigtalk.locater import find
 from bigtalk.methods import fmt
-from bigtalk.timings import elapsed, fntime
-from bigtalk.workdir import kinds
+from bigtalk.persist import find, fntime, kinds
+from bigtalk.utility import elapsed
 
 
 def fnd(event):

@@ -12,18 +12,20 @@ import time
 
 
 from bigtalk.brokers import getobj
-from bigtalk.clients import Output
 from bigtalk.command import command
-from bigtalk.configs import Cfg
-from bigtalk.locater import last
+from bigtalk.handler import Output
 from bigtalk.message import Message
 from bigtalk.methods import edit, fmt
 from bigtalk.objects import Object, keys
-from bigtalk.persist import write
+from bigtalk.package import pkgname
+from bigtalk.persist import ident, last, write
+from bigtalk.runtime import Cfg
 from bigtalk.threads import launch
-from bigtalk.workdir import getident
 
- 
+
+NAME = Cfg.name or pkgname(Object)
+
+
 lock = threading.RLock()
 
 
@@ -480,7 +482,6 @@ class IRC(Output):
         self.state.lastline = splitted[-1]
 
     def start(self):
-        last(self.cfg)
         if self.cfg.channel not in self.channels:
             self.channels.append(self.cfg.channel)
         self.events.ready.clear()
@@ -569,9 +570,7 @@ def cb_privmsg(evt):
     if not bot.cfg.commands:
         return
     if evt.text:
-        if evt.text[0] in [
-            "!",
-        ]:
+        if evt.text[0] in ["!",]:
             evt.text = evt.text[1:]
         elif evt.text.startswith(f"{bot.cfg.nick}:"):
             evt.text = evt.text[len(bot.cfg.nick) + 1 :]
@@ -597,18 +596,18 @@ def cb_quit(evt):
 
 def cfg(event):
     config = Config()
-    fnm = last(config)
+    fnm = last(config) or ident(config)
     if not event.sets:
         event.reply(
             fmt(
                 config,
                 keys(config),
-                skip="control,name,word,realname,sleep,username".split(",")
+                skip="control,name,password,realname,sleep,username".split(",")
             )
         )
     else:
         edit(config, event.sets)
-        write(config, fnm or getident(config))
+        write(config, fnm or ident(config))
         event.reply("ok")
 
 

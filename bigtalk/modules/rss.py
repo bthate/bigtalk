@@ -19,23 +19,20 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.brokers import objs
-from bigtalk.configs import Cfg
-from bigtalk.locater import find, last
-from bigtalk.methods import fmt
+from bigtalk.brokers import getobjs
+from bigtalk.methods import fmt, fqn
 from bigtalk.objects import Object, update
-from bigtalk.persist import write
+from bigtalk.persist import find, fntime, ident, last, write
+from bigtalk.runtime import Cfg
 from bigtalk.threads import launch
-from bigtalk.timings import Repeater, elapsed, fntime
-from bigtalk.utility import spl
-from bigtalk.workdir import getident
+from bigtalk.utility import Repeater, elapsed, spl
 
 
 def init():
     fetcher = Fetcher()
     fetcher.start()
-    if fetcher.seenfn:
-        logging.warning("since %s", elapsed(time.time()-fntime(fetcher.seenfn)))
+    if seenfn:
+        logging.warning("since %s", elapsed(time.time()-fntime(seenfn)))
     else:
         logging.warning("since %s", time.ctime(time.time()).replace("  ", " "))
     return fetcher
@@ -46,17 +43,18 @@ importlock = _thread.allocate_lock()
 
 
 errors = {}
+seenfn = ""
 skipped = []
 
 
-class Feed:
+class Feed(Object):
 
     def __init__(self):
         self.link = ""
         self.name = ""
 
 
-class Rss:
+class Rss(Object):
 
     def __init__(self):
         self.display_list = "title,link,author"
@@ -65,17 +63,19 @@ class Rss:
         self.rss = ""
 
 
-class Urls:
+class Urls(Object):
 
     pass
 
 
+seen = Urls()
+
+
 class Fetcher(Object):
+
 
     def __init__(self):
         self.dosave = False
-        self.seen = Urls()
-        self.seenfn = None
 
     @staticmethod
     def display(obj):
@@ -99,9 +99,10 @@ class Fetcher(Object):
         return result[:-2].rstrip()
 
     def fetch(self, feed, silent=False):
+        global seenfn
         with fetchlock:
             result = []
-            seen = getattr(self.seen, feed.rss, [])
+            see = getattr(seen, feed.rss, [])
             urls = []
             counter = 0
             for obj in reversed(getfeed(feed.rss, feed.display_list)):
@@ -115,15 +116,16 @@ class Fetcher(Object):
                 else:
                     uurl = fed.link
                 urls.append(uurl)
-                if uurl in seen:
+                if uurl in see:
                     continue
                 if self.dosave:
                     write(fed)
                 result.append(fed)
-            setattr(self.seen, feed.rss, urls)
-            if not self.seenfn:
-                self.seenfn = getident(self.seen)
-            write(self.seen, self.seenfn)
+            setattr(seen, feed.rss, urls)
+            if not seenfn:
+                seenfn = ident(seen)
+            write(seen, seenfn)
+            time.sleep(1.0)
         if silent:
             return counter
         txt = ""
@@ -132,18 +134,18 @@ class Fetcher(Object):
             txt = f"[{feedname}] "
         for obj in result:
             txt2 = txt + self.display(obj)
-            for bot in objs("announce"):
+            for bot in getobjs("announce"):
                 bot.announce(txt2)
         return counter
 
     def run(self, silent=False):
         thrs = []
-        for _fn, feed in find("rss.Rss"):
+        for _fn, feed in find(fqn(Rss)):
             thrs.append(launch(self.fetch, feed, silent))
         return thrs
 
     def start(self, repeat=True):
-        self.seenfn = last(self.seen)
+        last(seen)
         if repeat:
             repeater = Repeater(300.0, self.run)
             repeater.start()
@@ -357,7 +359,7 @@ def dpl(event):
         event.reply("dpl <stringinurl> <item1,item2>")
         return
     setter = {"display_list": event.args[1]}
-    for fnm, feed in find("rss.Rss", {"rss": event.args[0]}):
+    for fnm, feed in find(fqn(Rss), {"rss": event.args[0]}):
         if feed:
             update(feed, setter)
             write(feed, fnm)
@@ -368,7 +370,7 @@ def exp(event):
     with importlock:
         event.reply(TEMPLATE)
         nrs = 0
-        for _fn, ooo in find("rss.Rss"):
+        for _fn, ooo in find(fqn(Rss)):
             nrs += 1
             obj = Rss()
             update(obj, ooo)
@@ -401,7 +403,7 @@ def imp(event):
                 continue
             if not url.startswith("http"):
                 continue
-            has = list(find("rss.Rss", {"rss": url}, matching=True))
+            has = list(find(fqn(Rss), {"rss": url}, matching=True))
             if has:
                 skipped.append(url)
                 nrskip += 1
@@ -423,7 +425,7 @@ def nme(event):
         event.reply("nme <stringinurl> <name>")
         return
     selector = {"rss": event.args[0]}
-    for fnm, fed in find("rss.Rss", selector):
+    for fnm, fed in find(fqn(Rss), selector):
         feed = Rss()
         update(feed, fed)
         if feed:
@@ -436,7 +438,7 @@ def rem(event):
     if len(event.args) != 1:
         event.reply("rem <stringinurl>")
         return
-    for fnm, fed in find("rss.Rss"):
+    for fnm, fed in find(fqn(Rss)):
         feed = Rss()
         update(feed, fed)
         if event.args[0] not in feed.rss:
@@ -452,7 +454,7 @@ def res(event):
     if len(event.args) != 1:
         event.reply("res <stringinurl>")
         return
-    for fnm, fed in find("rss.Rss", removed=True):
+    for fnm, fed in find(fqn(Rss), removed=True):
         feed = Rss()
         update(feed, fed)
         if event.args[0] not in feed.rss:
@@ -466,7 +468,7 @@ def res(event):
 def rss(event):
     if not event.rest:
         nrs = 0
-        for fnm, fed in find("rss.Rss"):
+        for fnm, fed in find(fqn(Rss)):
             nrs += 1
             elp = elapsed(time.time() - fntime(fnm))
             txt = fmt(fed)
@@ -478,7 +480,7 @@ def rss(event):
     if "http://" not in url and "https://" not in url:
         event.reply("i need an url")
         return
-    for fnm, result in find("rss.Rss", {"rss": url}):
+    for fnm, result in find(fqn(Rss), {"rss": url}):
         if result:
             event.reply(f"{url} is known")
             return

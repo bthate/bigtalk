@@ -4,10 +4,9 @@
 import time
 
 
-from bigtalk.locater import find
 from bigtalk.objects import Object
-from bigtalk.persist import write
-from bigtalk.timings import elapsed, fntime
+from bigtalk.persist import find, fntime, write
+from bigtalk.utility import elapsed
 
 
 class Log(Object):

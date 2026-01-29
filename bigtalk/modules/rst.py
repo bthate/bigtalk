@@ -10,10 +10,10 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.configs import Cfg
 from bigtalk.objects import Object
+from bigtalk.persist import kinds, workdir
+from bigtalk.runtime import Cfg
 from bigtalk.threads import launch
-from bigtalk.workdir import getstore, kinds
 
 
 def init():
@@ -89,17 +89,17 @@ class RESTHandler(BaseHTTPRequestHandler):
             self.write_header("text/html")
             txt = ""
             for fnm in kinds():
-                txt += f'<a href="http://{Cfg.hostname}:{Cfg.port}/{fnm}">{fnm}</a><br>\n'
+                txt += f'<a href="http://{Config.hostname}:{Config.port}/{fnm}">{fnm}</a><br>\n'
             self.send(html(txt.strip()))
             return
-        fnm = getstore() + self.path
+        fnm = os.path.join(workdir(), self.path)
         fnm = os.path.abspath(fnm)
         if os.path.isdir(fnm):
             self.write_header("text/html")
             txt = ""
             for fnn in os.listdir(fnm):
                 filename = self.path  + os.sep + fnn
-                txt += f'<a href="http://{Cfg.hostname}:{Cfg.port}/{filename}">{filename}</a><br>\n'
+                txt += f'<a href="http://{Config.hostname}:{Config.port}/{filename}">{filename}</a><br>\n'
             self.send(txt.strip())
             return
         try:

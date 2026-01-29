@@ -6,28 +6,38 @@
 
 class Broker:
 
-    objects = {}
+    objs = {}
 
 
 def addobj(obj):
     "add object to the broker, key is repr(obj)."
-    Broker.objects[repr(obj)] = obj
+    Broker.objs[repr(obj)] = obj
+
 
 def getobj(origin):
     "object by repr(obj)."
-    return Broker.objects.get(origin)
+    return Broker.objs.get(origin)
 
-def objs(attr):
-    "object with a certain attribute."
-    for obj in Broker.objects.values():
+
+def getobjs(attr):
+    "objects with a certain attribute."
+    for obj in Broker.objs.values():
         if attr in dir(obj):
             yield obj
 
+def hasobj(obj):
+    "whether the Broker has object."
+    return repr(obj) in Broker.objs
+
+
 def likeobj(txt):
     "all keys with a substring in their key."
-    for orig in Broker.objects:
-        if orig.split()[0] in orig.split()[0]:
+    for orig in Broker.objs:
+        if txt in orig.split()[0]:
             yield orig
+
+
+"interface"
 
 
 def __dir__():
@@ -35,6 +45,7 @@ def __dir__():
         'Broker',
         'addobj',
         'getobj',
-        'objs',
+        'getobjs',
+        'hasobj',
         'likeobj'
     )
