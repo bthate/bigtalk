@@ -64,6 +64,9 @@ class Term(Line):
         return evt
 
 
+"scripts"
+
+
 def background():
     "background script."
     daemon()
@@ -114,6 +117,9 @@ def service():
     forever()
 
 
+"commands"
+
+
 def cmd(event):
     "list available commands."
     event.reply(",".join(sorted(Commands.names or Commands.cmds)))
@@ -138,6 +144,9 @@ def srv(event):
 def ver(event):
     "show verson."
     event.reply(f"{Cfg.name.upper()} {Cfg.version}")
+
+
+'utilities"
 
 
 def banner():
@@ -231,6 +240,9 @@ def wrap(func):
         termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
 
 
+"data"
+
+
 SYSTEMD = """[Unit]
 Description=%s
 After=multi-user.target
@@ -243,6 +255,9 @@ ExecStart=/home/%s/.local/bin/%s -s
 
 [Install]
 WantedBy=multi-user.target"""
+
+
+"runtime"
 
 
 def main():
