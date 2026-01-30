@@ -4,8 +4,8 @@
 "working directory"
 
 
-from bigtalk.persist import workdir
+from bigtalk.persist import Workdir
 
 
 def wdr(event):
-    event.reply(workdir())
+    event.reply(Workdir.workdir())

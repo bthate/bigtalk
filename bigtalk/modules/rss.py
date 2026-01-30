@@ -19,20 +19,14 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.brokers import getobjs
-from bigtalk.methods import fmt, fqn
-from bigtalk.objects import Object, update
-from bigtalk.persist import find, fntime, ident, last, write
-from bigtalk.runtime import Cfg
-from bigtalk.threads import launch
-from bigtalk.utility import Repeater, elapsed, spl
+from bigtalk.defines import Broker, Cfg, Disk, Locate, Methods, Object, Repeater, Time, Utils
 
 
 def init():
     fetcher = Fetcher()
     fetcher.start()
     if seenfn:
-        logging.warning("since %s", elapsed(time.time()-fntime(seenfn)))
+        logging.warning("since %s", Time.elapsed(time.time()-Time.fntime(seenfn)))
     else:
         logging.warning("since %s", time.ctime(time.time()).replace("  ", " "))
     return fetcher
@@ -134,18 +128,18 @@ class Fetcher(Object):
             txt = f"[{feedname}] "
         for obj in result:
             txt2 = txt + self.display(obj)
-            for bot in getobjs("announce"):
+            for bot in Broker.objs("announce"):
                 bot.announce(txt2)
         return counter
 
     def run(self, silent=False):
         thrs = []
-        for _fn, feed in find(fqn(Rss)):
-            thrs.append(launch(self.fetch, feed, silent))
+        for _fn, feed in Locate.find(Methods.fqn(Rss)):
+            thrs.append(Thread.launch(self.fetch, feed, silent))
         return thrs
 
     def start(self, repeat=True):
-        last(seen)
+        Locate.last(seen)
         if repeat:
             repeater = Repeater(300.0, self.run)
             repeater.start()
@@ -256,7 +250,7 @@ class OPML:
             if not attrz:
                 continue
             obj = Object()
-            for itm in spl(itemz):
+            for itm in Utils.spl(itemz):
                 if itm == "link":
                     itm = "href"
                 val = OPML.getvalue(attrz, itm)
@@ -359,10 +353,10 @@ def dpl(event):
         event.reply("dpl <stringinurl> <item1,item2>")
         return
     setter = {"display_list": event.args[1]}
-    for fnm, feed in find(fqn(Rss), {"rss": event.args[0]}):
+    for fnm, feed in Locate.find(Methods.fqn(Rss), {"rss": event.args[0]}):
         if feed:
-            update(feed, setter)
-            write(feed, fnm)
+            Object.update(feed, setter)
+            Disk.write(feed, fnm)
     event.reply("ok")
 
 
@@ -370,10 +364,10 @@ def exp(event):
     with importlock:
         event.reply(TEMPLATE)
         nrs = 0
-        for _fn, ooo in find(fqn(Rss)):
+        for _fn, ooo in Locate.find(Methods.fqn(Rss)):
             nrs += 1
             obj = Rss()
-            update(obj, ooo)
+            Object.update(obj, ooo)
             name = f"url{nrs}"
             txt = f'<outline name="{name}" display_list="{obj.display_list}" xmlUrl="{obj.rss}"/>'
             event.reply(" " * 12 + txt)
@@ -403,16 +397,16 @@ def imp(event):
                 continue
             if not url.startswith("http"):
                 continue
-            has = list(find(fqn(Rss), {"rss": url}, matching=True))
+            has = list(Locate.find(Methods.fqn(Rss), {"rss": url}, matching=True))
             if has:
                 skipped.append(url)
                 nrskip += 1
                 continue
             feed = Rss()
-            update(feed, obj)
+            Object.update(feed, obj)
             feed.rss = obj.xmlUrl
             feed.insertid = insertid
-            write(feed)
+            Disk.write(feed)
             nrs += 1
     if nrskip:
         event.reply(f"skipped {nrskip} urls.")
@@ -425,12 +419,12 @@ def nme(event):
         event.reply("nme <stringinurl> <name>")
         return
     selector = {"rss": event.args[0]}
-    for fnm, fed in find(fqn(Rss), selector):
+    for fnm, fed in Locate.find(Methods.fqn(Rss), selector):
         feed = Rss()
-        update(feed, fed)
+        Object.update(feed, fed)
         if feed:
             feed.name = str(event.args[1])
-            write(feed, fnm)
+            Disk.write(feed, fnm)
     event.reply("ok")
 
 
@@ -438,14 +432,14 @@ def rem(event):
     if len(event.args) != 1:
         event.reply("rem <stringinurl>")
         return
-    for fnm, fed in find(fqn(Rss)):
+    for fnm, fed in Locate.find(Methods.fqn(Rss)):
         feed = Rss()
-        update(feed, fed)
+        Object.update(feed, fed)
         if event.args[0] not in feed.rss:
             continue
         if feed:
             feed.__deleted__ = True
-            write(feed, fnm)
+            Disk.write(feed, fnm)
             event.reply("ok")
             break
 
@@ -454,24 +448,24 @@ def res(event):
     if len(event.args) != 1:
         event.reply("res <stringinurl>")
         return
-    for fnm, fed in find(fqn(Rss), removed=True):
+    for fnm, fed in Locate.find(Methods.fqn(Rss), removed=True):
         feed = Rss()
-        update(feed, fed)
+        Object.update(feed, fed)
         if event.args[0] not in feed.rss:
             continue
         if feed:
             feed.__deleted__ = False
-            write(feed, fnm)
+            Disk.write(feed, fnm)
     event.reply("ok")
 
 
 def rss(event):
     if not event.rest:
         nrs = 0
-        for fnm, fed in find(fqn(Rss)):
+        for fnm, fed in Locate.find(Methods.fqn(Rss)):
             nrs += 1
-            elp = elapsed(time.time() - fntime(fnm))
-            txt = fmt(fed)
+            elp = Time.elapsed(time.time() - Time.fntime(fnm))
+            txt = Methods.fmt(fed)
             event.reply(f"{nrs} {txt} {elp}")
         if not nrs:
             event.reply("no feed found.")
@@ -480,13 +474,13 @@ def rss(event):
     if "http://" not in url and "https://" not in url:
         event.reply("i need an url")
         return
-    for fnm, result in find(fqn(Rss), {"rss": url}):
+    for fnm, result in Locate.find(Methods.fqn(Rss), {"rss": url}):
         if result:
             event.reply(f"{url} is known")
             return
     feed = Rss()
     feed.rss = event.args[0]
-    fnm = write(feed)
+    fnm = Disk.write(feed)
     event.reply("ok")
 
 

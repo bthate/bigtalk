@@ -23,7 +23,7 @@ class Thread(threading.Thread):
     def __init__(self, func, *args, daemon=True, **kwargs):
         super().__init__(None, self.run, None, (), daemon=daemon)
         self.event = None
-        self.name = kwargs.get("name", name(func))
+        self.name = kwargs.get("name", Thread.name(func))
         self.queue = queue.Queue()
         self.result = None
         self.starttime = time.time()
@@ -63,28 +63,25 @@ class Thread(threading.Thread):
             logging.exception(ex)
             _thread.interrupt_main()
 
+    @staticmethod
+    def launch(func, *args, **kwargs):
+        "run function in a thread."
+        with lock:
+            try:
+                thread = Thread(func, *args, **kwargs)
+                thread.start()
+                return thread
+            except (KeyboardInterrupt, EOFError):
+                _thread.interrupt_main()
 
-"utilities"
-
-
-def launch(func, *args, **kwargs):
-    "run function in a thread."
-    with lock:
-        try:
-            thread = Thread(func, *args, **kwargs)
-            thread.start()
-            return thread
-        except (KeyboardInterrupt, EOFError):
-            _thread.interrupt_main()
-
-
-def name(obj):
-    "string of function/method."
-    if inspect.ismethod(obj):
-        return f"{obj.__self__.__class__.__name__}.{obj.__name__}"
-    if inspect.isfunction(obj):
-        return repr(obj).split()[1]
-    return repr(obj)
+    @staticmethod
+    def name(obj):
+        "string of function/method."
+        if inspect.ismethod(obj):
+            return f"{obj.__self__.__class__.__name__}.{obj.__name__}"
+        if inspect.isfunction(obj):
+            return repr(obj).split()[1]
+        return repr(obj)
 
 
 "interface"
@@ -93,6 +90,4 @@ def name(obj):
 def __dir__():
     return (
         'Thread',
-        'launch',
-        'name'
     )

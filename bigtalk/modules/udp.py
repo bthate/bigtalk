@@ -9,10 +9,7 @@ import threading
 import time
 
 
-from bigtalk.brokers import getobjs
-from bigtalk.objects import Object
-from bigtalk.runtime import Cfg
-from bigtalk.threads import launch
+from bigtalk.defines import Broker, Cfg, Object, Thread
 
 
 def init():
@@ -44,7 +41,7 @@ class UDP(Object):
     def output(self, txt, addr=None):
         if addr:
             Config.addr = addr
-        for bot in getobjs("announce"):
+        for bot in Broker.getobjs("announce"):
             bot.announce(txt.replace("\00", ""))
 
     def loop(self):

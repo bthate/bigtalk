@@ -6,10 +6,7 @@ import os
 import time
 
 
-from bigtalk.methods import fmt
-from bigtalk.objects import Object, keys, update
-from bigtalk.persist import find, write
-from bigtalk.utility import MONTH, date, elapsed
+from bigtalk.defines import MONTH, Disk, Locate, Methods, Object, Time
 
 
 class Email(Object):
@@ -67,20 +64,20 @@ def eml(event):
             args.remove(key)
     args = set(args)
     result = sorted(
-                    find("email", event.gets),
-                    key=lambda x: date(todate(getattr(x[1], "Date", "")))
+                    Locate.find("email", event.gets),
+                    key=lambda x: Time.date(todate(getattr(x[1], "Date", "")))
                    )
     if event.index:
         obj = result[event.index]
         if obj:
             obj = obj[-1]
             tme = getattr(obj, "Date", "")
-            event.reply(f'{event.index} {fmt(obj, args, plain=True)} {elapsed(time.time() - date(todate(tme)))}')
+            event.reply(f'{event.index} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(Time.todate(tme)))}')
     else:
         for _fn, obj in result:
             nrs += 1
             tme = getattr(obj, "Date", "")
-            event.reply(f'{nrs} {fmt(obj, args, plain=True)} {elapsed(time.time() - date(todate(tme)))}')
+            event.reply(f'{nrs} {Methods.fmt(obj, args, plain=True)} {Time.elapsed(time.time() - Time.date(Time.todate(tme)))}')
     if not result:
         event.reply("no emails found.")
 

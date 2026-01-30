@@ -7,19 +7,16 @@ import threading
 import time
 
 
-from bigtalk.brokers import getobj, likeobj
-from bigtalk.objects import Object, items
-from bigtalk.persist import ident, last, write
-from bigtalk.utility import NoDate, Timed, day, elapsed, extract, hour, today
+from bigtalk.defines import Broker, Disk, Locate, Methods, Object, NoDate, Time, Timed
 
 
 rand = random.SystemRandom()
 
 
 def init():
-    Timers.path = last(Timers.timers) or ident(Timers.timers)
+    Timers.path = Locate.last(Timers.timers) or Methods.ident(Timers.timers)
     remove = []
-    for tme, args in items(Timers.timers):
+    for tme, args in Object.items(Timers.timers):
         if not args:
             continue
         orig, channel, txt = args
@@ -28,7 +25,7 @@ def init():
                 continue
             diff = float(tme) - time.time()
             if diff > 0:
-                bot = getobj(origin)
+                bot = Broker.get(origin)
                 timer = Timed(diff, bot.say, channel, txt)
                 timer.start()
             else:
@@ -36,7 +33,7 @@ def init():
     for tme in remove:
         Timers.delete(tme)
     if Timers.timers:
-        write(Timers.timers, Timers.path)
+        Disk.write(Timers.timers, Timers.path)
     logging.warning("%s timers", len(Timers.timers))
 
 
@@ -66,10 +63,10 @@ def tmr(event):
     result = ""
     if not event.rest:
         nmr = 0
-        for tme, txt in items(Timers.timers):
+        for tme, txt in Object.items(Timers.timers):
             lap = float(tme) - time.time()
             if lap > 0:
-                event.reply(f'{nmr} {" ".join(txt)} {elapsed(lap)}')
+                event.reply(f'{nmr} {" ".join(txt)} {Time.elapsed(lap)}')
                 nmr += 1
         if not nmr:
             event.reply("no timers.")
@@ -89,10 +86,10 @@ def tmr(event):
         target = time.time() + seconds
     else:
         try:
-            target = day(event.rest)
+            target = Time.day(event.rest)
         except NoDate:
-            target = extract(today())
-        hours =  hour(event.rest)
+            target = Time.extract(Time.today())
+        hours =  Time.hour(event.rest)
         if hours:
             target += hours
     target += rand.random() 
@@ -102,8 +99,8 @@ def tmr(event):
     diff = target - time.time()
     txt = " ".join(event.args[1:])
     Timers.add(target, event.orig, event.channel, txt)
-    write(Timers.timers, Timers.path or ident(Timers.timers))
-    bot = getobj(event.orig)
+    Disk.write(Timers.timers, Timers.path or Methods.ident(Timers.timers))
+    bot = Broker.get(event.orig)
     timer = Timed(diff, bot.say, event.orig, event.channel, txt)
     timer.start()
-    event.reply("ok " + elapsed(diff))
+    event.reply("ok " + Time.elapsed(diff))

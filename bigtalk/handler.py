@@ -10,8 +10,8 @@ import threading
 import _thread
 
 
-from .brokers import addobj
-from .threads import launch
+from .brokers import Broker
+from .threads import Thread
 
 
 class Handler:
@@ -28,7 +28,7 @@ class Handler:
             event.ready()
             return
         name = event.text and event.text.split()[0]
-        event._thr = launch(func, event, name=name)
+        event._thr = Thread.launch(func, event, name=name)
 
     def loop(self):
         "event loop."
@@ -50,7 +50,7 @@ class Handler:
     def start(self, daemon=True):
         "start event handler loop."
         self.running.set()
-        launch(self.loop, daemon=daemon)
+        Thread.launch(self.loop, daemon=daemon)
 
     def stop(self):
         "stop event handler loop."
@@ -69,7 +69,7 @@ class Client(Handler):
         self.olock = threading.RLock()
         self.silent = True
         self.stopped = threading.Event()
-        addobj(self)
+        Broker.add(self)
 
     def announce(self, text):
         "announce text to all channels."
@@ -153,7 +153,7 @@ class Output(Client):
     def start(self):
         "start output loop."
         super().start()
-        launch(self.output)
+        Thread.launch(self.output)
 
     def stop(self):
         "stop output loop."

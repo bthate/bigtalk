@@ -1,12 +1,11 @@
 # This file is placed in the Public Domain.
 
 
-from bigtalk.brokers import getobjs
-from bigtalk.methods import fqn
+from bigtalk.defines import Broker, Methods, Object
 
 
 def flt(event):
-    clts = list(getobjs("announce"))
+    clts = list(Broker.getobjs("announce"))
     if event.args:
         index = int(event.args[0])
         if index < len(clts):
@@ -14,4 +13,4 @@ def flt(event):
         else:
             event.reply("no matching client in fleet.")
         return
-    event.reply(' | '.join([fqn(o).split(".")[-1] for o in clts]))
+    event.reply(' | '.join([Methods.fqn(o).split(".")[-1] for o in clts]))

@@ -13,15 +13,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.command import Commands, command
-from bigtalk.message import Message
-from bigtalk.methods import fmt, parse
-from bigtalk.handler import Client
-from bigtalk.package import initmods, listmods, pkgname, scanner
-from bigtalk.persist import setwd
-from bigtalk.runtime import Cfg
-from bigtalk.threads import launch
-from bigtalk.utility import elapsed, wrapped
+from bigtalk.defines import Cfg, Client, Commands, Message, Methods, Mods, Thread, Time, Utils, Workdir
 
 
 from bigtalk import modules as MODS
@@ -41,7 +33,7 @@ events = queue.Queue()
 Cfg.debug = True
 Cfg.ignore = ""
 Cfg.level = "info"
-Cfg.name = pkgname(Commands)
+Cfg.name = Mods.pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
 Cfg.version = 4
 Cfg.wdr = ".test"
@@ -54,7 +46,7 @@ class CLI(Client):
 
     def __init__(self):
         Client.__init__(self)
-        self.register("command", command)
+        self.register("command", Commands.command)
 
     def raw(self, txt):
         if "v" in Cfg.opts:
@@ -142,7 +134,7 @@ def wrap(func):
     except termios.error:
         pass
     try:
-        wrapped(func)
+        Utils.wrapped(func)
     finally:
         pass
     if old:
@@ -152,12 +144,12 @@ def wrap(func):
 def main():
     if "p" not in Cfg.opts and os.path.exists(Cfg.wdr):
         shutil.rmtree(Cfg.wdr)
-    parse(Cfg, " ".join(sys.argv[1:]))
-    setwd(Cfg.wdr)
-    initmods("modules", MODS.__path__[0])
+    Methods.parse(Cfg, " ".join(sys.argv[1:]))
+    Workdir.setwd(Cfg.wdr)
+    Mods.init("modules", MODS.__path__[0])
     if MODS2:
-        initmods("mods", MODS2.__path__[0])
-    scanner(listmods())
+        Mods.init("mods", MODS2.__path__[0])
+    Mods.scanner(Mods.list())
     if "v" in Cfg.opts:
         banner()
     if "z" in Cfg.opts:
@@ -172,18 +164,18 @@ def main():
         payload(examples)
     for _x in range(nrs):
         payload(post)
-    launch(consume)
+    Thread.launch(consume)
     nrevents = events.qsize()
     try:
         events.join()
     except (KeyboardInterrupt, EOFError):
         pass
     endtime = time.time()
-    lap = elapsed(endtime-starttime)
+    lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents
     nrs = events.qsize()
     if "v" in Cfg.opts:
-        print(f"{fmt(Cfg)}")
+        print(f"{Methods.fmt(Cfg)}")
         print(f"{nrs} events left.")
         print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
 
