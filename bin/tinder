@@ -43,7 +43,7 @@ Cfg.ignore = ""
 Cfg.level = "info"
 Cfg.name = pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 3
+Cfg.version = 4
 Cfg.wdr = ".test"
 
 

@@ -31,7 +31,7 @@ Cfg.ignore = "rst,udp,web"
 Cfg.level = "info"
 Cfg.name = pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 3
+Cfg.version = 4
 Cfg.wdr = os.path.expanduser(f"~/.{Cfg.name}")
 
 
@@ -146,7 +146,7 @@ def ver(event):
     event.reply(f"{Cfg.name.upper()} {Cfg.version}")
 
 
-'utilities"
+"utilities"
 
 
 def banner():
@@ -274,3 +274,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
