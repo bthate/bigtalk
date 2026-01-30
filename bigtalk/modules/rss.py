@@ -19,7 +19,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.defines import Broker, Cfg, Disk, Locate, Methods, Object, Repeater, Time, Utils
+from bigtalk.defines import Broker, Cfg, Disk, Locate, Methods, Object, Repeater, Time, Thread, Utils
 
 
 def init():
@@ -102,8 +102,8 @@ class Fetcher(Object):
             for obj in reversed(getfeed(feed.rss, feed.display_list)):
                 counter += 1
                 fed = Feed()
-                update(fed, obj)
-                update(fed, feed)
+                Object.update(fed, obj)
+                Object.update(fed, feed)
                 url = urllib.parse.urlparse(fed.link)
                 if url.path and not url.path == "/":
                     uurl = f"{url.scheme}://{url.netloc}/{url.path}"
@@ -113,12 +113,12 @@ class Fetcher(Object):
                 if uurl in see:
                     continue
                 if self.dosave:
-                    write(fed)
+                    Disk.write(fed)
                 result.append(fed)
             setattr(seen, feed.rss, urls)
             if not seenfn:
-                seenfn = ident(seen)
-            write(seen, seenfn)
+                seenfn = Methods.ident(seen)
+            Disk.write(seen, seenfn)
             time.sleep(1.0)
         if silent:
             return counter
@@ -128,7 +128,7 @@ class Fetcher(Object):
             txt = f"[{feedname}] "
         for obj in result:
             txt2 = txt + self.display(obj)
-            for bot in Broker.objs("announce"):
+            for bot in Broker.getobjs("announce"):
                 bot.announce(txt2)
         return counter
 
@@ -185,7 +185,7 @@ class Parser:
         for line in Parser.getitems(txt, toke):
             line = line.strip()
             obj = Object()
-            for itm in spl(items):
+            for itm in Utils.spl(items):
                 val = Parser.getitem(line, itm)
                 if val:
                     val = unescape(val.strip())
@@ -267,7 +267,7 @@ class OPML:
 
 
 def attrs(obj, txt):
-    update(obj, OPML.parse(txt))
+    Object.update(obj, OPML.parse(txt))
 
 
 def cdata(line):
