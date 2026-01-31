@@ -13,6 +13,9 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from bigtalk.defines import Cfg, Object, Thread, Workdir
 
 
+"init"
+
+
 def init():
     try:
         rest = REST((Config.hostname, int(Config.port)), RESTHandler)
@@ -23,10 +26,16 @@ def init():
         logging.error(str(ex))
 
 
+"config"
+
+
 class Config:
 
     hostname = "localhost"
     port     = 10102
+
+
+"rest"
 
 
 class REST(HTTPServer, Object):
@@ -49,7 +58,7 @@ class REST(HTTPServer, Object):
 
     def start(self):
         self._status = "ok"
-        launch(self.serve_forever)
+        Thread.launch(self.serve_forever)
 
     def request(self):
         self._last = time.time()
@@ -58,6 +67,9 @@ class REST(HTTPServer, Object):
         exctype, excvalue, _trb = sys.exc_info()
         exc = exctype(excvalue)
         logging.exception(exc)
+
+
+"handler"
 
 
 class RESTHandler(BaseHTTPRequestHandler):
@@ -85,11 +97,11 @@ class RESTHandler(BaseHTTPRequestHandler):
         if self.path == "/":
             self.write_header("text/html")
             txt = ""
-            for fnm in kinds():
+            for fnm in Workdir.kinds():
                 txt += f'<a href="http://{Config.hostname}:{Config.port}/{fnm}">{fnm}</a><br>\n'
             self.send(html(txt.strip()))
             return
-        fnm = os.path.join(workdir(), self.path)
+        fnm = os.path.join(Workdir.workdir(), self.path)
         fnm = os.path.abspath(fnm)
         if os.path.isdir(fnm):
             self.write_header("text/html")
@@ -112,6 +124,9 @@ class RESTHandler(BaseHTTPRequestHandler):
 
     def log(self, code):
         pass
+
+
+"data"
 
 
 def html(txt):

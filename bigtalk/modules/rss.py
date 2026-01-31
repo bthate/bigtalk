@@ -19,7 +19,8 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.defines import Broker, Cfg, Disk, Locate, Methods, Object, Repeater, Time, Thread, Utils
+from bigtalk.defines import Broker, Cfg, Disk, Locate, Methods, Object
+from bigtalk.defines import Repeater, Time, Thread, Utils
 
 
 def init():

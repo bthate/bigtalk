@@ -13,6 +13,9 @@ class Reserved(Exception):
     pass
 
 
+"object"
+
+
 class Object:
 
     def __contains__(self, key):
@@ -118,6 +121,15 @@ class Object:
         return obj.__dict__.values()
 
 
+"default"
+
+
+class Default(Object):
+
+    def __getattr__(self, key):
+        return self.__dict__.get(key, "")
+
+
 "json"
 
 
@@ -161,15 +173,6 @@ class Json:
     def loads(s, *args, **kw):
         "load object from string."
         return json.loads(s, *args, **kw)
-
-
-"default"
-
-
-class Default(Object):
-
-    def __getattr__(self, key):
-        return self.__dict__.get(key, "")
 
 
 "interface"

@@ -12,6 +12,9 @@ import time
 from bigtalk.defines import Broker, Message, Object, Repeater, Time
 
 
+"init"
+
+
 def init():
     for key in Object.keys(oorzaken):
         if "Psych" not in key:

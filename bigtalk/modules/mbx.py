@@ -10,11 +10,17 @@ from bigtalk.defines import Disk, Locate, Methods, Object, Time
 from bigtalk.utility import MONTH
 
 
+"email"
+
+
 class Email(Object):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.text = ""
+
+
+"utility"
 
 
 def todate(date):
@@ -53,20 +59,23 @@ def todate(date):
     return ddd
 
 
+"commands"
+
+
 def eml(event):
     nrs = -1
     args = ["From", "Subject"]
     if len(event.args) > 1:
         args.extend(event.args[1:])
     if event.gets:
-        args.extend(keys(event.gets))
+        args.extend(Object.keys(event.gets))
     for key in event.silent:
         if key in args:
             args.remove(key)
     args = set(args)
     result = sorted(
                     Locate.find("email", event.gets),
-                    key=lambda x: Time.date(todate(getattr(x[1], "Date", "")))
+                    key=lambda x: Time.date(Time.todate(getattr(x[1], "Date", "")))
                    )
     if event.index:
         obj = result[event.index]
@@ -102,13 +111,13 @@ def mbx(event):
     nrs = 0
     for mail in thing:
         obj = Email()
-        update(obj, dict(mail._headers))
+        Object.update(obj, dict(mail._headers))
         obj.text = ""
         for payload in mail.walk():
             if payload.get_content_type() == 'text/plain':
                 obj.text += payload.get_payload()
         obj.text = obj.text.replace("\\n", "\n")
-        write(obj)
+        Disk.write(obj)
         nrs += 1
     if nrs:
         event.reply("ok %s" % nrs)

@@ -8,6 +8,9 @@ import threading
 import time
 
 
+'message'
+
+
 class Message:
 
     def __init__(self):

@@ -11,7 +11,8 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Cfg, Commands, Disk, Locate, Output, Message, Methods, Object, Thread, Utils, Workdir
+from bigtalk.defines import Broker, Cfg, Commands, Disk, Locate, Output
+from bigtalk.defines import  Message, Methods, Object, Thread, Util, Utils
 
 
 NAME = Cfg.name or Utils.pkgname(Object)
@@ -598,7 +599,7 @@ def cfg(event):
         )
     else:
         Methods.edit(config, event.sets)
-        Disk.write(config, fnm or DiskUtils.ident(config))
+        Disk.write(config, fnm or Util.ident(config))
         event.reply("ok")
 
 
@@ -606,7 +607,7 @@ def mre(event):
     if not event.channel:
         event.reply("channel is not set.")
         return
-    bot = getobj(event.orig)
+    bot = Broker.get(event.orig)
     if "cache" not in dir(bot):
         event.reply("bot is missing cache")
         return

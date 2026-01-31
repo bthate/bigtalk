@@ -11,6 +11,9 @@ import os
 from .objects import Default, Object
 
 
+"methods"
+
+
 class Methods:
 
     @staticmethod
@@ -49,7 +52,7 @@ class Methods:
             elif isinstance(value, str):
                 txt += f'{key}="{value}" '
             else:
-                txt += f"{key}={fqn(value)}((value))"
+                txt += f"{key}={Methods.fqn(value)}((value))"
         if txt == "":
             txt = "{}"
         return txt.strip()

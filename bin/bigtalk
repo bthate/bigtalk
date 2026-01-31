@@ -133,7 +133,7 @@ class Cmd:
     @staticmethod
     def mod(event):
         "list available commands."
-        mods = listmods(Cfg.ignore)
+        mods = Mods.list(Cfg.ignore)
         if not mods:
             event.reply("no modules available")
             return
@@ -176,7 +176,7 @@ class Runtime:
         Cfg.ignore = Cfg.sets.ignore or Cfg.ignore or ""
         Cfg.init = Cfg.sets.init or Cfg.init or ""
         Cfg.level = Cfg.sets.level or Cfg.level or "info"
-        Cfg.wdr = Cfg.sets.wdr or Cfg.wdr or os.path.expanduser(f"~/.{pkgname(Cfg)}")
+        Cfg.wdr = Cfg.sets.wdr or Cfg.wdr or os.path.expanduser(f"~/.{Utils.pkgname(Cfg)}")
         Log.level(Cfg.level)
         Workdir.setwd(Cfg.wdr)
         if Cfg.wdr:

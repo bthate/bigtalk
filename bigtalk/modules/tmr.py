@@ -7,7 +7,8 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Disk, Locate, Methods, Object, NoDate, Time, Timed
+from bigtalk.defines import Broker, Disk, Locate, Methods, Object, NoDate
+from bigtalk.defines import Time, Timed
 
 
 rand = random.SystemRandom()
@@ -20,7 +21,7 @@ def init():
         if not args:
             continue
         orig, channel, txt = args
-        for origin in likeobj(orig):
+        for origin in Broker.like(orig):
             if not origin:
                 continue
             diff = float(tme) - time.time()

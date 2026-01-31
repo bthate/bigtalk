@@ -14,7 +14,7 @@ from bigtalk.defines import Cfg, Object, Thread, Utils
 
 
 def init():
-    Config.path = os.path.join(where(Object), "nucleus")
+    Config.path = os.path.join(Utils.where(Object), "nucleus")
     if not os.path.exists(os.path.join(Config.path, 'index.html')):
         logging.warning("no index.html")
         return

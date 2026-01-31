@@ -4,7 +4,7 @@
 import time
 
 
-from bigtalk.defines import Locate, Methods, Time, Utils, Workdir
+from bigtalk.defines import Locate, Methods, Time, Workdir
 
 
 def fnd(event):

@@ -14,6 +14,9 @@ from .threads import Thread
 from .utility import Utils
 
 
+"mods"
+
+
 class Mods:
 
     dirs = {}

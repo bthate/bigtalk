@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-from bigtalk.defines import Broker, Methods, Object
+from bigtalk.defines import Broker, Methods
 
 
 def flt(event):

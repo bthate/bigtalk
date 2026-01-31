@@ -24,12 +24,6 @@ class NoDate(Exception):
 "logging"
 
 
-class Log:
-
-    datefmt = "%H:%M:%S"
-    format = "%(module).3s %(message)s"
-
-
 class Format(logging.Formatter):
 
     def format(self, record):
@@ -250,10 +244,10 @@ class Time:
     def timed(txt):
         "scan string for date/time."
         try:
-            target = day(txt)
+            target = Time.day(txt)
         except NoDate:
-            target = extract(today())
-        hours = hour(txt)
+            target = Time.extract(Time.today())
+        hours = Time.hour(txt)
         if hours:
             target += hours
         return target
@@ -273,10 +267,10 @@ class Time:
                 return time.time() - seconds
         if not target:
             try:
-                target = day(txt)
+                target = Time.day(txt)
             except NoDate:
-                target = extract(today())
-            hours = hour(txt)
+                target = Time.extract(Time.today())
+            hours = Time.hour(txt)
             if hours:
                 target += hours
         return target
