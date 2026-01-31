@@ -4,10 +4,10 @@
 import time
 
 
-from bigtalk.defines import Disk, Locate, Object, Time
+from bigtalk.defines import Base, Disk, Locate, Time
 
 
-class Log(Object):
+class Log(Base):
 
     def __init__(self):
         super().__init__()

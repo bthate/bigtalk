@@ -7,8 +7,8 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Disk, Locate, Methods, Object, NoDate
-from bigtalk.defines import Time, Timed
+from bigtalk.defines import Base, Broker, Disk, Locate, Methods, Object
+from bigtalk.defines import NoDate, Time, Timed
 
 
 rand = random.SystemRandom()
@@ -38,12 +38,12 @@ def init():
     logging.warning("%s timers", len(Timers.timers))
 
 
-class Timer(Object):
+class Timer(Base):
 
     pass
 
 
-class Timers(Object):
+class Timers(Base):
 
     path = ""
     timers = Timer()

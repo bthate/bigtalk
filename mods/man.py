@@ -224,7 +224,7 @@ opml
 """
 
 
-from bigtalk.runtime import Cfg
+from bigtalk.modules import Cfg
 
 
 def man(event):

@@ -19,7 +19,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.defines import Broker, Cfg, Disk, Locate, Methods, Object
+from bigtalk.defines import Base, Broker, Cfg, Disk, Locate, Methods, Object
 from bigtalk.defines import Repeater, Time, Thread, Utils
 
 
@@ -42,14 +42,14 @@ seenfn = ""
 skipped = []
 
 
-class Feed(Object):
+class Feed(Base):
 
     def __init__(self):
         self.link = ""
         self.name = ""
 
 
-class Rss(Object):
+class Rss(Base):
 
     def __init__(self):
         self.display_list = "title,link,author"
@@ -58,7 +58,7 @@ class Rss(Object):
         self.rss = ""
 
 
-class Urls(Object):
+class Urls(Base):
 
     pass
 
@@ -66,7 +66,7 @@ class Urls(Object):
 seen = Urls()
 
 
-class Fetcher(Object):
+class Fetcher(Base):
 
 
     def __init__(self):
@@ -129,7 +129,7 @@ class Fetcher(Object):
             txt = f"[{feedname}] "
         for obj in result:
             txt2 = txt + self.display(obj)
-            for bot in Broker.getobjs("announce"):
+            for bot in Broker.objs("announce"):
                 bot.announce(txt2)
         return counter
 
@@ -185,7 +185,7 @@ class Parser:
         result = []
         for line in Parser.getitems(txt, toke):
             line = line.strip()
-            obj = Object()
+            obj = Base()
             for itm in Utils.spl(items):
                 val = Parser.getitem(line, itm)
                 if val:
@@ -250,7 +250,7 @@ class OPML:
         for attrz in OPML.getattrs(txt, toke):
             if not attrz:
                 continue
-            obj = Object()
+            obj = Base()
             for itm in Utils.spl(itemz):
                 if itm == "link":
                     itm = "href"
@@ -281,7 +281,7 @@ def cdata(line):
 
 
 def getfeed(url, items):
-    result = [Object(), Object()]
+    result = [Base(), Base()]
     if Cfg.debug or url in errors and (time.time() - errors[url]) < 600:
         return result
     try:

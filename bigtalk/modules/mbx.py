@@ -6,14 +6,14 @@ import os
 import time
 
 
-from bigtalk.defines import Disk, Locate, Methods, Object, Time
+from bigtalk.defines import Base, Disk, Locate, Methods, Object, Time
 from bigtalk.utility import MONTH
 
 
 "email"
 
 
-class Email(Object):
+class Email(Base):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

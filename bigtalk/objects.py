@@ -16,7 +16,7 @@ class Reserved(Exception):
 "object"
 
 
-class Object:
+class Base:
 
     def __contains__(self, key):
         return key in dir(self)
@@ -29,6 +29,9 @@ class Object:
 
     def __str__(self):
         return str(self.__dict__)
+
+
+class Object:
 
     @staticmethod
     def clear(obj):
@@ -124,7 +127,7 @@ class Object:
 "default"
 
 
-class Default(Object):
+class Default(Base):
 
     def __getattr__(self, key):
         return self.__dict__.get(key, "")
@@ -180,6 +183,7 @@ class Json:
 
 def __dir__():
     return (
+        'Base',
         'Default',
         'Json',
         'Object'

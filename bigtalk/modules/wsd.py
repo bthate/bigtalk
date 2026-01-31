@@ -21,7 +21,7 @@ def init():
 
 
 def wsd(event):
-    for bot in Broker.getobjs("announce"):
+    for bot in Broker.objs("announce"):
         bot.announce(rand.choice(TXT.split("\n")).strip()[2:])
 
 

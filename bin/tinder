@@ -13,7 +13,8 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.defines import Cfg, Client, Commands, Message, Methods, Mods, Thread, Time, Utils, Workdir
+from bigtalk.defines import Cfg, Client, Commands, Message, Methods, Mods, Thread
+from bigtalk.defines import Time, Utils, Workdir
 
 
 from bigtalk import modules as MODS

@@ -141,7 +141,7 @@ def cbnow(evt):
         nrtimes = int(delta/needed)
         txt += f"{getalias(nme)} {nrtimes} | "
     txt += SOURCE
-    for bot in Broker.getobjs("announce"):
+    for bot in Broker.objs("announce"):
         bot.announce(txt)
 
 
@@ -164,7 +164,7 @@ def cbstats(evt):
             nryear,
             Time.elapsed(needed)
         )
-        for bot in Broker.getobjs("announce"):
+        for bot in Broker.objs("announce"):
             bot.announce(txt)
 
 

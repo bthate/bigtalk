@@ -5,7 +5,7 @@ from bigtalk.defines import Broker, Methods
 
 
 def flt(event):
-    clts = list(Broker.getobjs("announce"))
+    clts = list(Broker.objs("announce"))
     if event.args:
         index = int(event.args[0])
         if index < len(clts):

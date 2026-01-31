@@ -7,9 +7,7 @@
 import unittest
 
 
-from bigtalk.handler import Client, Handler
-from bigtalk.message import Message
-from bigtalk.methods import parse
+from bigtalk.defines import Client, Handler, Message, Methods
 
 
 buffer = []
@@ -47,7 +45,6 @@ class TestHandler(unittest.TestCase):
         evt.text = "hello"
         self.hdl.callback(evt)
         evt.wait()
-        print(evt)
         self.assertTrue("hello" in evt.result.values())
 
     def test_loop(self):
@@ -116,15 +113,15 @@ class TestClient(unittest.TestCase):
         self.assertTrue("hello bot" in evt.result.values())
     
     def test_poll(self):
-         clt = Client()
-         evt = Message()
-         evt.text = "okdan"
-         clt.iqueue.put(evt)
-         event = clt.poll()
-         self.assertTrue(event is evt)
+        clt = Client()
+        evt = Message()
+        evt.text = "okdan"
+        clt.iqueue.put(evt)
+        event = clt.poll()
+        self.assertTrue(event is evt)
      
     def test_put(self):
-         evt = Message()
-         evt.type = "hello"
-         self.clt.put(evt)
+        evt = Message()
+        evt.type = "hello"
+        self.clt.put(evt)
                       

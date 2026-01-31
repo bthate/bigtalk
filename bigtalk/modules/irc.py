@@ -11,11 +11,12 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Cfg, Commands, Disk, Locate, Output
-from bigtalk.defines import  Message, Methods, Object, Thread, Util, Utils
+from bigtalk.defines import Base, Broker, Commands, Disk, Locate, Output
+from bigtalk.defines import Message, Methods, Object, Thread, Util, Utils
+from bigtalk.modules import Cfg
 
 
-NAME = Cfg.name or Utils.pkgname(Object)
+NAME = Cfg.name or Utils.pkgname(Base)
 
 
 lock = threading.RLock()
@@ -32,7 +33,7 @@ def init():
     return irc
 
 
-class Config(Object):
+class Config(Base):
 
     channel = f"#{Cfg.name}"
     commands = True
@@ -112,7 +113,7 @@ class IRC(Output):
         self.cache = {}
         self.cfg = Config()
         self.channels = []
-        self.events = Object()
+        self.events = Base()
         self.events.authed = threading.Event()
         self.events.connected = threading.Event()
         self.events.joined = threading.Event()
@@ -120,7 +121,7 @@ class IRC(Output):
         self.events.ready = threading.Event()
         self.silent = False
         self.sock = None
-        self.state = Object()
+        self.state = Base()
         self.state.error = ""
         self.state.keeprunning = False
         self.state.last = time.time()

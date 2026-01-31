@@ -12,7 +12,9 @@ from .handler import Console as Console
 from .handler import Output as Output
 from .message import Message as Message
 from .methods import Methods as Methods
+from .objects import Base as Base
 from .objects import Object as Object
+from .objects import Json as Json
 from .package import Cfg as Cfg
 from .package import Mods as Mods
 from .persist import Disk as Disk
@@ -30,6 +32,7 @@ from .utility import Utils as Utils
 
 def __dir__():
     return (
+        'Base',
         'Broker',
         'Cfg',
         'Client',
@@ -37,6 +40,7 @@ def __dir__():
         'Console',
         'Disk',
         'Handler',
+        'Json',
         'Locate',
         'Log',
         'Message',

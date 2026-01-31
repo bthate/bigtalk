@@ -10,11 +10,12 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.defines import Cfg, Object, Thread, Utils
+from bigtalk.defines import Base, Object, Thread, Utils
+from bigtalk.modules import Cfg
 
 
 def init():
-    Config.path = os.path.join(Utils.where(Object), "nucleus")
+    Config.path = os.path.join(Utils.where(Base), "nucleus")
     if not os.path.exists(os.path.join(Config.path, 'index.html')):
         logging.warning("no index.html")
         return
@@ -34,14 +35,14 @@ class Config:
     port = 8000
 
 
-class HTTP(HTTPServer, Object):
+class HTTP(HTTPServer, Base):
 
     daemon_thread = True
     allow_reuse_address = True
 
     def __init__(self, *args, **kwargs):
         HTTPServer.__init__(self, *args, **kwargs)
-        Object.__init__(self)
+        Base.__init__(self)
         self.host = args[0]
         self._starttime = time.time()
         self._last = time.time()

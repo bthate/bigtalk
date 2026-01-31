@@ -9,7 +9,8 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Cfg, Object, Thread
+from bigtalk.defines import Base, Broker, Object, Thread
+from bigtalk.modules import Cfg
 
 
 def init():
@@ -19,17 +20,17 @@ def init():
     return udp
 
 
-class Config(Object):
+class Config(Base):
 
     addr = ""
     host = "localhost"
     port = 5500
 
 
-class UDP(Object):
+class UDP(Base):
 
     def __init__(self):
-        Object.__init__(self)
+        Base.__init__(self)
         self.stopped = False
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -41,7 +42,7 @@ class UDP(Object):
     def output(self, txt, addr=None):
         if addr:
             Config.addr = addr
-        for bot in Broker.getobjs("announce"):
+        for bot in Broker.objs("announce"):
             bot.announce(txt.replace("\00", ""))
 
     def loop(self):

@@ -7,11 +7,11 @@
 import unittest
 
 
-from bigtalk.package import Mods, initmods
+from bigtalk.defines import Mods
 
 
 class TestPackage(unittest.TestCase):
 
     def test_init(self):
-        initmods("mod", "mod")
+        Mods.init("mod", "mod")
         self.assertTrue("mod" in Mods.dirs)
