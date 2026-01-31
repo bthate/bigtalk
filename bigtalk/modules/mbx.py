@@ -6,7 +6,8 @@ import os
 import time
 
 
-from bigtalk.defines import MONTH, Disk, Locate, Methods, Object, Time
+from bigtalk.defines import Disk, Locate, Methods, Object, Time
+from bigtalk.utility import MONTH
 
 
 class Email(Object):
