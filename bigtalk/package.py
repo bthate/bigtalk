@@ -10,8 +10,21 @@ import os
 
 
 from .command import Commands
+from .objects import Default
 from .threads import Thread
 from .utility import Utils
+
+
+"config"
+
+
+class Config(Default):
+
+    pass
+
+
+Cfg = Config()
+
 
 
 "mods"

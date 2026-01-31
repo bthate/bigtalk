@@ -13,12 +13,12 @@ from .handler import Output as Output
 from .message import Message as Message
 from .methods import Methods as Methods
 from .objects import Object as Object
+from .package import Cfg as Cfg
 from .package import Mods as Mods
 from .persist import Disk as Disk
 from .persist import Util as Util
 from .persist import Locate as Locate
 from .persist import Workdir as Workdir
-from .runtime import Cfg as Cfg
 from .threads import Thread as Thread
 from .utility import Log as Log
 from .utility import NoDate as NoDate
