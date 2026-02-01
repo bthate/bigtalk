@@ -8,7 +8,7 @@ import datetime
 import os
 
 
-from .objects import Default, Dict, Object
+from .objects import Default, Dict
 
 
 "methods"

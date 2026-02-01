@@ -4,7 +4,7 @@
 import time
 
 
-from bigtalk.defines import Dict, Disk, Locate, Object, Time
+from bigtalk.defines import Disk, Locate, Object, Time
 
 
 class Log(Object):

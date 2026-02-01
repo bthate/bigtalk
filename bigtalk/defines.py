@@ -32,7 +32,6 @@ from .utility import Utils as Utils
 
 def __dir__():
     return (
-        'Base',
         'Broker',
         'Cfg',
         'Client',

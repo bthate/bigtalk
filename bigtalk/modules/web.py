@@ -10,7 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.defines import Dict, Object, Thread, Utils
+from bigtalk.defines import Object, Thread, Utils
 from bigtalk.modules import Cfg
 
 

@@ -135,7 +135,7 @@ def hourly():
 def cbnow(evt):
     delta = time.time() - STARTTIME
     txt = Time.elapsed(delta) + " "
-    for nme in sorted(DIct.keys(oorzaken), key=lambda x: seconds(getnr(x))):
+    for nme in sorted(Dict.keys(oorzaken), key=lambda x: seconds(getnr(x))):
         needed = seconds(getnr(nme))
         if needed > 60*60:
             continue
