@@ -8,7 +8,7 @@ import datetime
 import os
 
 
-from .objects import Default, Object
+from .objects import Default, Dict, Object
 
 
 "methods"
@@ -24,7 +24,7 @@ class Methods:
     @staticmethod
     def edit(obj, setter={}, skip=False):
         "update object with dict."
-        for key, val in Object.items(setter):
+        for key, val in Dict.items(setter):
             if skip and val == "":
                 continue
             Methods.typed(obj, key, val)
@@ -127,7 +127,7 @@ class Methods:
     def search(obj, selector={}, matching=False):
         "check whether object matches search criteria."
         res = False
-        for key, value in Object.items(selector):
+        for key, value in Dict.items(selector):
             val = getattr(obj, key, None)
             if not val:
                 res = False
@@ -145,7 +145,7 @@ class Methods:
     def skip(obj, chars="_"):
         "skip keys containing chars."
         res = {}
-        for key, value in Object.items(obj):
+        for key, value in Dict.items(obj):
             next = False
             for char in chars:
                 if char in key:

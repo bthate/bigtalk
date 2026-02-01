@@ -18,7 +18,7 @@ lock = threading.RLock()
 "thread"
 
 
-class Thread(threading.Thread):
+class Task(threading.Thread):
 
     def __init__(self, func, *args, daemon=True, **kwargs):
         super().__init__(None, self.run, None, (), daemon=daemon)
@@ -63,12 +63,15 @@ class Thread(threading.Thread):
             logging.exception(ex)
             _thread.interrupt_main()
 
+
+class Thread:
+
     @staticmethod
     def launch(func, *args, **kwargs):
         "run function in a thread."
         with lock:
             try:
-                thread = Thread(func, *args, **kwargs)
+                thread = Task(func, *args, **kwargs)
                 thread.start()
                 return thread
             except (KeyboardInterrupt, EOFError):

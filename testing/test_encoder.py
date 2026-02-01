@@ -57,5 +57,5 @@ class TestTypes(unittest.TestCase):
         ooo = Object()
         ooo.a = "b"
         obj = Object()
-        Object.update(obj, Json.loads(Json.dumps(ooo)))
+        Dict.update(obj, Json.loads(Json.dumps(ooo)))
         self.assertEqual(obj.a, "b")

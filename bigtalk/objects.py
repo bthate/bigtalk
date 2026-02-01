@@ -16,7 +16,7 @@ class Reserved(Exception):
 "object"
 
 
-class Base:
+class Object:
 
     def __contains__(self, key):
         return key in dir(self)
@@ -31,7 +31,7 @@ class Base:
         return str(self.__dict__)
 
 
-class Object:
+class Dict:
 
     @staticmethod
     def clear(obj):
@@ -45,19 +45,19 @@ class Object:
         if args:
             val = args[0]
             if isinstance(val, zip):
-                Object.update(obj, dict(val))
+                Dict.update(obj, dict(val))
             elif isinstance(val, dict):
-                Object.update(obj, val)
+                Dict.update(obj, val)
             else:
-                Object.update(obj, vars(val))
+                Dict.update(obj, vars(val))
         if kwargs:
-            Object.update(obj, kwargs)
+            Dict.update(obj, kwargs)
 
     @staticmethod
     def copy(obj):
         "return shallow copy of the object."
         oobj = type(obj)()
-        Object.update(oobj, obj.__dict__.copy())
+        Dict.update(oobj, obj.__dict__.copy())
         return oobj
 
     @staticmethod
@@ -127,7 +127,7 @@ class Object:
 "default"
 
 
-class Default(Base):
+class Default(Object):
 
     def __getattr__(self, key):
         return self.__dict__.get(key, "")
@@ -183,8 +183,8 @@ class Json:
 
 def __dir__():
     return (
-        'Base',
         'Default',
+        'Dict',
         'Json',
         'Object'
     )

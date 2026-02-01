@@ -19,7 +19,7 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.defines import Base, Broker, Cfg, Disk, Locate, Methods, Object
+from bigtalk.defines import Broker, Cfg, Dict, Disk, Locate, Methods, Object
 from bigtalk.defines import Repeater, Time, Thread, Utils
 
 
@@ -42,14 +42,14 @@ seenfn = ""
 skipped = []
 
 
-class Feed(Base):
+class Feed(Object):
 
     def __init__(self):
         self.link = ""
         self.name = ""
 
 
-class Rss(Base):
+class Rss(Object):
 
     def __init__(self):
         self.display_list = "title,link,author"
@@ -58,7 +58,7 @@ class Rss(Base):
         self.rss = ""
 
 
-class Urls(Base):
+class Urls(Object):
 
     pass
 
@@ -66,7 +66,7 @@ class Urls(Base):
 seen = Urls()
 
 
-class Fetcher(Base):
+class Fetcher(Object):
 
 
     def __init__(self):
@@ -103,8 +103,8 @@ class Fetcher(Base):
             for obj in reversed(getfeed(feed.rss, feed.display_list)):
                 counter += 1
                 fed = Feed()
-                Object.update(fed, obj)
-                Object.update(fed, feed)
+                Dict.update(fed, obj)
+                Dict.update(fed, feed)
                 url = urllib.parse.urlparse(fed.link)
                 if url.path and not url.path == "/":
                     uurl = f"{url.scheme}://{url.netloc}/{url.path}"
@@ -185,7 +185,7 @@ class Parser:
         result = []
         for line in Parser.getitems(txt, toke):
             line = line.strip()
-            obj = Base()
+            obj = Object()
             for itm in Utils.spl(items):
                 val = Parser.getitem(line, itm)
                 if val:
@@ -250,7 +250,7 @@ class OPML:
         for attrz in OPML.getattrs(txt, toke):
             if not attrz:
                 continue
-            obj = Base()
+            obj = Object()
             for itm in Utils.spl(itemz):
                 if itm == "link":
                     itm = "href"
@@ -268,7 +268,7 @@ class OPML:
 
 
 def attrs(obj, txt):
-    Object.update(obj, OPML.parse(txt))
+    Dict.update(obj, OPML.parse(txt))
 
 
 def cdata(line):
@@ -281,7 +281,7 @@ def cdata(line):
 
 
 def getfeed(url, items):
-    result = [Base(), Base()]
+    result = [Object(), Object()]
     if Cfg.debug or url in errors and (time.time() - errors[url]) < 600:
         return result
     try:
@@ -356,7 +356,7 @@ def dpl(event):
     setter = {"display_list": event.args[1]}
     for fnm, feed in Locate.find(Methods.fqn(Rss), {"rss": event.args[0]}):
         if feed:
-            Object.update(feed, setter)
+            Dict.update(feed, setter)
             Disk.write(feed, fnm)
     event.reply("ok")
 
@@ -368,7 +368,7 @@ def exp(event):
         for _fn, ooo in Locate.find(Methods.fqn(Rss)):
             nrs += 1
             obj = Rss()
-            Object.update(obj, ooo)
+            Dict.update(obj, ooo)
             name = f"url{nrs}"
             txt = f'<outline name="{name}" display_list="{obj.display_list}" xmlUrl="{obj.rss}"/>'
             event.reply(" " * 12 + txt)
@@ -404,7 +404,7 @@ def imp(event):
                 nrskip += 1
                 continue
             feed = Rss()
-            Object.update(feed, obj)
+            Dict.update(feed, obj)
             feed.rss = obj.xmlUrl
             feed.insertid = insertid
             Disk.write(feed)
@@ -422,7 +422,7 @@ def nme(event):
     selector = {"rss": event.args[0]}
     for fnm, fed in Locate.find(Methods.fqn(Rss), selector):
         feed = Rss()
-        Object.update(feed, fed)
+        Dict.update(feed, fed)
         if feed:
             feed.name = str(event.args[1])
             Disk.write(feed, fnm)
@@ -435,7 +435,7 @@ def rem(event):
         return
     for fnm, fed in Locate.find(Methods.fqn(Rss)):
         feed = Rss()
-        Object.update(feed, fed)
+        Dict.update(feed, fed)
         if event.args[0] not in feed.rss:
             continue
         if feed:
@@ -451,7 +451,7 @@ def res(event):
         return
     for fnm, fed in Locate.find(Methods.fqn(Rss), removed=True):
         feed = Rss()
-        Object.update(feed, fed)
+        Dict.update(feed, fed)
         if event.args[0] not in feed.rss:
             continue
         if feed:

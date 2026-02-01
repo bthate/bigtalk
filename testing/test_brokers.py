@@ -4,7 +4,7 @@
 import unittest
 
 
-from bigtalk.defines import Broker, Client, Json, Object
+from bigtalk.defines import Broker, Client, Dict, Json, Object
 
 
 class TestBroker(unittest.TestCase):
@@ -48,5 +48,5 @@ class TestBroker(unittest.TestCase):
     def test_update(self):
         o = {}
         o["a"] = "b"
-        Object.update(Broker, o)
+        Dict.update(Broker, o)
         self.assertEqual(Broker.a, "b")

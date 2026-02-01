@@ -4,13 +4,13 @@
 import time
 
 
-from bigtalk.defines import Base, Disk, Locate, Object, Time
+from bigtalk.defines import Disk, Locate, Object, Time
 
 
-class Todo(Base):
+class Todo(Object):
 
     def __init__(self):
-        Base.__init__(self)
+        Object.__init__(self)
         self.txt = ''
 
 

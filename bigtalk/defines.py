@@ -12,7 +12,7 @@ from .handler import Console as Console
 from .handler import Output as Output
 from .message import Message as Message
 from .methods import Methods as Methods
-from .objects import Base as Base
+from .objects import Dict as Dict
 from .objects import Object as Object
 from .objects import Json as Json
 from .package import Cfg as Cfg
@@ -38,6 +38,7 @@ def __dir__():
         'Client',
         'Commands',
         'Console',
+        'Dict',
         'Disk',
         'Handler',
         'Json',

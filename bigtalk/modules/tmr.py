@@ -7,7 +7,7 @@ import threading
 import time
 
 
-from bigtalk.defines import Base, Broker, Disk, Locate, Methods, Object
+from bigtalk.defines import Broker, Dict, Disk, Locate, Methods, Object
 from bigtalk.defines import NoDate, Time, Timed
 
 
@@ -17,7 +17,7 @@ rand = random.SystemRandom()
 def init():
     Timers.path = Locate.last(Timers.timers) or Methods.ident(Timers.timers)
     remove = []
-    for tme, args in Object.items(Timers.timers):
+    for tme, args in Dict.items(Timers.timers):
         if not args:
             continue
         orig, channel, txt = args
@@ -38,12 +38,12 @@ def init():
     logging.warning("%s timers", len(Timers.timers))
 
 
-class Timer(Base):
+class Timer(Object):
 
     pass
 
 
-class Timers(Base):
+class Timers(Object):
 
     path = ""
     timers = Timer()
@@ -64,7 +64,7 @@ def tmr(event):
     result = ""
     if not event.rest:
         nmr = 0
-        for tme, txt in Object.items(Timers.timers):
+        for tme, txt in Dict.items(Timers.timers):
             lap = float(tme) - time.time()
             if lap > 0:
                 event.reply(f'{nmr} {" ".join(txt)} {Time.elapsed(lap)}')

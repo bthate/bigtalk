@@ -9,7 +9,7 @@ import threading
 import time
 
 
-from bigtalk.defines import Base, Broker, Object, Thread
+from bigtalk.defines import Broker, Object, Thread
 from bigtalk.modules import Cfg
 
 
@@ -20,17 +20,17 @@ def init():
     return udp
 
 
-class Config(Base):
+class Config(Object):
 
     addr = ""
     host = "localhost"
     port = 5500
 
 
-class UDP(Base):
+class UDP(Object):
 
     def __init__(self):
-        Base.__init__(self)
+        Object.__init__(self)
         self.stopped = False
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)

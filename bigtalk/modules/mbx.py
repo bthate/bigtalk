@@ -6,14 +6,14 @@ import os
 import time
 
 
-from bigtalk.defines import Base, Disk, Locate, Methods, Object, Time
+from bigtalk.defines import Disk, Locate, Methods, Object, Time
 from bigtalk.utility import MONTH
 
 
 "email"
 
 
-class Email(Base):
+class Email(Object):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -68,7 +68,7 @@ def eml(event):
     if len(event.args) > 1:
         args.extend(event.args[1:])
     if event.gets:
-        args.extend(Object.keys(event.gets))
+        args.extend(Dict.keys(event.gets))
     for key in event.silent:
         if key in args:
             args.remove(key)
@@ -111,7 +111,7 @@ def mbx(event):
     nrs = 0
     for mail in thing:
         obj = Email()
-        Object.update(obj, dict(mail._headers))
+        Dict.update(obj, dict(mail._headers))
         obj.text = ""
         for payload in mail.walk():
             if payload.get_content_type() == 'text/plain':

@@ -8,7 +8,7 @@ import unittest
 
 
 
-from bigtalk.defines import Client, Commands, Message, Object
+from bigtalk.defines import Client, Commands, Dict, Message, Object
 
 
 def cmnd(event):
@@ -45,4 +45,4 @@ class TestCommands(unittest.TestCase):
         evt.text = "cmnd"
         evt.orig = repr(clt)
         Commands.command(evt)
-        self.assertTrue("yo!" in Object.values(evt.result))
+        self.assertTrue("yo!" in Dict.values(evt.result))

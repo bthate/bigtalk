@@ -11,7 +11,7 @@ import threading
 
 
 from .methods import Methods
-from .objects import Json, Object
+from .objects import Dict, Json, Object
 from .utility import Time
 
 
@@ -39,7 +39,7 @@ class Cache:
     def sync(path, obj):
         "update cached object."
         try:
-            Object.update(Cache.paths[path], obj)
+            Dict.update(Cache.paths[path], obj)
         except KeyError:
             Cache.add(path, obj)
 
@@ -115,7 +115,7 @@ class Disk:
             pth = os.path.join(Workdir.wdr, "store", path)
             with open(pth, "r", encoding="utf-8") as fpt:
                 try:
-                    Object.update(obj, Json.load(fpt))
+                    Dict.update(obj, Json.load(fpt))
                 except json.decoder.JSONDecodeError as ex:
                     ex.add_note(path)
                     raise ex
@@ -144,7 +144,7 @@ class Locate:
         "show attributes for kind of objects."
         pth, obj = Locate.find(kind, nritems=1)
         if obj:
-            return list(Object.keys(obj))
+            return list(Dict.keys(obj))
         return []
 
     @staticmethod
@@ -190,7 +190,7 @@ class Locate:
         res = ""
         if result:
             inp = result[-1]
-            Object.update(obj, inp[-1])
+            Dict.update(obj, inp[-1])
             res = inp[0]
         return res
 
