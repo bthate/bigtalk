@@ -294,9 +294,9 @@ def getfeed(url, items):
         if "link" not in items:
             items += ",link"
         if url.endswith("atom"):
-            result = Parser.parse(str(rest.data, "utf-8"), "entry", items) or []
+            result = Parser.parse(str(rest.data, "utf-8", "ignore"), "entry", items) or []
         else:
-            result = Parser.parse(str(rest.data, "utf-8"), "item", items) or []
+            result = Parser.parse(str(rest.data, "utf-8", "ignore"), "item", items) or []
     return result
 
 
