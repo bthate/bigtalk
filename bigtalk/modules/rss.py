@@ -6,6 +6,7 @@ import html.parser
 import http.client
 import logging
 import os
+import queue
 import re
 import time
 import urllib
@@ -26,26 +27,17 @@ from bigtalk.modules import Cfg
 from bigtalk.objects import Dict, Object
 from bigtalk.persist import Disk, Locate
 from bigtalk.threads import Thread
-from bigtalk.utility import Repeater, Utils
+from bigtalk.utility import Repeater, Time, Utils
 
 
 def init():
     fetcher = Fetcher()
     fetcher.start()
-    if seenfn:
-        logging.warning("since %s", Time.elapsed(time.time()-Time.fntime(seenfn)))
+    if fetcher.seenfn:
+        logging.warning("since %s", Time.elapsed(time.time()-Time.fntime(fetcher.seenfn)))
     else:
         logging.warning("since %s", time.ctime(time.time()).replace("  ", " "))
     return fetcher
-
-
-fetchlock = _thread.allocate_lock()
-importlock = _thread.allocate_lock()
-
-
-errors = {}
-seenfn = ""
-skipped = []
 
 
 class Feed(Object):
@@ -69,14 +61,18 @@ class Urls(Object):
     pass
 
 
-seen = Urls()
-
-
 class Fetcher(Object):
 
+    errors = {}
 
     def __init__(self):
+        super().__init__()
         self.dosave = False
+        self.fetchlock = _thread.allocate_lock()
+        self.seen = Urls()
+        self.seenfn = ""
+        self.skipped = []
+        self.todo = queue.Queue()
 
     @staticmethod
     def display(obj):
@@ -100,10 +96,9 @@ class Fetcher(Object):
         return result[:-2].rstrip()
 
     def fetch(self, feed, silent=False):
-        global seenfn
-        with fetchlock:
+        with self.fetchlock:
             result = []
-            see = getattr(seen, feed.rss, [])
+            see = getattr(self.seen, feed.rss, [])
             urls = []
             counter = 0
             for obj in reversed(getfeed(feed.rss, feed.display_list)):
@@ -122,35 +117,43 @@ class Fetcher(Object):
                 if self.dosave:
                     Disk.write(fed)
                 result.append(fed)
-            setattr(seen, feed.rss, urls)
-            if not seenfn:
-                seenfn = Methods.ident(seen)
-            Disk.write(seen, seenfn)
-            time.sleep(1.0)
-        if silent:
+            setattr(self.seen, feed.rss, urls)
+            if not self.seenfn:
+                self.seenfn = Methods.ident(self.seen)
+            Disk.write(self.seen, self.seenfn)
+            if silent:
+                return counter
+            txt = ""
+            feedname = getattr(feed, "name", None)
+            if feedname:
+                txt = f"[{feedname}] "
+            for obj in result:
+                txt2 = txt + self.display(obj)
+                self.todo.put(txt2)
             return counter
-        txt = ""
-        feedname = getattr(feed, "name", None)
-        if feedname:
-            txt = f"[{feedname}] "
-        for obj in result:
-            txt2 = txt + self.display(obj)
+
+    def output(self):
+        while True:
+            txt = self.todo.get()
+            if txt is None:
+                break
             for bot in Broker.objs("announce"):
-                bot.announce(txt2)
-        return counter
+                bot.announce(txt)
 
     def run(self, silent=False):
-        thrs = []
         for _fn, feed in Locate.find(Methods.fqn(Rss)):
-            thrs.append(Thread.launch(self.fetch, feed, silent))
-        return thrs
+            self.fetch(feed, silent)
 
     def start(self, repeat=True):
-        Locate.last(seen)
+        self.seenfn = Locate.last(self.seen) or Methods.ident(self.seen)
         if repeat:
             repeater = Repeater(300.0, self.run)
             repeater.start()
+            Thread.launch(self.output)
 
+    def stop(self):
+        self.todo.put((None,None))
+        
 
 class Parser:
 
@@ -207,6 +210,9 @@ class Parser:
 
 
 class OPML:
+
+    importlock = _thread.allocate_lock()
+    skipped = []
 
     @staticmethod
     def getnames(line):
@@ -288,13 +294,13 @@ def cdata(line):
 
 def getfeed(url, items):
     result = [Object(), Object()]
-    if Cfg.debug or url in errors and (time.time() - errors[url]) < 600:
+    if Cfg.debug or url in Fetcher.errors and (time.time() - Fetcher.errors[url]) < 600:
         return result
     try:
         rest = geturl(url)
     except (http.client.HTTPException, ValueError, HTTPError, URLError) as ex:
         logging.error("%s %s", url, ex)
-        errors[url] = time.time()
+        Fetcher.errors[url] = time.time()
         return result
     if rest:
         if "link" not in items:
@@ -329,9 +335,12 @@ def geturl(url):
     url = urllib.parse.urlunparse(urllib.parse.urlparse(url))
     req = urllib.request.Request(str(url))
     req.add_header("User-agent", useragent("rss fetcher"))
-    with urllib.request.urlopen(req) as response:  # nosec
-        response.data = response.read()
-        return response
+    try:
+        with urllib.request.urlopen(req, timeout=5) as response:  # nosec
+            response.data = response.read()
+            return response
+    except TimeoutError:
+        return None
 
 
 def shortid():
@@ -368,7 +377,7 @@ def dpl(event):
 
 
 def exp(event):
-    with importlock:
+    with OPML.importlock:
         event.reply(TEMPLATE)
         nrs = 0
         for _fn, ooo in Locate.find(Methods.fqn(Rss)):
@@ -391,7 +400,7 @@ def imp(event):
     if not os.path.exists(fnm):
         event.reply(f"no {fnm} file found.")
         return
-    with importlock:
+    with OPML.importlock:
         with open(fnm, "r", encoding="utf-8") as file:
             txt = file.read()
         prs = OPML()
@@ -400,13 +409,13 @@ def imp(event):
         insertid = shortid()
         for obj in prs.parse(txt, "outline", "name,display_list,xmlUrl"):
             url = obj.xmlUrl
-            if url in skipped:
+            if url in OPML.kipped:
                 continue
             if not url.startswith("http"):
                 continue
             has = list(Locate.find(Methods.fqn(Rss), {"rss": url}, matching=True))
             if has:
-                skipped.append(url)
+                OPML.skipped.append(url)
                 nrskip += 1
                 continue
             feed = Rss()
@@ -496,11 +505,7 @@ def syn(event):
         return
     fetcher = Fetcher()
     fetcher.start(False)
-    thrs = fetcher.run(True)
-    nrs = 0
-    for thr in thrs:
-        thr.join()
-        nrs += 1
+    fetcher.run(True)
     event.reply(f"{nrs} feeds synced")
 
 

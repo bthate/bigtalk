@@ -15,7 +15,7 @@ sys.path.insert(0, os.getcwd())
 
 
 from bigtalk.command import Commands
-from bigtalk.handler import Console
+from bigtalk.clients import Console
 from bigtalk.message import Message
 from bigtalk.methods import Methods
 from bigtalk.modules import Cfg
