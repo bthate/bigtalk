@@ -7,7 +7,9 @@
 import unittest
 
 
-from bigtalk.defines import Client, Handler, Message, Methods
+from bigtalk.handler import Client, Handler
+from bigtalk.message import Message
+from bigtalk.methods import Methods
 
 
 buffer = []

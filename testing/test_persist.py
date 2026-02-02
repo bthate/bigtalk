@@ -9,7 +9,8 @@ import unittest
 sys.path.insert(0, ".")
 
 
-from bigtalk.defines import Disk, Object, Workdir
+from bigtalk.persist import Disk, Workdir
+from bigtalk.objects import Object
 
 
 Workdir.wdr = '.test'

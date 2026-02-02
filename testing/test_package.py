@@ -7,7 +7,7 @@
 import unittest
 
 
-from bigtalk.defines import Mods
+from bigtalk.package import Mods
 
 
 class TestPackage(unittest.TestCase):

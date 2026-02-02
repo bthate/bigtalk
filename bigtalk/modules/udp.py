@@ -9,8 +9,10 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Object, Thread
+from bigtalk.brokers import Broker
 from bigtalk.modules import Cfg
+from bigtalk.objects import Object
+from bigtalk.threads import Thread
 
 
 def init():

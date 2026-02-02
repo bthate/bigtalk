@@ -7,8 +7,10 @@
 import unittest
 
 
-
-from bigtalk.defines import Client, Commands, Dict, Message, Object
+from bigtalk.handler import Client
+from bigtalk.command import Commands
+from bigtalk.objects import Dict, Object
+from bigtalk.message import Message
 
 
 def cmnd(event):

@@ -10,8 +10,10 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.defines import Object, Thread, Workdir
 from bigtalk.modules import Cfg
+from bigtalk.objects import Object
+from bigtalk.persist import Workdir
+from bigtalk.threads import Thread
 
 
 "init"
