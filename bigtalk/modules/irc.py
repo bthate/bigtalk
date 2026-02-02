@@ -11,9 +11,16 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Commands, Dict, Disk, Locate, Output
-from bigtalk.defines import Message, Methods, Object, Thread, Util, Utils
+from bigtalk.brokers import Broker
+from bigtalk.command import Commands
+from bigtalk.handler import Output
+from bigtalk.message import Message
+from bigtalk.methods import Methods
 from bigtalk.modules import Cfg
+from bigtalk.objects import Dict, Object
+from bigtalk.persist import Disk, Locate, Util
+from bigtalk.threads import Thread
+from bigtalk.utility import Utils
 
 
 NAME = Cfg.name or Utils.pkgname(Object)

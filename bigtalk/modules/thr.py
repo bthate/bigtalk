@@ -5,7 +5,7 @@ import threading
 import time
 
 
-from bigtalk.defines import Time
+from bigtalk.utility import Time
 
 
 STARTTIME = time.time()

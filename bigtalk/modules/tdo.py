@@ -4,7 +4,9 @@
 import time
 
 
-from bigtalk.defines import Disk, Locate, Object, Time
+from bigtalk.objects import Object
+from bigtalk.persist import Disk, Locate
+from bigtalk.utility import Time
 
 
 class Todo(Object):

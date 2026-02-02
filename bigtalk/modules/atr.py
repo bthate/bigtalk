@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-from bigtalk.defines import Locate, Workdir
+from bigtalk.persist import Locate, Workdir
 
 
 def atr(event):

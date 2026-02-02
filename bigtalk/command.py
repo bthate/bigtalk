@@ -29,6 +29,17 @@ class Commands:
             Commands.names[name] = func.__module__.split(".")[-1]
 
     @staticmethod
+    def cmd(text):
+        "parse text for command and run it."
+        for txt in text.split(" ! "):
+            evt = Message()
+            evt.text = txt
+            evt.type = "command"
+            Commands.command(evt)
+            evt.wait()
+        return evt
+
+    @staticmethod
     def command(evt):
         "command callback."
         Methods.parse(evt, evt.text)
@@ -39,17 +50,6 @@ class Commands:
             if bot:
                 bot.display(evt)
         evt.ready()
-
-    @staticmethod
-    def cmd(text):
-        "parse text for command and run it."
-        for txt in text.split(" ! "):
-            evt = Message()
-            evt.text = txt
-            evt.type = "command"
-            Commands.command(evt)
-            evt.wait()
-        return evt
 
     @staticmethod
     def get(cmd):

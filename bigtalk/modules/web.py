@@ -10,8 +10,10 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.defines import Object, Thread, Utils
 from bigtalk.modules import Cfg
+from bigtalk.objects import Object
+from bigtalk.threads import Thread
+from bigtalk.utility import Utils
 
 
 def init():

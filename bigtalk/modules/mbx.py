@@ -6,8 +6,10 @@ import os
 import time
 
 
-from bigtalk.defines import Dict, Disk, Locate, Methods, Object, Time
-from bigtalk.utility import MONTH
+from bigtalk.methods import Methods
+from bigtalk.objects import Dict, Object
+from bigtalk.persist import Disk, Locate
+from bigtalk.utility import MONTH, Time
 
 
 "email"

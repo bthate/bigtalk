@@ -7,8 +7,11 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Dict, Disk, Locate, Methods, Object
-from bigtalk.defines import NoDate, Time, Timed
+from bigtalk.brokers import Broker
+from bigtalk.methods import Methods
+from bigtalk.objects import Dict, Object
+from bigtalk.persist import Disk, Locate
+from bigtalk.utility import NoDate, Time, Timed
 
 
 rand = random.SystemRandom()

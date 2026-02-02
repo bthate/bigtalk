@@ -9,8 +9,10 @@ import logging
 import time
 
 
-from bigtalk.defines import Broker, Dict, Message
-from bigtalk.defines import Object, Repeater, Time
+from bigtalk.brokers import Broker
+from bigtalk.message import Message
+from bigtalk.objects import Dict, Object
+from bigtalk.utility import Repeater, Time
 
 
 "init"

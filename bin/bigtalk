@@ -14,9 +14,15 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.defines import Commands, Console, Log, Message, Methods, Mods
-from bigtalk.defines import Utils, Workdir
+from bigtalk.command import Commands
+from bigtalk.handler import Console
+from bigtalk.message import Message
+from bigtalk.methods import Methods
 from bigtalk.modules import Cfg
+from bigtalk.package import Mods
+from bigtalk.utility import Utils
+from bigtalk.persist import Workdir
+from bigtalk.utility import Log
 
 
 from bigtalk import modules as MODS
