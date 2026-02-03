@@ -337,6 +337,8 @@ def geturl(url):
             response.data = response.read()
             return response
     except TimeoutError:
+        logging.error("%s %s", url, ex)
+        errors[url] = time.time()
         return None
 
 
