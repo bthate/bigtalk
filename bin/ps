@@ -26,7 +26,7 @@ def main():
     pid = 'none'
     with open(filename, 'r') as file:
         pid = int(file.read())
-    txt = f"ps -f -p {pid} -o pid,state,tname,time,size,rss,command"
+    txt = f"ps -f -p {pid} -o pid,state,tname,time,size,rss,share"
     res = ''
     for line in os.popen(txt):
         res = line
