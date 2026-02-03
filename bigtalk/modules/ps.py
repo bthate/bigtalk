@@ -4,10 +4,12 @@
 "show prodess stats"
 
 
-import psutil
-
-
 def ps(event):
+    try:
+        import psutil
+    except ModuleNotFoundError:
+        event.reply("psutil is not installed.")
+        return
     proc = psutil.Process()
     txt = ' '.join(str(proc.memory_info()).split('(')[1:])
     txt2 = ""
