@@ -137,6 +137,8 @@ class Fetcher(Object):
             txt2 = txt + self.display(obj)
             for bot in Broker.objs("announce"):
                 bot.announce(txt2)
+        for obj in result:
+            del obj
         return counter
 
     def run(self, silent=False):
@@ -330,9 +332,12 @@ def geturl(url):
     url = urllib.parse.urlunparse(urllib.parse.urlparse(url))
     req = urllib.request.Request(str(url))
     req.add_header("User-agent", useragent("rss fetcher"))
-    with urllib.request.urlopen(req, timeout=5.0) as response:  # nosec
-        response.data = response.read()
-        return response
+    try:
+        with urllib.request.urlopen(req, timeout=5.0) as response:  # nosec
+            response.data = response.read()
+            return response
+    except TimeoutError:
+        return None
 
 
 def shortid():
