@@ -8,7 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "bigtalk"
-version = "6"
+version = "7"
 authors = [
     {name = "Bart", email = "bthate@dds.nl" },
 ]

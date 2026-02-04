@@ -35,7 +35,7 @@ Cfg.ignore = "rst,udp,web"
 Cfg.level = "info"
 Cfg.name = Utils.pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 6
+Cfg.version = 7
 Cfg.wdr = os.path.expanduser(f"~/.{Cfg.name}")
 
 
