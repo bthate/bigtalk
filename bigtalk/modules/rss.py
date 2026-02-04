@@ -100,7 +100,7 @@ class Fetcher(Object):
 
     def fetch(self, feed, silent=False):
         global seenfn
-        if True:
+        with fetchlock:
             result = []
             see = getattr(seen, feed.rss, [])
             urls = []
@@ -124,8 +124,7 @@ class Fetcher(Object):
             setattr(seen, feed.rss, urls)
             if not seenfn:
                 seenfn = Methods.ident(seen)
-            with fetchlock:
-                Disk.write(seen, seenfn)
+            Disk.write(seen, seenfn)
             time.sleep(1.0)
         if silent:
             return counter
@@ -336,7 +335,7 @@ def geturl(url):
         with urllib.request.urlopen(req, timeout=5.0) as response:  # nosec
             response.data = response.read()
             return response
-    except TimeoutError:
+    except TimeoutError as ex:
         logging.error("%s %s", url, ex)
         errors[url] = time.time()
         return None
