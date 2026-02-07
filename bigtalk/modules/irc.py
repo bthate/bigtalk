@@ -15,10 +15,9 @@ from bigtalk.brokers import Broker
 from bigtalk.clients import Output
 from bigtalk.command import Commands
 from bigtalk.message import Message
-from bigtalk.methods import Methods
 from bigtalk.modules import Cfg
-from bigtalk.objects import Dict, Object
-from bigtalk.persist import Disk, Locate, Util
+from bigtalk.objects import Dict, Object, Methods
+from bigtalk.persist import Disk, Locate
 from bigtalk.threads import Thread
 from bigtalk.utility import Utils
 
@@ -43,7 +42,7 @@ def init():
 class Config(Object):
 
     channel = f"#{Cfg.name}"
-    commands = True
+    commands = Cfg.commands or False
     control = "!"
     ignore = ["PING", "PONG", "PRIVMSG"] 
     name = Cfg.name
@@ -607,7 +606,7 @@ def cfg(event):
         )
     else:
         Methods.edit(config, event.sets)
-        Disk.write(config, fnm or Util.ident(config))
+        Disk.write(config, fnm or Methods.ident(config))
         event.reply("ok")
 
 

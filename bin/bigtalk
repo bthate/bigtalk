@@ -17,11 +17,11 @@ sys.path.insert(0, os.getcwd())
 from bigtalk.command import Commands
 from bigtalk.clients import Console
 from bigtalk.message import Message
-from bigtalk.methods import Methods
 from bigtalk.modules import Cfg
+from bigtalk.objects import Methods
 from bigtalk.package import Mods
 from bigtalk.utility import Utils
-from bigtalk.persist import Workdir
+from bigtalk.persist import Disk, Workdir
 from bigtalk.utility import Log
 
 
@@ -31,11 +31,13 @@ from bigtalk import modules as MODS
 "config"
 
 
+Cfg.commands = True
 Cfg.ignore = "rst,udp,web"
 Cfg.level = "info"
 Cfg.name = Utils.pkgname(Commands)
+Cfg.poll = 600
 Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 7
+Cfg.version = 658
 Cfg.wdr = os.path.expanduser(f"~/.{Cfg.name}")
 
 
@@ -168,11 +170,13 @@ class Runtime:
     def banner():
         "hello."
         tme = time.ctime(time.time()).replace("  ", " ")
-        print("%s %s since %s (%s)" % (
+        print("%s %s since %s (%s/%s/%s)" % (
             Cfg.name.upper(),
             Cfg.version,
             tme,
+            (Cfg.commands and "COMMAND") or (not Cfg.commands and 'NOCOMMAND'),
             Cfg.level.upper(),
+            (Disk.cached() and 'CACHED') or (not Disk.cached() and 'DIRECT')
         ))
         sys.stdout.flush()
 
@@ -183,6 +187,11 @@ class Runtime:
         Cfg.ignore = Cfg.sets.ignore or Cfg.ignore or ""
         Cfg.init = Cfg.sets.init or Cfg.init or ""
         Cfg.level = Cfg.sets.level or Cfg.level or "info"
+        try:
+            Cfg.poll = int(Cfg.sets.poll)
+            Cfg.poll > 60
+        except ValueError:
+            pass
         Cfg.wdr = Cfg.sets.wdr or Cfg.wdr or os.path.expanduser(f"~/.{Utils.pkgname(Cfg)}")
         Log.level(Cfg.level)
         Workdir.setwd(Cfg.wdr)
@@ -196,6 +205,8 @@ class Runtime:
             Runtime.banner()
         if 'a' in Cfg.opts:
             Cfg.init = Mods.list(Cfg.ignore)
+        if 'x' in Cfg.opts:
+            Cfg.commands = True
 
     @staticmethod
     def check(text):
@@ -288,6 +299,8 @@ WantedBy=multi-user.target"""
 def main():
     "main"
     check = Runtime.check
+    if check('b'):
+        Disk.cache()
     if check("d"):
         Scripts.background()
     elif check("c"):

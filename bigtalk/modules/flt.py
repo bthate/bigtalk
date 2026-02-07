@@ -2,7 +2,7 @@
 
 
 from bigtalk.brokers import Broker
-from bigtalk.methods import Methods
+from bigtalk.objects import Methods
 
 
 def flt(event):

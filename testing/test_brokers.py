@@ -5,8 +5,9 @@ import unittest
 
 
 from bigtalk.brokers import Broker
-from bigtalk.handler import Client
-from bigtalk.objects import Dict, Json, Object
+from bigtalk.clients import Client
+from bigtalk.encoder import Json
+from bigtalk.objects import Dict, Object
 
 
 class TestBroker(unittest.TestCase):

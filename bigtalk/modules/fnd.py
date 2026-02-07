@@ -4,7 +4,7 @@
 import time
 
 
-from bigtalk.methods import Methods
+from bigtalk.objects import Methods
 from bigtalk.persist import Locate, Workdir
 from bigtalk.utility import Time
 

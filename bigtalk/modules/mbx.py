@@ -6,8 +6,7 @@ import os
 import time
 
 
-from bigtalk.methods import Methods
-from bigtalk.objects import Dict, Object
+from bigtalk.objects import Dict, Methods, Object
 from bigtalk.persist import Disk, Locate
 from bigtalk.utility import MONTH, Time
 

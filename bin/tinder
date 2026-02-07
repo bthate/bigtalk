@@ -13,11 +13,11 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
+from bigtalk.clients import Client
 from bigtalk.command import Commands
 from bigtalk.modules import Cfg
-from bigtalk.handler import Client
 from bigtalk.message import Message
-from bigtalk.methods import Methods
+from bigtalk.objects import Methods
 from bigtalk.package import Mods
 from bigtalk.persist import Workdir
 from bigtalk.threads import Thread
@@ -43,7 +43,7 @@ Cfg.ignore = ""
 Cfg.level = "info"
 Cfg.name = Mods.pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 7
+Cfg.version = 658
 Cfg.wdr = ".test"
 
 
@@ -223,7 +223,9 @@ examples = {
 
 pre = {
     "cfg": ["", "nick=mekker"],
-    "imp": ["", "testing/feeds.opml", "testing/feeds2.opml"],
+    "imp": ["",
+         "testing/feeds.opml",
+    ],
     "log": ["", "log add"],
     "rss": ["", "http://hnrss.org/newest"],
     "tdo": ["", "test"]

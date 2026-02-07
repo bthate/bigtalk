@@ -7,8 +7,7 @@
 import unittest
 
 
-from bigtalk.methods import Methods
-from bigtalk.objects import Object
+from bigtalk.objects import Methods, Object
 
 
 class TestMethods(unittest.TestCase):
