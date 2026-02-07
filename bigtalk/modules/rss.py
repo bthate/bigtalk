@@ -341,7 +341,8 @@ class Helpers:
                 ValueError,
                 HTTPError,
                 URLError,
-                UnicodeDecodeError
+                UnicodeDecodeError,
+                ConnectionResetError
         ) as ex:
             feed.error = str(ex)
             Disk.write(feed, fnm)
