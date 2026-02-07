@@ -6,7 +6,7 @@ import unittest
 
 from bigtalk.brokers import Broker
 from bigtalk.clients import Client
-from bigtalk.encoder import Json
+from bigtalk.decoder import Json
 from bigtalk.objects import Dict, Object
 
 

@@ -4,7 +4,7 @@
 import unittest
 
 
-from bigtalk.encoder import *
+from bigtalk.decoder import *
 from bigtalk.objects import *
 
 
