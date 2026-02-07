@@ -13,7 +13,7 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Client
+from bigtalk.clients import Client, ClientPool
 from bigtalk.command import Commands
 from bigtalk.modules import Cfg
 from bigtalk.message import Message
@@ -38,6 +38,7 @@ events = queue.Queue()
 
 "config"
 
+
 Cfg.debug = True
 Cfg.ignore = ""
 Cfg.level = "info"
@@ -59,35 +60,6 @@ class CLI(Client):
     def raw(self, txt):
         if "v" in Cfg.opts:
             print(txt)
-
-
-class Pool:
-
-    clients = []
-    lock = threading.RLock()
-    nrcpu = 1
-    nrlast = 0
-
-    @staticmethod
-    def add(client):
-        Pool.clients.append(client)
-
-    @staticmethod
-    def init(clz, nr):
-        Pool.nrcpu = nr
-        for _x in range(Pool.nrcpu):
-            clt = clz()
-            clt.start()
-            Pool.add(clt)
-
-    @staticmethod
-    def put(event):
-        with Pool.lock:
-            if Pool.nrlast >= Pool.nrcpu-1:
-                Pool.nrlast = 0
-            clt = Pool.clients[Pool.nrlast]
-            clt.put(event)
-            Pool.nrlast += 1
 
 
 "utilities"
@@ -126,7 +98,7 @@ def payload(todo):
             evt = Message()
             evt.text = f"{cmd} {ex}"
             evt.kind = "command"
-            Pool.put(evt)
+            ClientPool.put(evt)
             events.put(evt)
 
 
@@ -161,9 +133,9 @@ def main():
     if "v" in Cfg.opts:
         banner()
     if "z" in Cfg.opts:
-        Pool.init(CLI, os.cpu_count())
+        ClientPool.init(os.cpu_count(), CLI)
     else:
-        Pool.init(CLI, 1)
+        ClientPool.init(1, CLI)
     starttime = time.time()
     nrs = Cfg.index or 1
     for _x in range(nrs):
