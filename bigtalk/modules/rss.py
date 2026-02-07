@@ -467,7 +467,7 @@ def imp(event):
         nrs = 0
         nrskip = 0
         insertid = Helpers.shortid()
-        for obj in prs.parse(txt, "outline", "name,display_list,xmlUrl"):
+        for obj in prs.parse(txt, "outline", "name,xmlUrl"):
             url = obj["xmlUrl"]
             if url in skipped:
                 continue
@@ -479,10 +479,14 @@ def imp(event):
                 nrskip += 1
                 continue
             feed = Rss()
-            Dict.update(feed, obj)
             feed.rss = obj["xmlUrl"]
+            del obj["xmlUrl"]
+            Dict.update(feed, obj)
             uri = urllib.parse.urlparse(feed.rss)
-            feed.name = uri.netloc
+            if uri.netloc.count(".") >= 2:
+                feed.name = ".".join(uri.netloc.split('.')[1:-1])
+            else:
+                feed.name = '.'.join(uri.netloc.split('.')[:-1])
             feed.insertid = insertid
             Disk.write(feed)
             nrs += 1
