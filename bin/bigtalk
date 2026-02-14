@@ -58,7 +58,7 @@ class Line(Console):
         print(text.encode('utf-8', 'replace').decode("utf-8"))
 
 
-class Csl(Line):
+class CSL(Line):
 
     def callback(self, event):
         "wait for callback result."
@@ -103,7 +103,7 @@ class Scripts:
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
         Commands.cmd(Cfg.txt)
         Mods.inits(Cfg.modules, Cfg.ignore, Cfg.wait)
-        csl = Csl()
+        csl = CSL()
         csl.start()
         Runtime.forever()
 
@@ -236,7 +236,7 @@ class Runtime:
     @staticmethod
     def getargs():
         "parse commandline arguments."
-        parser = argparse.ArgumentParser(description="Skull, Bones and Number")
+        parser = argparse.ArgumentParser(description="Big Talk")
         parser.add_argument("-a", "--all", action="store_true", help="load all modules")
         parser.add_argument("-c", "--console", action="store_true", help="start console")
         parser.add_argument("-d", "--daemon", action="store_true", help="start background daemon")
