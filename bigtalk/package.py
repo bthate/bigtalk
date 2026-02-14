@@ -10,6 +10,7 @@ import os
 
 
 from .command import Commands
+from .objects import Dict
 from .threads import Thread
 from .utility import Utils
 
@@ -45,11 +46,8 @@ class Mods:
                     continue
                 modname = f"{pkgname}.{name}"
                 mod =  Mods.modules.get(modname, None)
-                if mod:
-                    logging.debug(f"cache {mod}")
-                else:
+                if not mod:
                     mod = Mods.importer(modname, os.path.join(path, fnm))
-                    logging.debug(f"import {mod}")
                 if mod:
                     yield name, mod
 
@@ -108,6 +106,17 @@ class Mods:
             Commands.scan(mod)
             res.append((name, mod))
         return res
+
+    @staticmethod
+    def shutdown():
+        "call shutdown on modules."
+        logging.debug("shutdown")
+        for mod in Dict.values(Mods.modules):
+            if "shutdown" in dir(mod):
+                try:
+                    mod.shutdown()
+                except Exception as ex:
+                    logging.exception(ex)
 
 
 "interface"

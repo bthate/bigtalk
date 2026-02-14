@@ -10,7 +10,7 @@ import pathlib
 import threading
 
 
-from .decoder import Json
+from .encoder import Json
 from .objects import Default, Dict, Methods
 from .utility import Time
 
@@ -23,29 +23,25 @@ lock = threading.RLock()
 
 class Cache:
 
-    enable = False
     paths = {}
 
     @staticmethod
     def add(path, obj):
         "put object into cache."
-        if Cache.enable:
-            Cache.paths[path] = obj
+        Cache.paths[path] = obj
 
     @staticmethod
     def get(path):
         "get object from cache."
-        if Cache.enable:
-            return Cache.paths.get(path, None)
+        return Cache.paths.get(path, None)
 
     @staticmethod
     def sync(path, obj):
         "update cached object."
-        if Cache.enable:
-            try:
-                Dict.update(Cache.paths[path], obj)
-            except KeyError:
-                Cache.add(path, obj)
+        try:
+            Dict.update(Cache.paths[path], obj)
+        except KeyError:
+            Cache.add(path, obj)
 
 
 "disk"
@@ -54,18 +50,11 @@ class Cache:
 class Disk:
 
     @staticmethod
-    def cache():
-        Cache.enable = True
-
-    @staticmethod
-    def cached():
-        return Cache.enable
-
-    @staticmethod
     def cdir(path):
         "create directory."
         pth = pathlib.Path(path)
-        pth.parent.mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(pth.parent):
+            pth.parent.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def read(obj, path):
@@ -108,13 +97,12 @@ class Locate:
 
     @staticmethod
     def count(kind):
-        return len(Locate.find(kind))
+        return len(list(Locate.find(kind)))
 
     @staticmethod
     def find(kind, selector={}, removed=False, matching=False, nritems=None):
         "locate objects by matching atributes."
         nrs = 0
-        res = []
         for pth in Locate.fns(Workdir.long(kind)):
             obj = Cache.get(pth)
             if not obj:
@@ -128,8 +116,7 @@ class Locate:
             if nritems and nrs >= nritems:
                 break
             nrs += 1
-            res.append((pth, obj))
-        return res
+            yield pth, obj
 
     @staticmethod
     def fns(kind):
@@ -227,7 +214,6 @@ class Workdir:
 
 def __dir__():
     return (
-        'Cache',
         'Disk',
         'Locate',
         'Workdir'

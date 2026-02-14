@@ -10,7 +10,7 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.modules import Cfg
+from bigtalk.command import Cfg
 from bigtalk.objects import Object
 from bigtalk.threads import Thread
 
@@ -27,6 +27,7 @@ class Config(Object):
     addr = ""
     host = "localhost"
     port = 5500
+
 
 
 class UDP(Object):

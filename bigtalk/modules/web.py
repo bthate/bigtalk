@@ -10,7 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.modules import Cfg
+from bigtalk.command import Cfg
 from bigtalk.objects import Object
 from bigtalk.threads import Thread
 from bigtalk.utility import Utils
@@ -32,6 +32,7 @@ def init():
 
 class Config:
 
+    debug = False
     hostname = "localhost"
     path = ""
     port = 8000

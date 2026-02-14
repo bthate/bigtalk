@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"internet relay chat"
+
+
 import base64
 import logging
 import os
@@ -13,19 +16,24 @@ import time
 
 from bigtalk.brokers import Broker
 from bigtalk.clients import Output
-from bigtalk.command import Commands
+from bigtalk.command import Cfg, Commands
 from bigtalk.message import Message
-from bigtalk.modules import Cfg
-from bigtalk.objects import Dict, Object, Methods
+from bigtalk.objects import Default, Dict, Object, Methods
+from bigtalk.package import Mods
 from bigtalk.persist import Disk, Locate
 from bigtalk.threads import Thread
-from bigtalk.utility import Utils
 
 
-NAME = Cfg.name or Utils.pkgname(Object)
+"defines"
+
+
+NAME = Mods.pkgname(Broker)
 
 
 lock = threading.RLock()
+
+
+"init"
 
 
 def init():
@@ -39,40 +47,38 @@ def init():
     return irc
 
 
-class Config(Object):
+"config"
 
-    channel = f"#{Cfg.name}"
-    commands = Cfg.commands or False
-    control = "!"
+
+class Config(Default):
+
     ignore = ["PING", "PONG", "PRIVMSG"] 
-    name = Cfg.name
-    nick = Cfg.name
-    word = ""
-    port = 6667
-    realname = Cfg.name
-    sasl = False
-    server = "localhost"
-    servermodes = ""
-    sleep = 60
-    username = Cfg.name
-    users = False
-    version = 1
 
-    def __init__(self):
-        super().__init__()
-        self.channel = Config.channel
-        self.commands = Config.commands
-        self.name = Config.name
-        self.nick = Config.nick
-        self.port = Config.port
-        self.realname = Config.realname
-        self.server = Config.server
-        self.username = Config.username
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = Cfg.name or NAME
+        self.channel = Cfg.room or f"#{self.name}"
+        self.commands = Cfg.commands or False
+        self.control = "!"
+        self.nick = Cfg.name or NAME
+        self.word = ""
+        self.port = Cfg.port or 6667
+        self.realname = Cfg.name or NAME
+        self.sasl = (self.port == 6697 and True) or False
+        self.server = Cfg.server or "localhost"
+        self.servermodes = ""
+        self.sleep = 60
+        self.username = Cfg.name or NAME
+        self.users = False
+        self.version = 1
 
     def __getattr__(self, name):
         if name not in self:
             return ""
         return self.__getattribute__(name)
+
+
+"event"
 
 
 class Event(Message):
@@ -96,6 +102,9 @@ class Event(Message):
         bot.dosay(self.channel, txt)
 
 
+"wraper"
+
+
 class TextWrap(textwrap.TextWrapper):
 
     def __init__(self):
@@ -109,6 +118,9 @@ class TextWrap(textwrap.TextWrapper):
 
 
 wrapper = TextWrap()
+
+
+"irc"
 
 
 class IRC(Output):
@@ -241,7 +253,7 @@ class IRC(Output):
                         self.events.joined.set()
                         continue
                     break
-            except (socket.timeout, ssl.SSLError, OSError, ConnectionResetError) as ex:
+            except (socket.error, socket.timeout, ssl.SSLError, OSError, ConnectionResetError) as ex:
                 self.events.joined.set()
                 self.state.error = str(ex)
                 logging.debug("%s", str(type(ex)) + " " + str(ex))
@@ -448,6 +460,7 @@ class IRC(Output):
         self.doconnect(self.cfg.server, self.cfg.nick, int(self.cfg.port))
 
     def restart(self):
+        logging.debug("restart")
         self.events.joined.set()
         self.state.pongcheck = False
         self.state.keeprunning = False
@@ -497,6 +510,7 @@ class IRC(Output):
         )
 
     def stop(self):
+        logging.warn("stopping")
         self.state.stopkeep = True
         Output.stop(self)
 

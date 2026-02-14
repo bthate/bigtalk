@@ -12,6 +12,9 @@ import time
 import _thread
 
 
+"defines"
+
+
 lock = threading.RLock()
 
 
@@ -42,7 +45,7 @@ class Task(threading.Thread):
             super().join(timeout or None)
             return self.result
         except (KeyboardInterrupt, EOFError) as ex:
-            if self.event:
+            if self.event and self.event.ready:
                 self.event.ready()
             raise ex
 
@@ -62,6 +65,9 @@ class Task(threading.Thread):
                 self.event.ready()
             logging.exception(ex)
             _thread.interrupt_main()
+
+
+"thread"
 
 
 class Thread:
