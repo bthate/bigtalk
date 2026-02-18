@@ -18,7 +18,7 @@ from bigtalk.command import Cfg, Commands
 from bigtalk.message import Message
 from bigtalk.objects import Methods
 from bigtalk.package import Mods
-from bigtalk.persist import Disk, Workdir
+from bigtalk.persist import Workdir
 from bigtalk.threads import Thread
 from bigtalk.utility import Time, Utils
 
@@ -43,7 +43,7 @@ Cfg.ignore = ""
 Cfg.level = "info"
 Cfg.name = Mods.pkgname(Commands)
 Cfg.txt = " ".join(sys.argv[1:])
-Cfg.version = 100
+Cfg.version = 8
 Cfg.wdr = ".test"
 
 
@@ -153,8 +153,6 @@ def wrap(func):
 def main():
     if "p" not in Cfg.opts and os.path.exists(Cfg.wdr):
         shutil.rmtree(Cfg.wdr)
-    if "b" in Cfg.opts:
-        Disk.cache()
     Methods.parse(Cfg, " ".join(sys.argv[1:]))
     Workdir.setwd(Cfg.wdr)
     Mods.init("modules", MODS.__path__[0])

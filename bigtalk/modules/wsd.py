@@ -9,22 +9,58 @@ from random import SystemRandom
 
 from bigtalk.brokers import Broker
 from bigtalk.message import Message
+from bigtalk.persist import StateFul
 from bigtalk.utility import Repeater
+
+
+'defines'
 
 
 rand = SystemRandom()
 
 
+"init"
+
+
 def init():
+    state.load()
     event = Message()
-    repeater = Repeater(3600.0,  wsd, event)
+    repeater = Repeater(3600,  wsd, event)
     repeater.start()
-    logging.warning("%s wise", len(TXT.split("\n")))
+    logging.warning("%s wise", len(TXTLIST))
+
+
+"state"
+
+
+class State(StateFul):
+
+    pass
+
+
+state = State()
+
+
+"commands"
 
 
 def wsd(event):
+    txt = ""
+    if 'seen' not in dir(state):
+        state.seen = []
+    for nrs in range(len(TXTLIST)):
+        txt = rand.choice(TXTLIST)
+        if txt in state.seen:
+            continue
+        state.seen.append(txt)
+        break
+    else:
+        state.seen = []
+        txt = "* reset"
+    state.dump()
     for bot in Broker.objs("announce"):
-        bot.announce(rand.choice(TXT.split("\n")).strip()[2:])
+        bot.announce(txt.strip()[2:])
+
 
 
 TXT = """| wijsheid, wijs !
@@ -208,3 +244,6 @@ TXT = """| wijsheid, wijs !
 | duiding
 | coding
 """
+
+
+TXTLIST = [x for x in TXT.split("\n") if x and '=' not in x]
