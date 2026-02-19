@@ -19,6 +19,7 @@ from bigtalk.command import Commands, Main
 from bigtalk.clients import Console
 from bigtalk.message import Message
 from bigtalk.package import Mods
+from bigtalk.persist import Locate
 from bigtalk.utility import Utils
 from bigtalk.persist import Workdir
 from bigtalk.utility import Log
@@ -34,7 +35,6 @@ Main.debug   = False
 Main.ignore  = "rst,udp,web"
 Main.level   = "info"
 Main.local   = True
-Main.mods    = ""
 Main.name    = Utils.pkgname(Commands)
 Main.txt     = " ".join(sys.argv[1:])
 Main.version = 8

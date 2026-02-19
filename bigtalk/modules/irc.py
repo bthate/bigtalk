@@ -70,17 +70,12 @@ class Config(Default):
         self.sleep = 60
         self.username = Main.name or NAME
         self.users = False
-        self.version = 1
+        self.version = Main.version
 
     def __getattr__(self, name):
         if name not in self:
             return ""
         return self.__getattribute__(name)
-
-
-
-Cfg = Config()
-Locate.last(Cfg)
 
 
 "event"
@@ -134,7 +129,7 @@ class IRC(Output):
         Output.__init__(self)
         self.buffer = []
         self.cache = {}
-        self.cfg = Cfg
+        self.cfg = Config()
         self.channels = []
         self.events = Object()
         self.events.authed = threading.Event()
@@ -612,7 +607,7 @@ def cb_quit(evt):
 "commands"
 
 
-def config(event):
+def cfg(event):
     config = Config()
     fnm = Locate.last(config) or Methods.ident(config)
     if not event.sets:
