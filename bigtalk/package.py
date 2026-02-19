@@ -29,7 +29,13 @@ class Mods:
         Mods.dirs[name] = path
 
     @staticmethod
-    def get(modlist, ignore=""):
+    def get(name):
+        result = list(Mods.iter(name))
+        if result:
+            return result[0]
+
+    @staticmethod
+    def iter(modlist, ignore=""):
         "loop over modules."
         for pkgname, path in Mods.dirs.items():
             if not os.path.exists(path):
@@ -91,7 +97,7 @@ class Mods:
     def inits(modlist, ignore="", wait=False):
         "scan named modules for commands."
         thrs = []
-        for name, mod in Mods.get(modlist, ignore):
+        for name, mod in Mods.iter(modlist, ignore):
             if "init" in dir(mod):
                 thrs.append((name, Thread.launch(mod.init)))
         if wait:
@@ -102,7 +108,7 @@ class Mods:
     def scanner(modlist, ignore=""):
         "scan named modules for commands."
         res = []
-        for name, mod in Mods.get(modlist, ignore):
+        for name, mod in Mods.iter(modlist, ignore):
             Commands.scan(mod)
             res.append((name, mod))
         return res

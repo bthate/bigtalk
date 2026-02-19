@@ -9,7 +9,7 @@ import inspect
 
 from .brokers import Broker
 from .message import Message
-from .objects import Config, Default, Methods
+from .objects import Config, Methods
 
 
 "config"

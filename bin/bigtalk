@@ -19,7 +19,6 @@ from bigtalk.command import Commands, Main
 from bigtalk.clients import Console
 from bigtalk.message import Message
 from bigtalk.package import Mods
-from bigtalk.persist import Locate
 from bigtalk.utility import Utils
 from bigtalk.persist import Workdir
 from bigtalk.utility import Log
