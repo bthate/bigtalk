@@ -4,7 +4,7 @@
 "configuration"
 
 
-from bigtalk.command import Cfg
+from bigtalk.command import Main
 from bigtalk.objects import Dict, Methods
 from bigtalk.package import Mods
 from bigtalk.persist import Disk, Locate
@@ -17,7 +17,7 @@ def cfg(event):
     if event.args:
         name = event.args[0]
     if not name:
-        cfg = Cfg
+        cfg = Main
     if not cfg:
         modlist = list(Mods.get(name))
         if modlist:

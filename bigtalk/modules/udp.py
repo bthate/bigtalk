@@ -10,7 +10,7 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.command import Cfg
+from bigtalk.command import Main
 from bigtalk.objects import Object
 from bigtalk.threads import Thread
 
@@ -76,7 +76,7 @@ class UDP(Object):
 
 
 def toudp(host, port, txt):
-    if Cfg.debug:
+    if Main.debug:
         return
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.sendto(bytes(txt.strip(), "utf-8"), (host, port))

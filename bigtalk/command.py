@@ -9,18 +9,13 @@ import inspect
 
 from .brokers import Broker
 from .message import Message
-from .objects import Default, Methods
+from .objects import Config, Default, Methods
 
 
 "config"
 
 
-class Config(Default):
-
-    pass
-
-
-Cfg = Config()
+Main = Config()
 
 
 "commands"
@@ -87,4 +82,5 @@ class Commands:
 def __dir__():
     return (
         'Commands',
+        'Main'
     )

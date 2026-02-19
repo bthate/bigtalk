@@ -10,7 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.command import Cfg
+from bigtalk.command import Main
 from bigtalk.objects import Object
 from bigtalk.persist import Workdir
 from bigtalk.threads import Thread
@@ -94,7 +94,7 @@ class RESTHandler(BaseHTTPRequestHandler):
         self.end_headers()
 
     def do_GET(self):
-        if Cfg.debug:
+        if Main.debug:
             return
         if "favicon" in self.path:
             return

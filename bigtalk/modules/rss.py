@@ -25,7 +25,7 @@ from urllib.parse import quote_plus, urlencode
 
 
 from bigtalk.brokers import Broker
-from bigtalk.command import Cfg
+from bigtalk.command import Main
 from bigtalk.objects import Default, Dict, Methods
 from bigtalk.persist import Disk, Locate
 from bigtalk.threads import Thread
@@ -71,7 +71,7 @@ class Fetcher:
         State.seenfn = Locate.last(State.seen) or Methods.ident(State.seen)
         State.modifiedfn = Locate.last(State.modified) or Methods.ident(State.modified)
         if repeat:
-            repeater = Repeater(Cfg.poll or 600, self.run)
+            repeater = Repeater(300, self.run)
             repeater.start()
 
     def stop(self):
@@ -672,7 +672,7 @@ def rss(event):
 
 
 def syn(event):
-    if Cfg.debug:
+    if Main.debug:
         return
     fetcher = Fetcher()
     fetcher.start(False)

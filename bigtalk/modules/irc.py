@@ -16,7 +16,7 @@ import time
 
 from bigtalk.brokers import Broker
 from bigtalk.clients import Output
-from bigtalk.command import Cfg, Commands
+from bigtalk.command import Commands, Main
 from bigtalk.message import Message
 from bigtalk.objects import Default, Dict, Object, Methods
 from bigtalk.package import Mods
@@ -56,19 +56,19 @@ class Config(Default):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.name = Cfg.name or NAME
-        self.channel = Cfg.room or f"#{self.name}"
-        self.commands = Cfg.commands or False
+        self.name = Main.name or NAME
+        self.channel = Main.room or f"#{self.name}"
+        self.commands = Main.commands or False
         self.control = "!"
-        self.nick = Cfg.name or NAME
+        self.nick = Main.name or NAME
         self.word = ""
-        self.port = Cfg.port or 6667
-        self.realname = Cfg.name or NAME
+        self.port = Main.port or 6667
+        self.realname = Main.name or NAME
         self.sasl = (self.port == 6697 and True) or False
-        self.server = Cfg.server or "localhost"
+        self.server = Main.server or "localhost"
         self.servermodes = ""
         self.sleep = 60
-        self.username = Cfg.name or NAME
+        self.username = Main.name or NAME
         self.users = False
         self.version = 1
 

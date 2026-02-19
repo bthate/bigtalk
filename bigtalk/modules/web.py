@@ -10,7 +10,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.command import Cfg
+from bigtalk.command import Main
 from bigtalk.objects import Object
 from bigtalk.threads import Thread
 from bigtalk.utility import Utils
@@ -98,7 +98,7 @@ class HTTPHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         if "favicon" in self.path:
             return
-        if Cfg.debug:
+        if Main.debug:
             return
         if self.path == "/":
             self.path = "index.html"
