@@ -78,6 +78,11 @@ class Config(Default):
         return self.__getattribute__(name)
 
 
+
+Cfg = Config()
+Locate.last(Cfg)
+
+
 "event"
 
 
@@ -129,7 +134,7 @@ class IRC(Output):
         Output.__init__(self)
         self.buffer = []
         self.cache = {}
-        self.cfg = Config()
+        self.cfg = Cfg
         self.channels = []
         self.events = Object()
         self.events.authed = threading.Event()
@@ -607,7 +612,7 @@ def cb_quit(evt):
 "commands"
 
 
-def cfg(event):
+def config(event):
     config = Config()
     fnm = Locate.last(config) or Methods.ident(config)
     if not event.sets:
