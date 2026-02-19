@@ -1,6 +1,9 @@
 # This file is placed in the Public Domain.
 
 
+"show bot in fleet"
+
+
 from bigtalk.brokers import Broker
 from bigtalk.objects import Methods
 
