@@ -17,7 +17,7 @@ class Reserved(Exception):
     pass
 
 
-"object"
+"objects"
 
 
 class Object:

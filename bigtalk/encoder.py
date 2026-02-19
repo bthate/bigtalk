@@ -26,6 +26,9 @@ class Encoder(json.JSONEncoder):
                 return repr(o)
 
 
+"json"
+
+
 class Json:
 
     @staticmethod
