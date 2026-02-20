@@ -107,11 +107,13 @@ class Mods:
                 thr.join()
         
     @staticmethod
-    def scanner(modlist, ignore=""):
+    def scanner(modlist, ignore="", noconfig=False):
         "scan named modules for commands."
         res = []
         for name, mod in Mods.iter(modlist, ignore):
             Commands.scan(mod)
+            if not noconfig and "configure" in dir(mod):
+                mod.configure()
             res.append((name, mod))
         return res
 

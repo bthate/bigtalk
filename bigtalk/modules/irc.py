@@ -39,12 +39,16 @@ lock = threading.RLock()
 def init():
     irc = IRC()
     irc.start()
-    irc.events.joined.wait(30.0)
+    irc.events.joined.wait(60.0)
     if irc.events.joined.is_set():
         logging.warning("%s", Methods.fmt(irc.cfg, skip=["name", "word", "realname", "username", "version"]))
     else:
         irc.stop()
     return irc
+
+
+def configure():
+    Locate.last(Cfg)
 
 
 "config"
@@ -76,6 +80,9 @@ class Config(Default):
         if name not in self:
             return ""
         return self.__getattribute__(name)
+
+
+Cfg = Config()
 
 
 "event"
@@ -129,7 +136,7 @@ class IRC(Output):
         Output.__init__(self)
         self.buffer = []
         self.cache = {}
-        self.cfg = Config()
+        self.cfg = Cfg
         self.channels = []
         self.events = Object()
         self.events.authed = threading.Event()
@@ -144,6 +151,7 @@ class IRC(Output):
         self.state.keeprunning = False
         self.state.last = time.time()
         self.state.lastline = ""
+        self.state.nickchange = 0
         self.state.nrconnect = 0
         self.state.nrerror = 0
         self.state.nrsend = 0
@@ -247,7 +255,7 @@ class IRC(Output):
             try:
                 if self.connect(server, port):
                     self.logon(self.cfg.server, self.cfg.nick)
-                    self.events.joined.wait(15.0)
+                    self.events.joined.wait(45.0)
                     if not self.events.joined.is_set():
                         self.disconnect()
                         self.events.joined.set()
@@ -287,7 +295,8 @@ class IRC(Output):
             self.events.joined.set()
         elif cmd == "433":
             self.state.error = txt
-            nck = self.cfg.nick = self.cfg.nick + "_"
+            self.state.nickchange += 1
+            nck = self.cfg.nick + ("_" * self.state.nickchange)
             self.docommand("NICK", nck)
         return evt
 

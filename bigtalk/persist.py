@@ -90,10 +90,10 @@ class Locate:
     @staticmethod
     def attrs(kind):
         "show attributes for kind of objects."
-        pth, obj = Locate.find(kind, nritems=1)
-        if obj:
-            return list(Dict.keys(obj))
-        return []
+        result = []
+        for pth, obj in Locate.find(kind, nritems=1):
+            result.extend(Dict.keys(obj))
+        return {x for x in result}
 
     @staticmethod
     def count(kind):
@@ -117,6 +117,8 @@ class Locate:
                 break
             nrs += 1
             yield pth, obj
+        else:
+            return None, None
 
     @staticmethod
     def first(obj, selector={}):

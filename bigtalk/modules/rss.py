@@ -534,9 +534,11 @@ def err(event):
         if not event.rest:
             nrs += 1
             event.reply(f"{nrs} {Methods.fmt(obj)}")
-    if event.rest:
+    if not nrs:
+        event.reply("no feed errors.")
+    else:
         event.reply(f'{nre} feeds reset.')
-
+    
 
 def exp(event):
     with Run.importlock:
