@@ -10,6 +10,9 @@ from bigtalk.objects import Methods
 
 def flt(event):
     clts = list(Broker.objs("announce"))
+    if not clts:
+        event.reply("no bots")
+        return
     if event.args:
         index = int(event.args[0])
         if index < len(clts):
