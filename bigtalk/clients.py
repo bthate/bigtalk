@@ -24,7 +24,7 @@ class Client(Handler):
         Handler.__init__(self)
         self.iqueue = queue.Queue()
         self.olock = threading.RLock()
-        self.silent = True
+        self.silent = False
         self.stopped = threading.Event()
         Broker.add(self)
 

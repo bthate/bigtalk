@@ -188,7 +188,7 @@ class RunnerPool:
     @staticmethod
     def put(*args):
         if not RunnerPool.runners:
-            RunnerPool.init(1, Runner)
+            RunnerPool.init(RunnerPool.nrcpu, Runner)
         with RunnerPool.lock:
             if RunnerPool.nrlast >= RunnerPool.nrcpu-1:
                 RunnerPool.nrlast = 0
