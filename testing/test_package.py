@@ -13,5 +13,5 @@ from bigtalk.package import Mods
 class TestPackage(unittest.TestCase):
 
     def test_init(self):
-        Mods.init("mod", "mod")
-        self.assertTrue("mod" in Mods.dirs)
+        Mods.init("test", ".test")
+        self.assertTrue("test" in Mods.dirs)

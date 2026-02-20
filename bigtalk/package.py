@@ -26,10 +26,12 @@ class Mods:
     @staticmethod
     def init(name, path):
         "add modules directory." 
-        Mods.dirs[name] = path
+        if os.path.exists(path):
+            Mods.dirs[name] = path
 
     @staticmethod
     def get(name):
+        "return module."
         result = list(Mods.iter(name))
         if result:
             return result[0]

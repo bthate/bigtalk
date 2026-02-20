@@ -18,7 +18,7 @@ import _thread
 lock = threading.RLock()
 
 
-"thread"
+"tasks"
 
 
 class Task(threading.Thread):

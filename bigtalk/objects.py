@@ -61,7 +61,6 @@ class Dict:
         "remove all items from the object."
         obj.__dict__.clear()
 
-
     @staticmethod
     def construct(obj, *args, **kwargs):
         "object contructor."

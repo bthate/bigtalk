@@ -41,7 +41,7 @@ def init():
     irc.start()
     irc.events.joined.wait(30.0)
     if irc.events.joined.is_set():
-        logging.warning("%s", Methods.fmt(irc.cfg, skip=["name", "word", "realname", "username"]))
+        logging.warning("%s", Methods.fmt(irc.cfg, skip=["name", "word", "realname", "username", "version"]))
     else:
         irc.stop()
     return irc
@@ -57,15 +57,15 @@ class Config(Default):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = Main.name or NAME
-        self.channel = Main.room or f"#{self.name}"
-        self.commands = Main.commands or False
+        self.channel = f"#{self.name}"
+        self.commands = True
         self.control = "!"
         self.nick = Main.name or NAME
         self.word = ""
-        self.port = Main.port or 6667
+        self.port = 6667
         self.realname = Main.name or NAME
         self.sasl = (self.port == 6697 and True) or False
-        self.server = Main.server or "localhost"
+        self.server = "localhost"
         self.servermodes = ""
         self.sleep = 60
         self.username = Main.name or NAME

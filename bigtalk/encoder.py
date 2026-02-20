@@ -1,11 +1,14 @@
 # This file is placed in the Public Domain.
 
 
-"json"
+"encoder/decoder"
 
 
 import json
 import types
+
+
+"encoder"
 
 
 class Encoder(json.JSONEncoder):
