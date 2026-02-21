@@ -48,7 +48,7 @@ def init():
 
 
 def configure():
-    Locate.last(Cfg)
+    Locate.first(Cfg)
 
 
 "config"
@@ -616,6 +616,7 @@ def cb_quit(evt):
 "commands"
 
 
+'''
 def cfg(event):
     config = Config()
     fnm = Locate.last(config) or Methods.ident(config)
@@ -631,7 +632,7 @@ def cfg(event):
         Methods.edit(config, event.sets)
         Disk.write(config, fnm or Methods.ident(config))
         event.reply("ok")
-
+'''
 
 def mre(event):
     if not event.channel:

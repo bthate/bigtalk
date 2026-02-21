@@ -57,10 +57,12 @@ class Disk:
             pth.parent.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
-    def read(obj, path):
+    def read(obj, path, base="store"):
         "read object from path."
         with lock:
-            pth = os.path.join(Workdir.wdr, "store", path)
+            pth = os.path.join(Workdir.wdr, base, path)
+            if not os.path.exists(pth):
+                return
             with open(pth, "r", encoding="utf-8") as fpt:
                 try:
                     Dict.update(obj, Json.load(fpt))
@@ -69,12 +71,12 @@ class Disk:
                     raise ex
 
     @staticmethod
-    def write(obj, path=""):
+    def write(obj, path="", base="store"):
         "write object to disk."
         with lock:
             if path == "":
                 path = Methods.ident(obj)
-            pth = os.path.join(Workdir.wdr, "store", path)
+            pth = os.path.join(Workdir.wdr, base, path)
             Disk.cdir(pth)
             with open(pth, "w", encoding="utf-8") as fpt:
                 Json.dump(obj, fpt, indent=4)
@@ -131,7 +133,7 @@ class Locate:
             inp = result[0]
             Dict.update(obj, inp[-1])
             res = inp[0]
-        return res        
+        return res
 
     @staticmethod
     def fns(kind):
@@ -204,6 +206,8 @@ class Workdir:
     @staticmethod
     def long(name):
         "expand to fqn."
+        if "." in name:
+            return name
         split = name.split(".")[-1].lower()
         res = name
         for names in Workdir.kinds():

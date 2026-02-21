@@ -17,7 +17,8 @@ def cfg(event):
     if event.args:
         name = event.args[0]
     if not name:
-        cfg = Main
+        event.reply("cfg <modulename>")
+        return
     if not cfg:
         modlist = list(Mods.get(name))
         if modlist:
@@ -35,7 +36,7 @@ def cfg(event):
             )
         )
         return
-    fnm = Locate.last(cfg or Methods.ident(cfg)) 
+    fnm = Locate.first(cfg) 
     Methods.edit(cfg, event.sets)
     Disk.write(cfg, fnm)
     event.reply("ok")

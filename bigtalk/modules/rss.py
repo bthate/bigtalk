@@ -35,6 +35,10 @@ from bigtalk.utility import Repeater, Time, Utils
 "init"
 
 
+def configure():
+    Locate.first(Cfg)
+
+
 def init():
     "initializer."
     RunnerPool.init(1, Runner)
@@ -45,6 +49,18 @@ def init():
 def shutdown():
     "shutdown."
     Run.fetcher.stop()
+
+
+'config'
+
+
+class Config(Default):
+
+    pass
+
+
+Cfg = Config()
+Cfg.polltime = 300
 
 
 "fetcher"
@@ -71,7 +87,7 @@ class Fetcher:
         State.seenfn = Locate.last(State.seen) or Methods.ident(State.seen)
         State.modifiedfn = Locate.last(State.modified) or Methods.ident(State.modified)
         if repeat:
-            repeater = Repeater(300, self.run)
+            repeater = Repeater(Cfg.polltime, self.run)
             repeater.start()
 
     def stop(self):
@@ -478,6 +494,7 @@ class Run:
 
 class State:
 
+    configfn = ""
     modified = Modified()
     modifiedfn = ""
     seenfn = ""

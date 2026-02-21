@@ -19,6 +19,7 @@ from bigtalk.command import Commands, Main
 from bigtalk.clients import Console
 from bigtalk.message import Message
 from bigtalk.package import Mods
+from bigtalk.persist import Disk, Locate
 from bigtalk.utility import Utils
 from bigtalk.persist import Workdir
 from bigtalk.utility import Log
@@ -180,15 +181,16 @@ class Runtime:
     @staticmethod
     def boot(args):
         "in the beginning."
-        Main.all     = args.all
-        Main.level   = args.level
-        Main.local   = Main.local or args.local
-        Main.mods    = args.mods
-        Main.verbose = args.verbose
-        Main.wait    = args.wait
-        Main.wdr     = args.wdr or os.path.expanduser(f"~/.{Utils.pkgname(Main)}")
-        Log.level(Main.level)
+        Main.all     = args.all or Main.all
+        Main.level   = args.level or Nain.level
+        Main.local   = args.local or Main.local
+        Main.mods    = args.mods or Main.mods
+        Main.txt     = args.txt
+        Main.verbose = args.verbose or Main.verbose
+        Main.wait    = args.wait or Main.wait
+        Main.wdr     = args.wdr or Main.wdr or os.path.expanduser(f"~/.{Utils.pkgname(Main)}")
         Workdir.setwd(Main.wdr)
+        Log.level(Main.level)
         if Main.wdr:
             Mods.init("modules", os.path.join(Workdir.workdir(), "mods"))
         if MODS:
@@ -295,7 +297,8 @@ WantedBy=multi-user.target"""
 
 def main():
     "main"
-    args, rest = Runtime.getargs()
+    args, arguments = Runtime.getargs()
+    args.txt = " ".join(arguments)
     if args.daemon:
         Scripts.background(args)
     elif args.console:
