@@ -27,7 +27,7 @@ from . import modules as MODS
 Main.all = False
 Main.debug = False
 Main.default = "irc,mdl,rss,wsd"
-Main.ignore = "rst,udp,web"
+Main.ignore = "man,rst,udp,web"
 Main.level = "info"
 Main.local = True
 Main.mods = ""
