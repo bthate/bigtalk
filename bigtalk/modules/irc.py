@@ -15,25 +15,13 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.clients import Output
-from bigtalk.command import Commands, Main
+from bigtalk.clients import Main, Output
+from bigtalk.command import Commands
 from bigtalk.message import Message
-from bigtalk.objects import Default, Dict, Object, Methods
-from bigtalk.package import Mods
-from bigtalk.persist import Disk, Locate
+from bigtalk.objects import Configuration, Object, Methods
+from bigtalk.persist import Locate
 from bigtalk.threads import Thread
-
-
-"defines"
-
-
-NAME = Mods.pkgname(Broker)
-
-
-lock = threading.RLock()
-
-
-"init"
+from bigtalk.utility import Utils
 
 
 def init():
@@ -47,45 +35,24 @@ def init():
     return irc
 
 
-def configure():
-    Locate.first(Cfg)
+class Config(Configuration):
 
-
-"config"
-
-
-class Config(Default):
-
+    name = Main.name or Utils.pkgname(Commands)
+    channel = f"#{name}"
+    commands = True
+    control = "!"
     ignore = ["PING", "PONG", "PRIVMSG"] 
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.name = Main.name or NAME
-        self.channel = f"#{self.name}"
-        self.commands = True
-        self.control = "!"
-        self.nick = Main.name or NAME
-        self.word = ""
-        self.port = 6667
-        self.realname = Main.name or NAME
-        self.sasl = (self.port == 6697 and True) or False
-        self.server = "localhost"
-        self.servermodes = ""
-        self.sleep = 60
-        self.username = Main.name or NAME
-        self.users = False
-        self.version = Main.version
-
-    def __getattr__(self, name):
-        if name not in self:
-            return ""
-        return self.__getattribute__(name)
-
-
-Cfg = Config()
-
-
-"event"
+    nick = name
+    word = ""
+    port = 6667
+    realname = name
+    sasl = (port == 6697 and True) or False
+    server = "localhost"
+    servermodes = ""
+    sleep = 60
+    username = name
+    users = False
+    version = 1
 
 
 class Event(Message):
@@ -109,9 +76,6 @@ class Event(Message):
         bot.dosay(self.channel, txt)
 
 
-"wraper"
-
-
 class TextWrap(textwrap.TextWrapper):
 
     def __init__(self):
@@ -127,16 +91,13 @@ class TextWrap(textwrap.TextWrapper):
 wrapper = TextWrap()
 
 
-"irc"
-
-
 class IRC(Output):
 
     def __init__(self):
         Output.__init__(self)
         self.buffer = []
         self.cache = {}
-        self.cfg = Cfg
+        self.cfg = Config()
         self.channels = []
         self.events = Object()
         self.events.authed = threading.Event()
@@ -144,6 +105,7 @@ class IRC(Output):
         self.events.joined = threading.Event()
         self.events.logon = threading.Event()
         self.events.ready = threading.Event()
+        self.lock = threading.RLock()
         self.silent = False
         self.sock = None
         self.state = Object()
@@ -204,7 +166,7 @@ class IRC(Output):
         return False
 
     def direct(self, txt):
-        with lock:
+        with self.lock:
             time.sleep(2.0)
             self.raw(txt)
 
@@ -235,7 +197,7 @@ class IRC(Output):
                 self.say(event.channel, f"use !mre to show more (+{length})")
 
     def docommand(self, cmd, *args):
-        with lock:
+        with self.lock:
             if not args:
                 self.raw(cmd)
             elif len(args) == 1:
@@ -511,6 +473,7 @@ class IRC(Output):
         Output.start(self)
         if not self.state.keeprunning:
            Thread.launch(self.keep)
+        Locate.first(self.cfg)
         Thread.launch(
             self.doconnect,
             self.cfg.server or "localhost",
@@ -525,9 +488,6 @@ class IRC(Output):
 
     def wait(self):
         self.events.ready.wait()
-
-
-"callbacks"
 
 
 def cb_auth(evt):
@@ -613,27 +573,6 @@ def cb_quit(evt):
         bot.stop()
 
 
-"commands"
-
-
-'''
-def cfg(event):
-    config = Config()
-    fnm = Locate.last(config) or Methods.ident(config)
-    if not event.sets:
-        event.reply(
-            Methods.fmt(
-                config,
-                Dict.keys(config),
-                skip="control,name,password,realname,sleep,username".split(",")
-            )
-        )
-    else:
-        Methods.edit(config, event.sets)
-        Disk.write(config, fnm or Methods.ident(config))
-        event.reply("ok")
-'''
-
 def mre(event):
     if not event.channel:
         event.reply("channel is not set.")
@@ -664,9 +603,6 @@ def pwd(event):
     base = base64.b64encode(enc)
     dcd = base.decode("ascii")
     event.reply(dcd)
-
-
-"utility"
 
 
 def rlog(txt):

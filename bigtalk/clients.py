@@ -12,10 +12,13 @@ import _thread
 
 from .brokers import Broker
 from .handler import Handler
+from .objects import Configuration
 from .threads import Thread
 
 
-"client"
+class Main(Configuration):
+
+    pass
 
 
 class Client(Handler):
@@ -67,9 +70,6 @@ class Client(Handler):
         self.raw(text)
 
 
-"console"
-
-
 class Console(Client):
 
     def loop(self):
@@ -85,9 +85,6 @@ class Console(Client):
     def poll(self):
         "return event."
         return self.iqueue.get()
-
-
-"buffered"
 
 
 class Output(Client):
@@ -125,12 +122,10 @@ class Output(Client):
             _thread.interrupt_main()
 
 
-"interface"
-
-
 def __dir__():
     return (
         'Client',
         'Console',
+        'Main',
         'Output'
     )

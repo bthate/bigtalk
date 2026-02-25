@@ -13,8 +13,8 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.command import Main
-from bigtalk.objects import Object
+from bigtalk.clients import Main
+from bigtalk.objects import Configuration, Object
 from bigtalk.threads import Thread
 from bigtalk.utility import Utils
 
@@ -33,12 +33,10 @@ def init():
         logging.warning("%s", str(ex))
 
 
-class Config:
+class Config(Configuration):
 
-    debug = False
     hostname = "localhost"
     path = ""
-    port = 8000
 
 
 class HTTP(HTTPServer, Object):

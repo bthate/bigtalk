@@ -12,15 +12,6 @@ import time
 import _thread
 
 
-"defines"
-
-
-lock = threading.RLock()
-
-
-"tasks"
-
-
 class Task(threading.Thread):
 
     def __init__(self, func, *args, daemon=True, **kwargs):
@@ -67,15 +58,14 @@ class Task(threading.Thread):
             _thread.interrupt_main()
 
 
-"thread"
-
-
 class Thread:
+
+    lock = threading.RLock()
 
     @staticmethod
     def launch(func, *args, **kwargs):
         "run function in a thread."
-        with lock:
+        with Thread.lock:
             try:
                 task = Task(func, *args, **kwargs)
                 task.start()
@@ -91,9 +81,6 @@ class Thread:
         if inspect.isfunction(obj):
             return repr(obj).split()[1]
         return repr(obj)
-
-
-"interface"
 
 
 def __dir__():

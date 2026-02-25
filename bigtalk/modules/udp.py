@@ -13,8 +13,8 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.command import Main
-from bigtalk.objects import Object
+from bigtalk.clients import Main
+from bigtalk.objects import Configuration, Object
 from bigtalk.threads import Thread
 
 
@@ -25,12 +25,10 @@ def init():
     return udp
 
 
-class Config(Object):
+class Config(Configuration):
 
-    addr = ""
     host = "localhost"
     port = 5500
-
 
 
 class UDP(Object):

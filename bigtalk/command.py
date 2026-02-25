@@ -9,16 +9,7 @@ import inspect
 
 from .brokers import Broker
 from .message import Message
-from .objects import Config, Methods
-
-
-"config"
-
-
-Main = Config()
-
-
-"commands"
+from .objects import Methods
 
 
 class Commands:
@@ -76,11 +67,7 @@ class Commands:
             Commands.add(cmdz)
 
 
-"interface"
-
-
 def __dir__():
     return (
         'Commands',
-        'Main'
     )

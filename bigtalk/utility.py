@@ -21,9 +21,6 @@ class NoDate(Exception):
     pass
 
 
-"logging"
-
-
 class Format(logging.Formatter):
 
     def format(self, record):
@@ -47,9 +44,6 @@ class Log:
             handlers=[stream,],
             force=True
         )
-
-
-"repeater"
 
 
 class Timy(threading.Timer):
@@ -99,9 +93,6 @@ class Repeater(Timed):
         "run function and launch timer for next run."
         Thread.launch(super().run)
         Thread.launch(self.start)
-
-
-"time"
 
 
 class Time:
@@ -281,9 +272,6 @@ class Time:
         return str(datetime.datetime.today()).split()[0]
 
 
-"utilities"
-
-
 class Utils:
 
     @staticmethod
@@ -336,9 +324,6 @@ class Utils:
             pass
 
 
-"data"
-
-
 MONTH = {
     'Jan': 1,
     'Feb': 2,
@@ -363,9 +348,6 @@ TIMES = [
     "%d-%m",
     "%m-%d"
 ]
-
-
-"interface"
 
 
 def __dir__():

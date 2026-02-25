@@ -9,17 +9,6 @@ import os
 import types
 
 
-"exceptions"
-
-
-class Reserved(Exception):
-
-    pass
-
-
-"objects"
-
-
 class Object:
 
     def __contains__(self, key):
@@ -41,7 +30,7 @@ class Default(Object):
         return self.__dict__.get(key, "")
 
 
-class Config(Default):
+class Configuration(Default):
 
     def __init__(self, *args, **kwargs):
         super().__init__()
@@ -49,9 +38,6 @@ class Config(Default):
            Dict.update(self, args[0])
         if kwargs:
            Dict.update(self, kwargs)
-
-
-"dict"
 
 
 class Dict:
@@ -121,6 +107,14 @@ class Dict:
         return obj.__dict__.popitem()
 
     @staticmethod
+    def reduce(obj):
+        result = {}
+        for key, value in Dict.items(obj):
+            if value:
+                result[key] = value
+        return result
+
+    @staticmethod
     def update(obj, data, empty=True):
         "update object,"
         if isinstance(obj, type):
@@ -155,9 +149,6 @@ class Dict:
                 res.append(obj[key])
             return res
         return obj.__dict__.values()
-
-
-"methods"
 
 
 class Methods:
@@ -322,12 +313,9 @@ class Methods:
             setattr(obj, key, val)
 
 
-"interface"
-
-
 def __dir__():
     return (
-        'Config',
+        'Configuration',
         'Default',
         'Dict',
         'Methods',

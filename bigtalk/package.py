@@ -9,13 +9,7 @@ import logging
 import os
 
 
-from .command import Commands
-from .objects import Dict
-from .threads import Thread
 from .utility import Utils
-
-
-"mods"
 
 
 class Mods:
@@ -24,17 +18,26 @@ class Mods:
     modules = {}
 
     @staticmethod
-    def init(name, path):
+    def add(name, path):
         "add modules directory." 
         if os.path.exists(path):
             Mods.dirs[name] = path
 
     @staticmethod
-    def get(name):
+    def get(modname):
         "return module."
-        result = list(Mods.iter(name))
+        result = list(Mods.iter(modname))
         if result:
-            return result[0]
+            return result[0][-1]
+
+    @staticmethod
+    def has(attr):
+        "return list of modules containing an attribute."
+        result = []
+        for mod in Mods.modules.values():
+            if getattr(mod, attr, False):
+                result.append(mod.__name__.split(".")[-1])
+        return ",".join(result)
 
     @staticmethod
     def iter(modlist, ignore=""):
@@ -91,45 +94,8 @@ class Mods:
         return mod
 
     @staticmethod
-    def pkgname(obj):
-        "package name of an object."
-        return obj.__module__.split(".")[0]
-
-    @staticmethod
-    def inits(modlist, ignore="", wait=False):
-        "scan named modules for commands."
-        thrs = []
-        for name, mod in Mods.iter(modlist, ignore):
-            if "init" in dir(mod):
-                thrs.append((name, Thread.launch(mod.init)))
-        if wait:
-            for name, thr in thrs:
-                thr.join()
-        
-    @staticmethod
-    def scanner(modlist, ignore="", noconfig=False):
-        "scan named modules for commands."
-        res = []
-        for name, mod in Mods.iter(modlist, ignore):
-            Commands.scan(mod)
-            if not noconfig and "configure" in dir(mod):
-                mod.configure()
-            res.append((name, mod))
-        return res
-
-    @staticmethod
-    def shutdown():
-        "call shutdown on modules."
-        logging.debug("shutdown")
-        for mod in Dict.values(Mods.modules):
-            if "shutdown" in dir(mod):
-                try:
-                    mod.shutdown()
-                except Exception as ex:
-                    logging.exception(ex)
-
-
-"interface"
+    def pkg(package):
+        return Mods.add(package.__name__, package.__path__[0])
 
 
 def __dir__():

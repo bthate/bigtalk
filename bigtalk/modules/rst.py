@@ -13,13 +13,14 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.command import Main
-from bigtalk.objects import Object
-from bigtalk.persist import Workdir
+from bigtalk.clients import Main
+from bigtalk.objects import Configuration, Object
+from bigtalk.persist import Locate, Workdir
 from bigtalk.threads import Thread
 
 
-"init"
+def configure(cfg):
+    Locate.first(Config)
 
 
 def init():
@@ -32,17 +33,10 @@ def init():
         logging.error(str(ex))
 
 
-"config"
+class Config(Configuration):
 
-
-class Config:
-
-    debug = False
     hostname = "localhost"
-    port     = 10102
-
-
-"rest"
+    port = 10102
 
 
 class REST(HTTPServer, Object):
@@ -76,9 +70,6 @@ class REST(HTTPServer, Object):
         logging.exception(exc)
 
 
-"handler"
-
-
 class RESTHandler(BaseHTTPRequestHandler):
 
     def setup(self):
@@ -108,7 +99,11 @@ class RESTHandler(BaseHTTPRequestHandler):
                 txt += f'<a href="http://{Config.hostname}:{Config.port}/{fnm}">{fnm}</a><br>\n'
             self.send(html(txt.strip()))
             return
-        fnm = os.path.join(Workdir.workdir(), self.path)
+        if self.path.startswith("/"):
+            fnm = self.path[1:]
+        else:
+            fnm = self.path
+        fnm = os.path.join(Workdir.workdir("store"), fnm)
         fnm = os.path.abspath(fnm)
         if os.path.isdir(fnm):
             self.write_header("text/html")
@@ -126,14 +121,11 @@ class RESTHandler(BaseHTTPRequestHandler):
             self.send(html(txt))
         except (TypeError, FileNotFoundError, IsADirectoryError) as ex:
             self.send_response(404)
-            logging.exception(ex)
+            logging.debug(str(ex))
             self.end_headers()
 
     def log(self, code):
         pass
-
-
-"data"
 
 
 def html(txt):

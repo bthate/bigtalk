@@ -13,10 +13,10 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Client
-from bigtalk.command import Commands, Main
+from bigtalk.clients import Client, Main
+from bigtalk.command import Commands
 from bigtalk.message import Message
-from bigtalk.objects import Methods
+from bigtalk.objects import Default, Methods
 from bigtalk.package import Mods
 from bigtalk.persist import Workdir
 from bigtalk.threads import Thread
@@ -35,19 +35,15 @@ except ModuleNotFoundError:
 events = queue.Queue()
 
 
-"config"
-
-
 Main.debug = True
 Main.ignore = ""
 Main.level = "info"
-Main.name = Mods.pkgname(Commands)
+Main.mods = ""
+Main.name = Utils.pkgname(Commands)
+Main.opts = Default()
 Main.txt = " ".join(sys.argv[1:])
 Main.version = 8
 Main.wdr = ".test"
-
-
-"clients"
 
 
 class CLI(Client):
@@ -90,9 +86,6 @@ class ClientPool:
             ClientPool.nrlast += 1
 
 
-"utilities"
-
-
 def banner():
     tme = time.ctime(time.time()).replace("  ", " ")
     print(f"{Main.name.upper()} {Main.version} since {tme} ({Main.level})")
@@ -130,11 +123,17 @@ def payload(todo):
             events.put(evt)
 
 
-"runtime"
+def scanner(cfg):
+    res = []
+    for name, mod in Mods.iter(Mods.list()):
+        Commands.scan(mod)
+        if "configure" in dir(mod):
+            mod.configure(cfg)
+        res.append((name, mod))
+    return res
 
 
 def wrap(func):
-    "restore console."
     import termios
     old = None
     try:
@@ -154,10 +153,11 @@ def main():
         shutil.rmtree(Main.wdr)
     Methods.parse(Main, " ".join(sys.argv[1:]))
     Workdir.setwd(Main.wdr)
-    Mods.init("modules", MODS.__path__[0])
+    Mods.add("modules", MODS.__path__[0])
     if MODS2:
-        Mods.init("mods", MODS2.__path__[0])
-    Mods.scanner(Mods.list())
+        Mods.add("mods", MODS2.__path__[0])
+    Main.mods = Main.mods or Mods.list()
+    scanner(Main)
     if "v" in Main.opts:
         banner()
     if "z" in Main.opts:
@@ -188,9 +188,6 @@ def main():
         print(f"total: {lap} nrs: {nrevents} call: %.6fs" % percall)
 
 
-"date"
-
-
 examples = {
     "atr": [""],
     "cmd": [""],
@@ -201,7 +198,7 @@ examples = {
     "flt": ["", "0"],
     "fnd": ["", "log", "rss", "config", "todo"],
     "lou": [""],
-    "man": ["", "test"],
+    "man": ["", "nixt"],
     "mbx": [""],
     "mod": [""],
     "mre": [""],
@@ -224,7 +221,7 @@ examples = {
 pre = {
     "cfg": ["", "nick=mekker"],
     "imp": ["",
-         "testing/feeds.opml",
+         "testing/opml/feeds.opml",
     ],
     "log": ["", "log add"],
     "rss": ["", "http://hnrss.org/newest"],
@@ -237,9 +234,6 @@ post = {
     "exp": [""],
     "rem": ["", "hnrss"]
 }
-
-
-"trampoline"
 
 
 if __name__ == "__main__":

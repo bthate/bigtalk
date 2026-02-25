@@ -23,10 +23,14 @@ classifiers = [
 ]
 
 
+[project.scripts]
+"bigtalk" = "bigtalk.runtime:main"
+
+
 [project.urls]
 "home" = "https://pypi.org/project/bigtalk"
-"bugs" = "https://github.com/nixtniet/bigtalk/issues"
-"source" = "https://github.com/nixtniet/bigtalk"
+"bugs" = "https://github.com/bthate/bigtalk/issues"
+"source" = "https://github.com/bthate/bigtalk"
 
 
 [tool.setuptools]

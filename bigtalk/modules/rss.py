@@ -25,45 +25,26 @@ from urllib.parse import quote_plus, urlencode
 
 
 from bigtalk.brokers import Broker
-from bigtalk.command import Main
-from bigtalk.objects import Default, Dict, Methods
+from bigtalk.clients import Main
+from bigtalk.objects import Configuration, Default, Dict, Methods
 from bigtalk.persist import Disk, Locate
 from bigtalk.threads import Thread
 from bigtalk.utility import Repeater, Time, Utils
 
 
-"init"
-
-
-def configure():
-    Locate.first(Cfg)
-
-
 def init():
-    "initializer."
     RunnerPool.init(1, Runner)
     Run.fetcher.start()
     logging.warning("%s feeds", Locate.count("rss"))
 
 
 def shutdown():
-    "shutdown."
     Run.fetcher.stop()
 
 
-'config'
+class Config(Configuration):
 
-
-class Config(Default):
-
-    pass
-
-
-Cfg = Config()
-Cfg.polltime = 300
-
-
-"fetcher"
+    polltime = 300
 
 
 class Fetcher:
@@ -87,16 +68,13 @@ class Fetcher:
         State.seenfn = Locate.last(State.seen) or Methods.ident(State.seen)
         State.modifiedfn = Locate.last(State.modified) or Methods.ident(State.modified)
         if repeat:
-            repeater = Repeater(Cfg.polltime, self.run)
+            repeater = Repeater(Config.polltime, self.run)
             repeater.start()
 
     def stop(self):
         logging.debug("stopped fetcher")
         Disk.write(State.modified, State.modifiedfn)
         self.stopped.set()
-
-
-"runner"
 
 
 class Runner:
@@ -179,9 +157,6 @@ class Runner:
         self.stopped.set()
 
 
-"pool"
-
-
 class RunnerPool:
 
     runners = []
@@ -211,9 +186,6 @@ class RunnerPool:
             clt = RunnerPool.runners[RunnerPool.nrlast]
             clt.put(*args)
             RunnerPool.nrlast += 1
-
-
-"parser"
 
 
 class Parser:
@@ -260,9 +232,6 @@ class Parser:
                 if val:
                     obj[itm] = Helpers.striphtml(Helpers.unescape(val.strip())).replace("\n", "")
             yield obj
-
-
-"opml"
 
 
 class OPML:
@@ -315,9 +284,6 @@ class OPML:
                     itm = "href"
                 obj[itm] = OPML.getvalue(attrz, itm)
             yield obj
-
-
-"utilities"
 
 
 class Helpers:
@@ -454,9 +420,6 @@ class Helpers:
         return "Mozilla/5.0 (X11; Linux x86_64) " + txt
 
 
-"persist"
-
-
 class Feed(Default):
 
     pass
@@ -482,9 +445,6 @@ class Urls:
     pass
 
 
-"state"
-
-
 class Run:
 
     fetcher = Fetcher()
@@ -500,9 +460,6 @@ class State:
     seenfn = ""
     seen = Urls()
     skipped = []
-
-
-"commands"
 
 
 def atr(event):
@@ -697,9 +654,6 @@ def syn(event):
     fetcher.start(False)
     nrs = fetcher.run(True)
     event.reply(f"{nrs} feeds synced")
-
-
-"data"
 
 
 TEMPLATE = """<opml version="1.0">
