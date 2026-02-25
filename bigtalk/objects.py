@@ -171,6 +171,8 @@ class Methods:
         "format object info printable string."
         if args == []:
             args = list(obj.__dict__.keys())
+        if args == []:
+            args = [x for x in dir(obj) if not x.startswith("_")]
         txt = ""
         for key in args:
             if key.startswith("__"):

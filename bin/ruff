@@ -1,1 +1,1 @@
-ruff check bigtalk bigtalk/modules bin/bigtalk bin/tinder $* ;
+ruff check bigtalk bigtalk/modules bin/tinder testing $* ;

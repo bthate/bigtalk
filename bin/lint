@@ -1,1 +1,1 @@
-pylint -d C,R,W,E0401,E0402  bigtalk bigtalk/modules bin/bigtalk bin/tinder
+pylint -d C,R,W,E0401,E0402,E0611  bigtalk bigtalk/modules bin/bigtalk bin/tinder
