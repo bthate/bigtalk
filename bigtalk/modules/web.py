@@ -13,8 +13,8 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.clients import Main
 from bigtalk.objects import Configuration, Object
+from bigtalk.persist import Main
 from bigtalk.threads import Thread
 from bigtalk.utility import Utils
 
@@ -37,6 +37,7 @@ class Config(Configuration):
 
     hostname = "localhost"
     path = ""
+    port = 8000
 
 
 class HTTP(HTTPServer, Object):

@@ -12,11 +12,11 @@ import time
 
 
 from .command import Commands
-from .clients import Console, Main
+from .clients import Console
 from .message import Message
 from .objects import Dict, Methods
 from .package import Mods
-from .persist import Disk, Locate, Workdir
+from .persist import Disk, Locate, Main, Workdir
 from .threads import Thread
 from .utility import Log, Utils
 
@@ -24,20 +24,9 @@ from .utility import Log, Utils
 from . import modules as MODS
 
 
-Main.all = False
-Main.debug = False
 Main.default = "irc,mdl,rss,wsd"
 Main.ignore = "man,rst,udp,web"
-Main.level = "info"
-Main.local = True
-Main.mods = ""
-Main.name = Utils.pkgname(Commands)
-Main.nochdir = False
-Main.noignore = False
-Main.txt = " ".join(sys.argv[1:])
-Main.verbose = False
 Main.version = 8
-Main.wait = False
 Main.wdr = os.path.expanduser(f"~/.{Main.name}")
 
 
@@ -89,9 +78,9 @@ class Runtime:
         "in the beginning."
         Methods.parse(Main, args.txt)
         Dict.update(Main, Main.sets)
-        Dict.update(Main, Dict.reduce(vars(args)))
+        Dict.merge(Main, vars(args))
         Workdir.setwd(Main.wdr)
-        Log.level(Main.level)
+        Log.level(Main.level or "info")
         if Main.noignore:
             Main.ignore = ""
         if Main.wdr:

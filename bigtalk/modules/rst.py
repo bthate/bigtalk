@@ -13,9 +13,8 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.clients import Main
 from bigtalk.objects import Configuration, Object
-from bigtalk.persist import Locate, Workdir
+from bigtalk.persist import Locate, Main, Workdir
 from bigtalk.threads import Thread
 
 

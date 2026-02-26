@@ -25,9 +25,8 @@ from urllib.parse import quote_plus, urlencode
 
 
 from bigtalk.brokers import Broker
-from bigtalk.clients import Main
 from bigtalk.objects import Configuration, Default, Dict, Methods
-from bigtalk.persist import Disk, Locate
+from bigtalk.persist import Disk, Locate, Main
 from bigtalk.threads import Thread
 from bigtalk.utility import Repeater, Time, Utils
 

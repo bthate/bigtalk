@@ -13,8 +13,8 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.clients import Main
 from bigtalk.objects import Configuration, Object
+from bigtalk.persist import Main
 from bigtalk.threads import Thread
 
 

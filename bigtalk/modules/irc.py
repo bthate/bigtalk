@@ -15,11 +15,11 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.clients import Main, Output
+from bigtalk.clients import Output
 from bigtalk.command import Commands
 from bigtalk.message import Message
 from bigtalk.objects import Configuration, Object, Methods
-from bigtalk.persist import Locate
+from bigtalk.persist import Locate, Main
 from bigtalk.threads import Thread
 from bigtalk.utility import Utils
 
