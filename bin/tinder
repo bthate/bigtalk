@@ -13,12 +13,12 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Client, Main
+from bigtalk.clients import Client
 from bigtalk.command import Commands
 from bigtalk.message import Message
 from bigtalk.objects import Default, Methods
 from bigtalk.package import Mods
-from bigtalk.persist import Workdir
+from bigtalk.persist import Main, Workdir
 from bigtalk.threads import Thread
 from bigtalk.utility import Time, Utils
 
