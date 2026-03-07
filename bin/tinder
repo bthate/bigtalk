@@ -2,6 +2,9 @@
 # This file is placed in the Public Domain.
 
 
+"stress test"
+
+
 import os
 import queue
 import shutil
@@ -13,14 +16,15 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.clients import Client
 from bigtalk.command import Commands
-from bigtalk.message import Message
-from bigtalk.objects import Default, Methods
+from bigtalk.configs import Main
+from bigtalk.handler import Client, Event
+from bigtalk.objects import Data, Methods
 from bigtalk.package import Mods
-from bigtalk.persist import Main, Workdir
+from bigtalk.persist import Workdir
+from bigtalk.runtime import Runtime
 from bigtalk.threads import Thread
-from bigtalk.utility import Time, Utils
+from bigtalk.utility import Log, Time, Utils
 
 
 from bigtalk import modules as MODS
@@ -40,8 +44,7 @@ Main.ignore = ""
 Main.level = "info"
 Main.mods = ""
 Main.name = Utils.pkgname(Commands)
-Main.opts = Default()
-Main.txt = " ".join(sys.argv[1:])
+Main.opts = Data()
 Main.version = 8
 Main.wdr = ".test"
 
@@ -52,55 +55,38 @@ class CLI(Client):
         Client.__init__(self)
         self.register("command", Commands.command)
 
-    def raw(self, txt):
+    def raw(self, text):
         if "v" in Main.opts:
-            print(txt)
+            print(text)
 
 
-class ClientPool:
+class Clients:
 
     clients = []
     lock = threading.RLock()
     nrcpu = 1
-    nrlast = 0
+    last = 0
 
     @staticmethod
     def add(client):
-        ClientPool.clients.append(client)
+        Clients.clients.append(client)
 
     @staticmethod
     def init(nrcpu, cls):
-        ClientPool.nrcpu = nrcpu
-        for _x in range(ClientPool.nrcpu):
+        Clients.nrcpu = nrcpu
+        for _x in range(Clients.nrcpu):
             clt = cls()
             clt.start()
-            ClientPool.add(clt)
+            Clients.add(clt)
 
     @staticmethod
     def put(*args):
-        with ClientPool.lock:
-            if ClientPool.nrlast >= ClientPool.nrcpu-1:
-                ClientPool.nrlast = 0
-            clt = ClientPool.clients[ClientPool.nrlast]
+        with Clients.lock:
+            if Clients.last >= Clients.nrcpu-1:
+                Clients.last = 0
+            clt = Clients.clients[Clients.last]
             clt.put(*args)
-            ClientPool.nrlast += 1
-
-
-def banner():
-    tme = time.ctime(time.time()).replace("  ", " ")
-    print(f"{Main.name.upper()} {Main.version} since {tme} ({Main.level})")
-    sys.stdout.flush()
-
-
-def check(text):
-    args = sys.argv[1:]
-    for arg in args:
-        if not arg.startswith("-"):
-            continue
-        for char in text:
-            if char in arg:
-                return True
-    return False
+            Clients.last += 1
 
 
 def consume():
@@ -115,37 +101,15 @@ def consume():
 
 def payload(todo):
     for cmd, example in todo.items():
+        if Main.cmd:
+            if cmd not in Utils.spl(Main.cmd):
+                continue
         for ex in example:
-            evt = Message()
+            evt = Event()
             evt.text = f"{cmd} {ex}"
             evt.kind = "command"
-            ClientPool.put(evt)
+            Clients.put(evt)
             events.put(evt)
-
-
-def scanner(cfg):
-    res = []
-    for name, mod in Mods.iter(Mods.list()):
-        Commands.scan(mod)
-        if "configure" in dir(mod):
-            mod.configure(cfg)
-        res.append((name, mod))
-    return res
-
-
-def wrap(func):
-    import termios
-    old = None
-    try:
-        old = termios.tcgetattr(sys.stdin.fileno())
-    except termios.error:
-        pass
-    try:
-        Utils.wrapped(func)
-    finally:
-        pass
-    if old:
-        termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
 
 
 def main():
@@ -153,17 +117,18 @@ def main():
         shutil.rmtree(Main.wdr)
     Methods.parse(Main, " ".join(sys.argv[1:]))
     Workdir.setwd(Main.wdr)
+    Log.level(Main.level)
     Mods.add("modules", MODS.__path__[0])
     if MODS2:
         Mods.add("mods", MODS2.__path__[0])
     Main.mods = Main.mods or Mods.list()
-    scanner(Main)
+    Runtime.scanner(Main)
     if "v" in Main.opts:
-        banner()
+        Runtime.banner()
     if "z" in Main.opts:
-        ClientPool.init(os.cpu_count(), CLI)
+        Clients.init(os.cpu_count(), CLI)
     else:
-        ClientPool.init(1, CLI)
+        Clients.init(1, CLI)
     starttime = time.time()
     nrs = Main.index or 1
     for _x in range(nrs):
@@ -182,6 +147,7 @@ def main():
     lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents
     nrs = events.qsize()
+    Runtime.shutdown()
     if "v" in Main.opts:
         print(f"{Methods.fmt(Main, skip='otxt,txt')}")
         print(f"{nrs} events left.")
@@ -198,7 +164,7 @@ examples = {
     "flt": ["", "0"],
     "fnd": ["", "log", "rss", "config", "todo"],
     "lou": [""],
-    "man": ["", "nixt"],
+    "man": ["", "bigtalk"],
     "mbx": [""],
     "mod": [""],
     "mre": [""],
@@ -237,4 +203,4 @@ post = {
 
 
 if __name__ == "__main__":
-    wrap(main)
+    Runtime.wrap(main)
