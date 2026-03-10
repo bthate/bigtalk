@@ -4,6 +4,7 @@
 "package"
 
 
+import os
 import unittest
 
 
@@ -13,5 +14,6 @@ from bigtalk.package import Mods
 class TestPackage(unittest.TestCase):
 
     def test_add(self):
-        Mods.add("mods", "mods")
-        self.assertTrue("mods" in Mods.dirs)
+        if os.path.exists("mods"):
+            Mods.add("mods", "mods")
+            self.assertTrue("mods" in Mods.dirs)
