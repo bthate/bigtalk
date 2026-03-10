@@ -26,7 +26,7 @@ from bigtalk.utility import SYSTEMD
 from bigtalk import modules as MODS
 
 
-Main.default = "mdl,irc,rss,thr.wsd"
+Main.default = "mdl,irc,rss,thr,wsd"
 Main.ignore = "man,rst,web,udp"
 Main.level = "info"
 Main.version = 455
