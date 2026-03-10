@@ -4,7 +4,7 @@
 "configurations"
 
 
-from .objects import Data, Dict
+from .objects import Data, Dict, Methods
 from .utility import Utils
 
 
@@ -18,18 +18,25 @@ class Configuration(Data):
             Dict.update(self, kwargs)
 
 
-class Main(Configuration):
+class MainConfig(type):
 
-    debug = False
-    default = ""
-    ignore = ""
-    level = "info"
+    def __getattr__(cls, key):
+        if key not in dir(cls):
+            return ""
+        return cls.__getattribute__(key)
+
+    def __str__(cls):
+        return str(Methods.skip(cls.__dict__))
+
+
+class Main(metaclass=MainConfig):
+
     name = Utils.pkgname(Configuration)
-    version = 1
     wdr = f".{name}"
 
 
 def __dir__():
     return (
-        'Main',
+        'Configuration',
+        'Main'
     )

@@ -7,7 +7,7 @@
 import unittest
 
 
-from bigtalk.configs import Main
+from bigtalk.defines import Main
 from bigtalk.runtime import Runtime
 
 

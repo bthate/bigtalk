@@ -24,17 +24,16 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.brokers import Broker
-from bigtalk.clocker import Repeater
-from bigtalk.configs import Configuration
+from bigtalk.defines import Configuration
+from bigtalk.handler import Broker
 from bigtalk.objects import Data, Dict, Methods
 from bigtalk.persist import Disk, Locate, Main
-from bigtalk.threads import Thread
+from bigtalk.threads import Repeater, Thread
 from bigtalk.utility import Time, Utils
 
 
 def init():
-    Runners.init(3, Runner)
+    RunnerPool.init(1, Runner)
     Run.fetcher.start()
     logging.warning("%s feeds", Locate.count("rss"))
 
@@ -46,31 +45,6 @@ def shutdown():
 class Config(Configuration):
 
     polltime = 300
-
-
-class Feed(Data):
-
-    pass
-
-
-class Modified(Data):
-
-    pass
-
-
-class Rss(Data):
-
-    def __init__(self):
-        super().__init__()
-        self.display_list = "title,link,author"
-        self.insertid = None
-        self.name = ""
-        self.rss = ""
-
-
-class Urls(Data):
-
-    pass
 
 
 class Fetcher:
@@ -86,7 +60,7 @@ class Fetcher:
         for fnm, feed in Locate.find(Methods.fqn(Rss)):
             if feed.skip:
                 continue
-            Runners.put((fnm, feed, silent))
+            RunnerPool.put((fnm, feed, silent))
             nrs += 1
         return nrs
 
@@ -183,35 +157,35 @@ class Runner:
         self.stopped.set()
 
 
-class Runners:
+class RunnerPool:
 
     runners = []
     lock = threading.RLock()
     nrcpu = 1
-    last = 0
+    nrlast = 0
 
     @staticmethod
     def add(client):
-        Runners.runners.append(client)
+        RunnerPool.runners.append(client)
 
     @staticmethod
     def init(nrcpu, cls):
-        Runners.nrcpu = nrcpu
-        for _x in range(Runners.nrcpu):
+        RunnerPool.nrcpu = nrcpu
+        for _x in range(RunnerPool.nrcpu):
             clt = cls()
             clt.start()
-            Runners.add(clt)
+            RunnerPool.add(clt)
 
     @staticmethod
     def put(*args):
-        if not Runners.runners:
-            Runners.init(Runners.nrcpu, Runner)
-        with Runners.lock:
-            if Runners.last >= Runners.nrcpu-1:
-                Runners.last = 0
-            clt = Runners.runners[Runners.last]
+        if not RunnerPool.runners:
+            RunnerPool.init(RunnerPool.nrcpu, Runner)
+        with RunnerPool.lock:
+            if RunnerPool.nrlast >= RunnerPool.nrcpu-1:
+                RunnerPool.nrlast = 0
+            clt = RunnerPool.runners[RunnerPool.nrlast]
             clt.put(*args)
-            Runners.last += 1
+            RunnerPool.nrlast += 1
 
 
 class Parser:
@@ -379,12 +353,12 @@ class Helpers:
             if Helpers.doskip(feed.error):
                 feed.skip = True
                 Disk.write(feed, fnm)
-                logging.debug("removed %s %s", feed.rss, ex)
+                logging.error("removed %s %s", feed.rss, ex)
         return result
 
     @staticmethod
     def gettinyurl(url):
-        "query tinyurl for a link." 
+        "query tinyurl for a link."
         postarray = [
             ("submit", "submit"),
             ("url", url),
@@ -444,6 +418,31 @@ class Helpers:
     def useragent(txt):
         "produce useragent string."
         return "Mozilla/5.0 (X11; Linux x86_64) " + txt
+
+
+class Feed(Data):
+
+    pass
+
+
+class Modified:
+
+    pass
+
+
+class Rss(Data):
+
+    def __init__(self):
+        super().__init__()
+        self.display_list = "title,link,author"
+        self.insertid = None
+        self.name = ""
+        self.rss = ""
+
+
+class Urls:
+
+    pass
 
 
 class Run:
@@ -646,6 +645,9 @@ def rss(event):
     feed.rss = event.args[0]
     fnm = Disk.write(feed)
     event.reply("ok")
+
+
+rss.flood = True
 
 
 def syn(event):

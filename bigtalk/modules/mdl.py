@@ -10,9 +10,9 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.clocker import Repeater
 from bigtalk.handler import Event
 from bigtalk.objects import Dict, Object
+from bigtalk.threads import Repeater
 from bigtalk.utility import Time
 
 

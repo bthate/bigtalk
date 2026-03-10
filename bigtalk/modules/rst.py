@@ -13,7 +13,7 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.configs import Configuration, Main
+from bigtalk.defines import Configuration, Main
 from bigtalk.objects import Object
 from bigtalk.persist import Locate, Workdir
 from bigtalk.threads import Thread
@@ -109,7 +109,7 @@ class RESTHandler(BaseHTTPRequestHandler):
             self.write_header("text/html")
             txt = ""
             for fnn in os.listdir(fnm):
-                filename = self.path  + os.sep + fnn
+                filename = self.path + os.sep + fnn
                 txt += f'<a href="http://{Config.hostname}:{Config.port}/{filename}">{filename}</a><br>\n'
             self.send(txt.strip())
             return

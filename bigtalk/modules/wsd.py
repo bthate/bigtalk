@@ -11,9 +11,10 @@ from random import SystemRandom
 
 
 from bigtalk.brokers import Broker
-from bigtalk.clocker import Repeater
 from bigtalk.handler import Event
-from bigtalk.persist import State
+from bigtalk.objects import Methods
+from bigtalk.persist import Disk, Locate
+from bigtalk.threads import Repeater
 
 
 rand = SystemRandom()
@@ -27,12 +28,22 @@ def init():
     logging.warning("%s wise", len(TXTLIST))
 
 
-class Stated(State):
+class State:
 
-    pass
+    def __init__(self):
+        super().__init__()
+        self.fnm = ""
+
+    def dump(self):
+        if not self.fnm:
+            self.fnm = Locate.first(self) or Methods.ident(self)
+        Disk.write(self, self.fnm)
+
+    def load(self):
+        Locate.first(self)
 
 
-state = Stated()
+state = State()
 
 
 def wsd(event):
@@ -51,7 +62,6 @@ def wsd(event):
     state.dump()
     for bot in Broker.objs("announce"):
         bot.announce(txt.strip()[2:])
-
 
 
 TXT = """| wijsheid, wijs !

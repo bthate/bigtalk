@@ -19,7 +19,7 @@ class Mods:
 
     @staticmethod
     def add(name, path):
-        "add modules directory." 
+        "add modules directory."
         if os.path.exists(path):
             Mods.dirs[name] = path
 
@@ -58,12 +58,12 @@ class Mods:
                 if ignore and name in Utils.spl(ignore):
                     continue
                 modname = f"{pkgname}.{name}"
-                mod =  Mods.modules.get(modname, None)
+                mod = Mods.modules.get(modname, None)
                 if not mod:
-                    try:
-                        mod = Mods.importer(modname, os.path.join(path, fnm))
-                    except ModuleNotFoundError:
+                    pth = os.path.join(path, fnm)
+                    if not os.path.exists(pth):
                         continue
+                    mod = Mods.importer(modname, pth)
                 if mod:
                     yield name, mod
 

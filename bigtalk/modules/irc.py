@@ -4,7 +4,6 @@
 "internet relay chat"
 
 
-import base64
 import logging
 import os
 import socket
@@ -14,11 +13,10 @@ import threading
 import time
 
 
-from bigtalk.brokers import Broker
 from bigtalk.command import Commands
-from bigtalk.configs import Configuration
-from bigtalk.handler import Event, Output
-from bigtalk.objects import Object, Methods
+from bigtalk.defines import Configuration
+from bigtalk.handler import Broker, Event, Output
+from bigtalk.objects import Data, Methods
 from bigtalk.persist import Locate, Main
 from bigtalk.threads import Thread
 from bigtalk.utility import Utils
@@ -33,6 +31,13 @@ def init():
     else:
         irc.stop()
     return irc
+
+
+def rlog(txt):
+    for ign in Config.ignore:
+        if ign in str(txt):
+            return
+    logging.debug(txt)
 
 
 class Config(Configuration):
@@ -96,19 +101,19 @@ class IRC(Output):
     def __init__(self):
         Output.__init__(self)
         self.buffer = []
-        self.cache = {}
         self.cfg = Config()
         self.channels = []
-        self.events = Object()
+        self.events = Data()
         self.events.authed = threading.Event()
         self.events.connected = threading.Event()
         self.events.joined = threading.Event()
         self.events.logon = threading.Event()
         self.events.ready = threading.Event()
         self.lock = threading.RLock()
+        self.noflood = True
         self.silent = False
         self.sock = None
-        self.state = Object()
+        self.state = Data()
         self.state.error = ""
         self.state.keeprunning = False
         self.state.last = time.time()
@@ -173,28 +178,17 @@ class IRC(Output):
     def disconnect(self):
         try:
             self.sock.shutdown(2)
-        except (ssl.SSLError, OSError, BrokenPipeError) as _ex:
+        except (ssl.SSLError, OSError, BrokenPipeError):
             pass
 
     def display(self, event):
+        if len(event.result) > 3:
+            self.say(event.channel, "command would flood, use cli or console")
+            return
         for key in sorted(event.result):
             txt = event.result.get(key)
-            if not txt:
-                continue
-            textlist = []
-            txtlist = wrapper.wrap(txt)
-            if len(txtlist) > 3:
-                self.extend(event.channel, txtlist[3:])
-                textlist = txtlist[:3]
-            else:
-                textlist = txtlist
-            _nr = -1
-            for text in textlist:
-                _nr += 1
+            for text in wrapper.wrap(txt):
                 self.dosay(event.channel, text)
-            if len(txtlist) > 3:
-                length = len(txtlist) - 3
-                self.say(event.channel, f"use !mre to show more (+{length})")
 
     def docommand(self, cmd, *args):
         with self.lock:
@@ -262,23 +256,6 @@ class IRC(Output):
             self.docommand("NICK", nck)
         return evt
 
-    def extend(self, channel, txtlist):
-        if channel not in self.cache:
-            self.cache[channel] = []
-        chanlist = self.cache.get(channel)
-        chanlist.extend(txtlist)
-
-    def gettxt(self, channel):
-        txt = None
-        try:
-            che = self.cache.get(channel, None)
-            if che:
-                txt = che.pop(0)
-                del che
-        except (KeyError, IndexError):
-            pass
-        return txt
-
     def joinall(self):
         for channel in self.channels:
             self.docommand("JOIN", channel)
@@ -304,8 +281,6 @@ class IRC(Output):
         self.direct(f"USER {nck} {server} {server} {nck}")
 
     def oput(self, event):
-        if event.channel and event.channel not in self.cache:
-            self.cache[event.channel] = []
         self.oqueue.put_nowait(event)
 
     def parsing(self, txt):
@@ -440,11 +415,6 @@ class IRC(Output):
         self.stop()
         Thread.launch(init)
 
-    def size(self, chan):
-        if chan in self.cache:
-            return len(self.cache.get(chan, []))
-        return 0
-
     def say(self, channel, text):
         event = IEvent()
         event.channel = channel
@@ -556,7 +526,7 @@ def cb_privmsg(evt):
         if evt.text[0] in ["!",]:
             evt.text = evt.text[1:]
         elif evt.text.startswith(f"{bot.cfg.nick}:"):
-            evt.text = evt.text[len(bot.cfg.nick) + 1 :]
+            evt.text = evt.text[len(bot.cfg.nick) + 1:]
         else:
             return
         if evt.text:
@@ -572,42 +542,3 @@ def cb_quit(evt):
     bot.state.error = evt.text
     if evt.orig and evt.orig in bot.zelf:
         bot.stop()
-
-
-def mre(event):
-    if not event.channel:
-        event.reply("channel is not set.")
-        return
-    bot = Broker.get(event.orig)
-    if "cache" not in dir(bot):
-        event.reply("bot is missing cache")
-        return
-    if event.channel not in bot.cache:
-        event.reply(f"no output in {event.channel} cache.")
-        return
-    for _x in range(3):
-        txt = bot.gettxt(event.channel)
-        event.reply(txt)
-    size = bot.size(event.channel)
-    if size != 0:
-        event.reply(f"{size} more in cache")
-
-
-def pwd(event):
-    if len(event.args) != 2:
-        event.reply("pwd <nick> <password>")
-        return
-    arg1 = event.args[0]
-    arg2 = event.args[1]
-    txt = f"\x00{arg1}\x00{arg2}"
-    enc = txt.encode("ascii")
-    base = base64.b64encode(enc)
-    dcd = base.decode("ascii")
-    event.reply(dcd)
-
-
-def rlog(txt):
-    for ign in Config.ignore:
-        if ign in str(txt):
-            return
-    logging.debug(txt)

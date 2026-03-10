@@ -5,6 +5,7 @@
 
 
 import argparse
+import base64
 import logging
 import os
 import sys
@@ -12,22 +13,23 @@ import time
 
 
 from bigtalk.command import Commands
-from bigtalk.configs import Main
+from bigtalk.defines import Main
 from bigtalk.handler import Console, Event
+from bigtalk.loggers import Log
 from bigtalk.objects import Dict, Methods
 from bigtalk.package import Mods
 from bigtalk.persist import Disk, Locate, Workdir
 from bigtalk.threads import Thread
-from bigtalk.utility import Log
+from bigtalk.utility import SYSTEMD
 
 
 from bigtalk import modules as MODS
 
 
 Main.default = "irc,rss,thr"
-Main.ignore = ""
-Main.local = False
-Main.version = 8
+Main.ignore = "man,rst,web,udp"
+Main.level = "info"
+Main.version = 455
 Main.wdr = os.path.expanduser(f"~/.{Main.name}")
 
 
@@ -80,7 +82,7 @@ class Runtime:
         "in the beginning."
         Methods.parse(Main, args.txt)
         Dict.update(Main, Main.sets)
-        Dict.merge(Main, vars(args))
+        Methods.merge(Main, vars(args))
         Workdir.setwd(Main.wdr)
         Log.level(Main.level or "info")
         if Main.noignore:
@@ -95,6 +97,20 @@ class Runtime:
             Runtime.banner()
         if Main.all:
             Main.mods = Mods.list(Main.ignore)
+
+    @staticmethod
+    def cmd(text):
+        "parse text for command and run it."
+        cli = Line()
+        cli.start()
+        for txt in text.split(" ! "):
+            evt = Event()
+            evt.orig = repr(cli)
+            evt.text = txt
+            evt.kind = "command"
+            Commands.command(evt)
+            evt.wait()
+        return evt
 
     @staticmethod
     def daemon(verbose=False, nochdir=False):
@@ -138,9 +154,9 @@ class Runtime:
         parser.add_argument("-m", "--mods", default="", help='modules to load')
         parser.add_argument("-n", "--noignore", action="store_true", help="disable ignore")
         parser.add_argument("-s", "--service", action="store_true", help="start service")
-        parser.add_argument("-t", "--threaded", action='store_true',help='enable multiple workers')
-        parser.add_argument("-v", "--verbose", action='store_true',help='enable verbose')
-        parser.add_argument("-w", "--wait", action='store_true',help='wait for services to start')
+        parser.add_argument("-t", "--threaded", action='store_true', help='enable multiple workers')
+        parser.add_argument("-v", "--verbose", action='store_true', help='enable verbose')
+        parser.add_argument("-w", "--wait", action='store_true', help='wait for services to start')
         parser.add_argument("--local", action="store_true", help="use local mods directory")
         parser.add_argument("--wdr", help='set working directory')
         return parser.parse_known_args()
@@ -249,13 +265,11 @@ class Scripts:
         "cli script."
         if len(sys.argv) == 1:
             return
-        Runtime.boot(args,MODS)
+        Runtime.boot(args, MODS)
         Main.mods = Mods.list(Main.ignore)
-        Commands.add(Cmd.cfg, Cmd.cmd, Cmd.mod, Cmd.srv, Cmd.ver)
+        Commands.add(Cmd.cfg, Cmd.cmd, Cmd.mod, Cmd.pwd, Cmd.srv, Cmd.ver)
         Runtime.scanner(Main)
-        evt = Commands.cmd(Main.txt)
-        for line in evt.result.values():
-            Runtime.out(line)
+        Runtime.cmd(Main.txt)
 
     @staticmethod
     def service(args):
@@ -315,6 +329,19 @@ class Cmd:
         event.reply(mods)
 
     @staticmethod
+    def pwd(event):
+        if len(event.args) != 2:
+            event.reply("pwd <nick> <password>")
+            return
+        arg1 = event.args[0]
+        arg2 = event.args[1]
+        txt = f"\x00{arg1}\x00{arg2}"
+        enc = txt.encode("ascii")
+        base = base64.b64encode(enc)
+        dcd = base.decode("ascii")
+        event.reply(dcd)
+
+    @staticmethod
     def srv(event):
         "generate systemd service file."
         import getpass
@@ -340,20 +367,6 @@ def main():
     else:
         Runtime.wrap(Scripts.control, args)
     Runtime.shutdown()
-
-
-SYSTEMD = """[Unit]
-Description=%s
-After=multi-user.target
-
-[Service]
-Type=simple
-User=%s
-Group=%s
-ExecStart=/home/%s/.local/bin/%s -s
-
-[Install]
-WantedBy=multi-user.target"""
 
 
 if __name__ == "__main__":

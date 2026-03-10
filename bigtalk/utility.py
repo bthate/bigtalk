@@ -6,9 +6,7 @@
 
 import datetime
 import inspect
-import logging
 import os
-import re
 import time
 
 
@@ -17,71 +15,20 @@ class NoDate(Exception):
     pass
 
 
-class Format(logging.Formatter):
-
-    def format(self, record):
-        record.module = record.module.upper()
-        return logging.Formatter.format(self, record)
-
-
-class Log:
-
-    datefmt = "%H:%M:%S"
-    format = "%(module).3s %(message)s"
-
-    @staticmethod
-    def level(loglevel):
-        "set log level."
-        formatter = Format(Log.format, Log.datefmt)
-        stream = logging.StreamHandler()
-        stream.setFormatter(formatter)
-        logging.basicConfig(
-            level=loglevel.upper(),
-            handlers=[stream,],
-            force=True
-        )
-
-
 class Time:
 
     @staticmethod
     def date(daystr):
         "date from string."
         daystring = daystr.encode('utf-8', 'replace').decode("utf-8")
-        res = time.time()
+        if "-" not in daystring:
+            date = datetime.date.fromtimestamp(time.time())
+            daystring = f"{date.year}-{date.month}-{date.day}" + " " + daystring
         for fmat in TIMES:
             try:
-                res = time.mktime(time.strptime(daystring, fmat))
-                break
+                return time.mktime(time.strptime(daystring, fmat))
             except ValueError:
                 pass
-        return res
-
-    @staticmethod
-    def day(daystr):
-        "day part in a string."
-        days = None
-        month = None
-        yea = None
-        try:
-            ymdre = re.search(r'(\d+)-(\d+)-(\d+)', daystr)
-            if ymdre:
-                (days, month, yea) = ymdre.groups()
-        except ValueError:
-            try:
-                ymre = re.search(r'(\d+)-(\d+)', daystr)
-                if ymre:
-                    (days, month) = ymre.groups()
-                    yea = time.strftime("%Y", time.localtime())
-            except Exception as ex:
-                raise NoDate(daystr) from ex
-        if days:
-            days = int(days)
-            month = int(month)
-            yea = int(yea)
-            dte = f"{days} {MONTH[month]} {yea}"
-            return time.mktime(time.strptime(dte, r"%d %b %Y"))
-        raise NoDate(daystr)
 
     @staticmethod
     def elapsed(seconds, short=True):
@@ -90,23 +37,23 @@ class Time:
         nsec = float(seconds)
         if nsec < 1:
             return f"{nsec:.2f}s"
-        yea     = 365 * 24 * 60 * 60
-        week    = 7 * 24 * 60 * 60
-        nday    = 24 * 60 * 60
-        hou    = 60 * 60
-        minute  = 60
-        yeas    = int(nsec / yea)
-        nsec   -= yeas * yea
-        weeks   = int(nsec / week)
-        nsec   -= weeks * week
-        nrdays  = int(nsec / nday)
-        nsec   -= nrdays * nday
-        hours   = int(nsec / hou)
-        nsec   -= hours * hou
+        yea = 365 * 24 * 60 * 60
+        week = 7 * 24 * 60 * 60
+        nday = 24 * 60 * 60
+        hou = 60 * 60
+        minute = 60
+        yeas = int(nsec / yea)
+        nsec -= yeas * yea
+        weeks = int(nsec / week)
+        nsec -= weeks * week
+        nrdays = int(nsec / nday)
+        nsec -= nrdays * nday
+        hours = int(nsec / hou)
+        nsec -= hours * hou
         minutes = int(nsec / minute)
-        nsec   -= minutes * minute
-        sec     = int(nsec / 1)
-        nsec   -= nsec - sec
+        nsec -= minutes * minute
+        sec = int(nsec / 1)
+        nsec -= nsec - sec
         if yeas:
             txt += f"{yeas}y"
         if weeks:
@@ -157,63 +104,6 @@ class Time:
         return float(timd)
 
     @staticmethod
-    def hour(daystr):
-        "hour in string."
-        try:
-            hmsre = re.search(r'(\d+):(\d+):(\d+)', str(daystr))
-            hours = 60 * 60 * (int(hmsre.group(1)))
-            hoursmin = hours  + int(hmsre.group(2)) * 60
-            hmsres = hoursmin + int(hmsre.group(3))
-        except AttributeError:
-            pass
-        except ValueError:
-            pass
-        try:
-            hmre = re.search(r'(\d+):(\d+)', str(daystr))
-            hours = 60 * 60 * (int(hmre.group(1)))
-            hmsres = hours + int(hmre.group(2)) * 60
-        except AttributeError:
-            return 0
-        except ValueError:
-            return 0
-        return hmsres
-
-    @staticmethod
-    def timed(txt):
-        "scan string for date/time."
-        try:
-            target = Time.day(txt)
-        except NoDate:
-            target = Time.extract(Time.today())
-        hours = Time.hour(txt)
-        if hours:
-            target += hours
-        return target
-
-    @staticmethod
-    def parsetxt(txt):
-        "parse text for date/time."
-        seconds = 0
-        target = 0
-        text = str(txt)
-        for word in text.split():
-            if word.startswith("+"):
-                seconds = int(word[1:])
-                return time.time() + seconds
-            if word.startswith("-"):
-                seconds = int(word[1:])
-                return time.time() - seconds
-        if not target:
-            try:
-                target = Time.day(txt)
-            except NoDate:
-                target = Time.extract(Time.today())
-            hours = Time.hour(txt)
-            if hours:
-                target += hours
-        return target
-
-    @staticmethod
     def today():
         "start of the day."
         return str(datetime.datetime.today()).split()[0]
@@ -227,7 +117,7 @@ class Utils:
         import hashlib
         with open(path, "r", encoding="utf-8") as file:
             txt = file.read().encode("utf-8")
-            return hashlib.md5(txt, usedforsecurity=False).hexdigest()
+            return hashlib.md5(txt).hexdigest()
 
     @staticmethod
     def pkgname(obj):
@@ -262,24 +152,23 @@ class Utils:
             pass
 
 
-MONTH = {
-    'Jan': 1,
-    'Feb': 2,
-    'Mar': 3,
-    'Apr': 4,
-    'May': 5,
-    'Jun': 6,
-    'Jul': 7,
-    'Aug': 8,
-    'Sep': 9,
-    'Oct': 10,
-    'Nov': 11,
-    'Dec': 12
-}
+SYSTEMD = """[Unit]
+Description=%s
+After=multi-user.target
+
+[Service]
+Type=simple
+User=%s
+Group=%s
+ExecStart=/home/%s/.local/bin/%s -s
+
+[Install]
+WantedBy=multi-user.target"""
 
 
 TIMES = [
-    "%Y-%M-%D %H:%M:%S",
+    "%Y-%m-%d %H:%M:%S",
+    "%Y-%m-%d %H:%M",
     "%Y-%m-%d %H:%M:%S",
     "%Y-%m-%d",
     "%d-%m-%Y",
@@ -290,6 +179,7 @@ TIMES = [
 
 def __dir__():
     return (
+        'SYSTEMD',
         'Log',
         'NoDate',
         'Time',

@@ -17,14 +17,15 @@ sys.path.insert(0, os.getcwd())
 
 
 from bigtalk.command import Commands
-from bigtalk.configs import Main
+from bigtalk.defines import Main
 from bigtalk.handler import Client, Event
+from bigtalk.loggers import Log
 from bigtalk.objects import Data, Methods
 from bigtalk.package import Mods
 from bigtalk.persist import Workdir
 from bigtalk.runtime import Runtime
 from bigtalk.threads import Thread
-from bigtalk.utility import Log, Time, Utils
+from bigtalk.utility import Time, Utils
 
 
 from bigtalk import modules as MODS
@@ -164,7 +165,7 @@ examples = {
     "flt": ["", "0"],
     "fnd": ["", "log", "rss", "config", "todo"],
     "lou": [""],
-    "man": ["", "bigtalk"],
+    "man": ["", "bigtalk nixtniet@gmail.com Nixt Niet"],
     "mbx": [""],
     "mod": [""],
     "mre": [""],
@@ -186,8 +187,9 @@ examples = {
 
 pre = {
     "cfg": ["", "nick=mekker"],
-    "imp": ["",
-         "testing/opml/feeds.opml",
+    "imp": [
+        "",
+        "testing/opml/feeds.opml",
     ],
     "log": ["", "log add"],
     "rss": ["", "http://hnrss.org/newest"],
