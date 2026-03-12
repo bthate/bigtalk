@@ -74,7 +74,7 @@ class Runtime:
             Main.name.upper(),
             Main.version,
             tme,
-            Main.level.upper(),
+            Utils.md5sum(Mods.path("tbl"))[:7],
         ))
         sys.stdout.flush()
         return Main.version

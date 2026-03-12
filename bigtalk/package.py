@@ -104,6 +104,13 @@ class Mods:
         return mod
 
     @staticmethod
+    def path(name):
+        for pkgname, path in Mods.dirs.items():
+            pth = os.path.join(path, name + ".py")
+            if os.path.exists(pth):
+                return pth
+
+    @staticmethod
     def pkg(package):
         return Mods.add(package.__name__, package.__path__[0])
 
