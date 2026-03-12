@@ -247,7 +247,9 @@ class Scripts:
         Runtime.boot(args, MODS)
         Workdir.pidfile(Main.name)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Runtime.scanner(Main)
+        Mods.table()
+        if not Mods.names:
+            Runtime.scanner(Main)
         Runtime.init(Main)
         Runtime.forever()
 
@@ -258,7 +260,9 @@ class Scripts:
         readline.redisplay()
         Runtime.boot(args, MODS)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Runtime.scanner(Main, False)
+        Mods.table()
+        if not Mods.names:
+            Runtime.scanner(Main, False)
         Runtime.init(Main, default=False)
         csl = CSL()
         csl.start()
@@ -272,7 +276,9 @@ class Scripts:
         Runtime.boot(args, MODS)
         Main.mods = Mods.list(Main.ignore)
         Commands.add(*Dict.values(Cmd))
-        Runtime.scanner(Main)
+        Mods.table()
+        if not Mods.names:
+            Runtime.scanner(Main)
         Runtime.cmd(Main.txt)
 
     @staticmethod
@@ -283,7 +289,9 @@ class Scripts:
         Runtime.boot(args, MODS)
         Workdir.pidfile(Main.name)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Runtime.scanner(Main)
+        Mods.table()
+        if not Mods.names:
+            Runtime.scanner(Main)
         Runtime.init(Main)
         Runtime.forever()
 
@@ -321,14 +329,14 @@ class Cmd:
     @staticmethod
     def cmd(event):
         "list available commands."
-        event.reply(",".join(sorted(Commands.names or Commands.cmds)))
+        event.reply(",".join(sorted(Mods.names.keys() or Commands.cmds)))
 
     @staticmethod
-    def md5(event):
-        event.reply(Json.dumps(Mods.md5s, indent=4))
-        for path in Mods.dirs.values():
-            if os.listdir(path):
-                event.reply(f"{path}: {Utils.md5s(path)[:7]}")
+    def tbl(event):
+        Mods.all()
+        event.reply("# This file is placed in the Pubic Domain.\n\n")
+        event.reply(f"NAMES = {Json.dumps(Commands.names, indent=4)}\n\n")
+        event.reply(f"MD5 = {Json.dumps(Mods.md5s, indent=4)}")
 
     @staticmethod
     def mod(event):

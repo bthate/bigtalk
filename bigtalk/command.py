@@ -9,12 +9,12 @@ import inspect
 
 from .brokers import Broker
 from .objects import Methods
+from .package import Mods
 
 
 class Commands:
 
     cmds = {}
-    names = {}
 
     @staticmethod
     def add(*args):
@@ -22,13 +22,16 @@ class Commands:
         for func in args:
             name = func.__name__
             Commands.cmds[name] = func
-            Commands.names[name] = func.__module__.split(".")[-1]
 
     @staticmethod
     def command(evt):
         "command callback."
         Methods.parse(evt, evt.text)
         func = Commands.get(evt.cmd)
+        if not func:
+            name = Mods.names.get(evt.cmd)
+            if name:
+                func = getattr(Mods.get(name), evt.cmd)
         if func:
             func(evt)
             bot = Broker.get(evt.orig)

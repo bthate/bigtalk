@@ -1,0 +1,60 @@
+# This file is placed in the Pubic Domain.
+
+
+NAMES = {
+    "atr": "rss",
+    "flt": "flt",
+    "fnd": "fnd",
+    "log": "log",
+    "man": "man",
+    "eml": "mbx",
+    "mbx": "mbx",
+    "dis": "mdl",
+    "now": "mdl",
+    "pth": "pth",
+    "req": "req",
+    "dpl": "rss",
+    "err": "rss",
+    "exp": "rss",
+    "imp": "rss",
+    "nme": "rss",
+    "rem": "rss",
+    "res": "rss",
+    "rss": "rss",
+    "syn": "rss",
+    "lou": "sil",
+    "sil": "sil",
+    "slg": "slg",
+    "dne": "tdo",
+    "tdo": "tdo",
+    "thr": "thr",
+    "tmr": "tmr",
+    "upt": "upt",
+    "wdr": "wdr",
+    "wsd": "wsd"
+}
+
+
+MD5 = {
+    "bigtalk.modules.atr": "12a7dc7789a921d759f278d8782137f3",
+    "bigtalk.modules.flt": "a6d18c00ac2cf50b267562eed85c3c5e",
+    "bigtalk.modules.fnd": "a0951661a39c633445addbdf945b0cd0",
+    "bigtalk.modules.irc": "6b346f001204dd7b9d1ebc57c11e9b3b",
+    "bigtalk.modules.log": "dd6094da8a62dea4ee27979506f76ccc",
+    "bigtalk.modules.man": "8faa3fdf6f55f06370fe33cbb5c8a40e",
+    "bigtalk.modules.mbx": "4c0c5b13aa36d6fea9daa9654c40491c",
+    "bigtalk.modules.mdl": "3091f7e9eeaa67a7e9e505daa4c1721a",
+    "bigtalk.modules.pth": "ac2b5aa3e5b8a1d9810585cdda60e940",
+    "bigtalk.modules.req": "bc1984d2e9de0310dc1b468f25c7ab8c",
+    "bigtalk.modules.rss": "e90c238009aa48367598cd2e7513f149",
+    "bigtalk.modules.rst": "10fd06237348c3fbf0418b1be2442677",
+    "bigtalk.modules.sil": "6927ad118995f9353a3ba867555024aa",
+    "bigtalk.modules.slg": "0196cecb8ff67e032bd389a0b1860353",
+    "bigtalk.modules.tdo": "a2ac6e6df8566a61997b46db29f6760d",
+    "bigtalk.modules.thr": "3b500251b5dada3d2243bec714568456",
+    "bigtalk.modules.tmr": "40d24c8d191b11fa4173abc71234df6b",
+    "bigtalk.modules.upt": "0c899c354b57265cb100a3b38a8668a1",
+    "bigtalk.modules.wdr": "0e0492203ff32017137bd4218fb10018",
+    "bigtalk.modules.web": "e6aec2e213cb74eae1fd14ca709c4e06",
+    "bigtalk.modules.wsd": "519e022a1aa86f18c82ea3a1763382b5"
+}
