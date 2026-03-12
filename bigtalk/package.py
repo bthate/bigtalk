@@ -15,6 +15,7 @@ from .utility import Utils
 class Mods:
 
     dirs = {}
+    md5s = {}
     modules = {}
 
     @staticmethod
@@ -90,6 +91,7 @@ class Mods:
         if not spec or not spec.loader:
             logging.debug("missing spec or loader for %s", name)
             return None
+        Mods.md5s[name] = Utils.md5sum(spec.loader.path)
         mod = importlib.util.module_from_spec(spec)
         if not mod:
             logging.debug("can't load %s module from spec", name)

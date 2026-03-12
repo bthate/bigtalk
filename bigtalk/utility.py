@@ -120,6 +120,18 @@ class Utils:
             return hashlib.md5(txt).hexdigest()
 
     @staticmethod
+    def md5s(path):
+        import hashlib
+        sums = hashlib.md5()
+        for fnm in os.listdir(path):
+            if fnm.startswith("_"):
+                continue
+            pth = os.path.join(path, fnm)
+            with open(pth, "rb") as file:
+                sums.update(file.read())
+        return sums.hexdigest()
+
+    @staticmethod
     def pkgname(obj):
         "return package name of an object."
         return obj.__module__.split(".", maxsplit=1)[0]

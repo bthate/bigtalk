@@ -18,9 +18,9 @@ from bigtalk.handler import Console, Event
 from bigtalk.loggers import Log
 from bigtalk.objects import Dict, Methods
 from bigtalk.package import Mods
-from bigtalk.persist import Disk, Locate, Workdir
+from bigtalk.persist import Disk, Json, Locate, Workdir
 from bigtalk.threads import Thread
-from bigtalk.utility import SYSTEMD
+from bigtalk.utility import SYSTEMD, Utils
 
 
 from bigtalk import modules as MODS
@@ -271,7 +271,7 @@ class Scripts:
             return
         Runtime.boot(args, MODS)
         Main.mods = Mods.list(Main.ignore)
-        Commands.add(Cmd.cfg, Cmd.cmd, Cmd.mod, Cmd.pwd, Cmd.srv, Cmd.ver)
+        Commands.add(*Dict.values(Cmd))
         Runtime.scanner(Main)
         Runtime.cmd(Main.txt)
 
@@ -322,6 +322,13 @@ class Cmd:
     def cmd(event):
         "list available commands."
         event.reply(",".join(sorted(Commands.names or Commands.cmds)))
+
+    @staticmethod
+    def md5(event):
+        event.reply(Json.dumps(Mods.md5s, indent=4))
+        for path in Mods.dirs.values():
+            if os.listdir(path):
+                event.reply(f"{path}: {Utils.md5s(path)[:7]}")
 
     @staticmethod
     def mod(event):

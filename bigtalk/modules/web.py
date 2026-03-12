@@ -88,7 +88,6 @@ class HTTPHandler(BaseHTTPRequestHandler):
 
     def write_header(self, htype='text/plain', size=None):
         self.send_response(200)
-        #self.send_header('Content-type', '%s; charset=%s ' % (htype, "utf-8"))
         self.send_header('Content-type: ', '%s' % htype)
         if size is not None:
             self.send_header('Content-length', size)
