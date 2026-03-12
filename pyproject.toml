@@ -37,16 +37,16 @@ classifiers = [
 packages = [
     'bigtalk',
     'bigtalk.modules',
-    'bigtalk.nucleus',
-    'bigtalk.nucleus.pdf',
-    'bigtalk.nucleus._static',
-    'bigtalk.nucleus._images'
+    'bigtalk.network',
+    'bigtalk.network.pdf',
+    'bigtalk.network._static',
+    'bigtalk.network._images'
 ]
 include-package-data = true
 
 
 [tool.setuptools.package-data]
-"bigtalk.nucleus"         = ["*"]
-"bigtalk.nucleus.pdf"     = ["*"]
-"bigtalk.nucleus._images" = ["*"]
-"bigtalk.nucleus._static" = ["*"]
+"bigtalk.network"         = ["*"]
+"bigtalk.network.pdf"     = ["*"]
+"bigtalk.network._images" = ["*"]
+"bigtalk.network._static" = ["*"]
