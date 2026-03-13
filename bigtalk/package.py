@@ -17,7 +17,6 @@ class Mods:
     dirs = {}
     md5s = {}
     modules = {}
-    names = {}
 
     @staticmethod
     def add(name, path):
@@ -99,7 +98,6 @@ class Mods:
             logging.debug("can't load %s module", name)
             return None
         Mods.modules[name] = mod
-        Mods.names[name] = mod.__name__.split(".")[-1]
         spec.loader.exec_module(mod)
         return mod
 
@@ -115,10 +113,9 @@ class Mods:
         return Mods.add(package.__name__, package.__path__[0])
 
     @staticmethod
-    def table():
+    def sums():
         mod = Mods.get("tbl")
         if mod:
-            Mods.names = getattr(mod, "NAMES", {})
             Mods.md5s = getattr(mod, "MD5", {})
         
 

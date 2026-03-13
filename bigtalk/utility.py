@@ -115,6 +115,8 @@ class Utils:
     def md5sum(path):
         "return md5 of a file."
         import hashlib
+        if not os.path.exists(path):
+            return ""
         with open(path, "r", encoding="utf-8") as file:
             txt = file.read().encode("utf-8")
             return hashlib.md5(txt).hexdigest()

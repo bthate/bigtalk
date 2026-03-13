@@ -74,7 +74,7 @@ class Runtime:
             Main.name.upper(),
             Main.version,
             tme,
-            Utils.md5sum(Mods.path("tbl"))[:7],
+            Utils.md5sum(Mods.path("tbl") or "")[:7],
         ))
         sys.stdout.flush()
         return Main.version
@@ -95,10 +95,14 @@ class Runtime:
             Mods.pkg(pkg)
         if Main.local:
             Mods.add('mods', 'mods')
+        Commands.table()
+        Mods.sums()
         if Main.verbose:
             Runtime.banner()
         if Main.all:
             Main.mods = Mods.list(Main.ignore)
+        if not Commands.names:
+            Runtime.scanner(Main)
 
     @staticmethod
     def cmd(text):
@@ -247,9 +251,6 @@ class Scripts:
         Runtime.boot(args, MODS)
         Workdir.pidfile(Main.name)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Mods.table()
-        if not Mods.names:
-            Runtime.scanner(Main)
         Runtime.init(Main)
         Runtime.forever()
 
@@ -260,9 +261,6 @@ class Scripts:
         readline.redisplay()
         Runtime.boot(args, MODS)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Mods.table()
-        if not Mods.names:
-            Runtime.scanner(Main, False)
         Runtime.init(Main, default=False)
         csl = CSL()
         csl.start()
@@ -276,9 +274,6 @@ class Scripts:
         Runtime.boot(args, MODS)
         Main.mods = Mods.list(Main.ignore)
         Commands.add(*Dict.values(Cmd))
-        Mods.table()
-        if not Mods.names:
-            Runtime.scanner(Main)
         Runtime.cmd(Main.txt)
 
     @staticmethod
@@ -289,9 +284,6 @@ class Scripts:
         Runtime.boot(args, MODS)
         Workdir.pidfile(Main.name)
         Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Mods.table()
-        if not Mods.names:
-            Runtime.scanner(Main)
         Runtime.init(Main)
         Runtime.forever()
 
@@ -329,7 +321,7 @@ class Cmd:
     @staticmethod
     def cmd(event):
         "list available commands."
-        event.reply(",".join(sorted(Mods.names.keys() or Commands.cmds)))
+        event.reply(",".join(sorted(Commands.names.keys() or Commands.cmds.keys())))
 
     @staticmethod
     def tbl(event):
