@@ -24,7 +24,10 @@ class Commands:
         for func in args:
             name = func.__name__
             Commands.cmds[name] = func
-            Commands.names[name] = func.__module__.split(".")[-1]
+            modname = func.__module__.split(".")[-1]
+            if "__" in modname:
+                continue
+            Commands.names[name] = modname
 
     @staticmethod
     def command(evt):
