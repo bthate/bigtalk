@@ -25,7 +25,7 @@ from bigtalk.utility import SYSTEMD, Utils
 from bigtalk import modules as MODS
 
 
-Main.default = "irc,rss,thr"
+Main.default = "mdl,irc,rss"
 Main.ignore = "udp"
 Main.level = "info"
 Main.local = True
