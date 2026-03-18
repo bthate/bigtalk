@@ -8,7 +8,6 @@ import argparse
 import base64
 import logging
 import os
-import sys
 import time
 
 
@@ -29,7 +28,8 @@ from bigtalk import modules as MODS
 Main.default = "irc,rss,thr"
 Main.ignore = "udp"
 Main.level = "info"
-Main.version = 455
+Main.local = True
+Main.version = 453
 Main.wdr = os.path.expanduser(f"~/.{Main.name}")
 
 
@@ -66,21 +66,23 @@ class Runtime:
 
     inits = []
 
-    @staticmethod
-    def banner():
+    @classmethod
+    def banner(cls):
         "hello."
+        import sys
         tme = time.ctime(time.time()).replace("  ", " ")
-        print("%s %s since %s (%s)" % (
+        print("%s %s since %s %s (%s)" % (
             Main.name.upper(),
             Main.version,
             tme,
+            Main.level.upper(),
             Utils.md5sum(Mods.path("tbl") or "")[:7],
         ))
         sys.stdout.flush()
         return Main.version
 
-    @staticmethod
-    def boot(args, *pkgs):
+    @classmethod
+    def boot(cls, args, *pkgs):
         "in the beginning."
         Methods.parse(Main, args.txt)
         Dict.update(Main, Main.sets)
@@ -89,23 +91,27 @@ class Runtime:
         Log.level(Main.level or "info")
         if Main.noignore:
             Main.ignore = ""
-        if Main.wdr:
-            Mods.add("modules", os.path.join(Main.wdr, "mods"))
-        for pkg in pkgs:
-            Mods.pkg(pkg)
         if Main.local:
             Mods.add('mods', 'mods')
-        Commands.table()
-        Mods.sums()
+        if pkgs:
+            for pkg in pkgs:
+                Mods.pkg(pkg)
+        if Main.wdr:
+            Mods.add("modules", os.path.join(Main.wdr, "mods"))
+        if Main.read:
+            cls.scanner(Main)
+        else:
+            Commands.table()
+            Mods.sums()
         if Main.verbose:
-            Runtime.banner()
+            cls.banner()
         if Main.all:
             Main.mods = Mods.list(Main.ignore)
         if not Commands.names:
-            Runtime.scanner(Main)
+            cls.scanner(Main)
 
-    @staticmethod
-    def cmd(text):
+    @classmethod
+    def cmd(cls, text):
         "parse text for command and run it."
         cli = Line()
         cli.start()
@@ -118,9 +124,10 @@ class Runtime:
             evt.wait()
         return evt
 
-    @staticmethod
-    def daemon(verbose=False, nochdir=False):
+    @classmethod
+    def daemon(cls, verbose=False, nochdir=False):
         "run in the background."
+        import sys
         pid = os.fork()
         if pid != 0:
             os._exit(0)
@@ -140,8 +147,8 @@ class Runtime:
             os.chdir("/")
         os.nice(10)
 
-    @staticmethod
-    def forever():
+    @classmethod
+    def forever(cls):
         "run forever until ctrl-c."
         while True:
             try:
@@ -149,8 +156,8 @@ class Runtime:
             except (KeyboardInterrupt, EOFError):
                 break
 
-    @staticmethod
-    def getargs():
+    @classmethod
+    def getargs(cls):
         "parse commandline arguments."
         parser = argparse.ArgumentParser(prog=Main.name, description=f"{Main.name.upper()}")
         parser.add_argument("-a", "--all", action="store_true", help="load all modules")
@@ -159,6 +166,7 @@ class Runtime:
         parser.add_argument("-l", "--level", default=Main.level, help='set loglevel')
         parser.add_argument("-m", "--mods", default="", help='modules to load')
         parser.add_argument("-n", "--noignore", action="store_true", help="disable ignore")
+        parser.add_argument("-r", "--read", action="store_true", help="read modules on start")
         parser.add_argument("-s", "--service", action="store_true", help="start service")
         parser.add_argument("-t", "--threaded", action='store_true', help='enable multiple workers')
         parser.add_argument("-v", "--verbose", action='store_true', help='enable verbose')
@@ -167,8 +175,8 @@ class Runtime:
         parser.add_argument("--wdr", help='set working directory')
         return parser.parse_known_args()
 
-    @staticmethod
-    def init(cfg, default=True):
+    @classmethod
+    def init(cls, cfg, default=True):
         "scan named modules for commands."
         thrs = []
         if default:
@@ -178,17 +186,17 @@ class Runtime:
         for name, mod in Mods.iter(cfg.mods or defs, cfg.ignore):
             if "init" in dir(mod):
                 thrs.append((name, Thread.launch(mod.init)))
-                Runtime.inits.append(name)
+                cls.inits.append(name)
         if cfg.wait:
             for name, thr in thrs:
                 thr.join()
 
-    @staticmethod
-    def out(txt):
+    @classmethod
+    def out(cls, txt):
         print(txt.encode('utf-8', 'replace').decode("utf-8"))
 
-    @staticmethod
-    def privileges():
+    @classmethod
+    def privileges(cls):
         "drop privileges."
         import getpass
         import pwd
@@ -196,8 +204,8 @@ class Runtime:
         os.setgid(pwnam2.pw_gid)
         os.setuid(pwnam2.pw_uid)
 
-    @staticmethod
-    def scanner(cfg, default=True):
+    @classmethod
+    def scanner(cls, cfg, default=True):
         "scan named modules for commands."
         res = []
         if default:
@@ -211,10 +219,10 @@ class Runtime:
             res.append((name, mod))
         return res
 
-    @staticmethod
-    def shutdown():
+    @classmethod
+    def shutdown(cls):
         "call shutdown on modules."
-        for name in Runtime.inits:
+        for name in cls.inits:
             mod = Mods.get(name)
             if "shutdown" in dir(mod):
                 try:
@@ -222,9 +230,10 @@ class Runtime:
                 except Exception as ex:
                     logging.exception(ex)
 
-    @staticmethod
-    def wrap(func, *args):
+    @classmethod
+    def wrap(cls, func, *args):
         "restore console."
+        import sys
         import termios
         old = None
         try:
@@ -239,53 +248,6 @@ class Runtime:
             logging.exception(ex)
         if old:
             termios.tcsetattr(sys.stdin.fileno(), termios.TCSADRAIN, old)
-
-
-class Scripts:
-
-    @staticmethod
-    def background(args):
-        "background script."
-        Runtime.daemon(Main.verbose, Main.nochdir)
-        Runtime.privileges()
-        Runtime.boot(args, MODS)
-        Workdir.pidfile(Main.name)
-        Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Runtime.init(Main)
-        Runtime.forever()
-
-    @staticmethod
-    def console(args):
-        "console script."
-        import readline
-        readline.redisplay()
-        Runtime.boot(args, MODS)
-        Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Runtime.init(Main, default=False)
-        csl = CSL()
-        csl.start()
-        Runtime.forever()
-
-    @staticmethod
-    def control(args):
-        "cli script."
-        if len(sys.argv) == 1:
-            return
-        Runtime.boot(args, MODS)
-        Main.mods = Mods.list(Main.ignore)
-        Commands.add(*Dict.values(Cmd))
-        Runtime.cmd(Main.txt)
-
-    @staticmethod
-    def service(args):
-        "service script."
-        Runtime.privileges()
-        Runtime.banner()
-        Runtime.boot(args, MODS)
-        Workdir.pidfile(Main.name)
-        Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
-        Runtime.init(Main)
-        Runtime.forever()
 
 
 class Cmd:
@@ -324,13 +286,6 @@ class Cmd:
         event.reply(",".join(sorted(Commands.names.keys() or Commands.cmds.keys())))
 
     @staticmethod
-    def tbl(event):
-        Mods.all()
-        event.reply("# This file is placed in the Pubic Domain.\n\n")
-        event.reply(f"NAMES = {Json.dumps(Commands.names, indent=4)}\n\n")
-        event.reply(f"MD5 = {Json.dumps(Mods.md5s, indent=4)}")
-
-    @staticmethod
     def mod(event):
         "list available commands."
         mods = Mods.list(Main.ignore)
@@ -360,9 +315,68 @@ class Cmd:
         event.reply(SYSTEMD % (Main.name.upper(), name, name, name, Main.name))
 
     @staticmethod
+    def tbl(event):
+        Mods.md5s = {}
+        for name, mod in Mods.all():
+            Commands.scan(mod)
+        event.reply("# This file is placed in the Pubic Domain.\n\n")
+        event.reply('"tables"\n\n')
+        event.reply(f"NAMES = {Json.dumps(Commands.names, indent=4)}\n\n")
+        event.reply(f"MD5 = {Json.dumps(Mods.md5s, indent=4)}")
+
+    @staticmethod
     def ver(event):
         "show verson."
         event.reply(f"{Main.name.upper()} {Main.version}")
+
+
+class Scripts:
+
+    @staticmethod
+    def background(args):
+        "background script."
+        Runtime.daemon(Main.verbose, Main.nochdir)
+        Runtime.privileges()
+        Runtime.boot(args, MODS)
+        Workdir.pidfile(Main.name)
+        Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
+        Runtime.init(Main)
+        Runtime.forever()
+
+    @staticmethod
+    def console(args):
+        "console script."
+        import readline
+        readline.redisplay()
+        Runtime.boot(args, MODS)
+        Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
+        Runtime.init(Main, default=False)
+        csl = CSL()
+        csl.start()
+        Runtime.forever()
+
+    @staticmethod
+    def control(args):
+        "cli script."
+        import sys
+        if len(sys.argv) == 1:
+            return
+        Main.all = True
+        Runtime.boot(args, MODS)
+        Main.mods = Mods.list(Main.ignore)
+        Commands.add(*Dict.values(Cmd))
+        Runtime.cmd(Main.txt)
+
+    @staticmethod
+    def service(args):
+        "service script."
+        Runtime.privileges()
+        Runtime.boot(args, MODS)
+        Runtime.banner()
+        Workdir.pidfile(Main.name)
+        Commands.add(Cmd.cmd, Cmd.mod, Cmd.ver)
+        Runtime.init(Main)
+        Runtime.forever()
 
 
 def main():

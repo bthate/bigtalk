@@ -17,21 +17,18 @@ class NoDate(Exception):
 
 class Time:
 
-    @staticmethod
-    def date(daystr):
+    @classmethod
+    def date(cls, daystr):
         "date from string."
-        daystring = daystr.encode('utf-8', 'replace').decode("utf-8")
-        if "-" not in daystring:
-            date = datetime.date.fromtimestamp(time.time())
-            daystring = f"{date.year}-{date.month}-{date.day}" + " " + daystring
+        daystr = daystr.encode('utf-8', 'replace').decode("utf-8")
         for fmat in TIMES:
             try:
-                return time.mktime(time.strptime(daystring, fmat))
+                return time.mktime(time.strptime(daystr, fmat))
             except ValueError:
                 pass
 
-    @staticmethod
-    def elapsed(seconds, short=True):
+    @classmethod
+    def elapsed(cls, seconds, short=True):
         "seconds to string."
         txt = ""
         nsec = float(seconds)
@@ -71,26 +68,28 @@ class Time:
         txt = txt.strip()
         return txt
 
-    @staticmethod
-    def extract(daystr):
+    @classmethod
+    def extract(cls, daystr):
         "extract date/time from string."
-        previous = ""
-        line = ""
-        daystring = str(daystr)
+        daystr = str(daystr)
         res = None
-        for word in daystring.split():
-            line = previous + " " + word
-            previous = word
-            try:
-                res = Time.date(line.strip())
+        for word in daystr.split():
+            if word.startswith("+"):
+                try:
+                    return int(word[1:]) + time.time()
+                except (ValueError, IndexError):
+                    continue
+            res = cls.date(word.strip())
+            if not res:
+                date = datetime.date.fromtimestamp(time.time())
+                word = f"{date.year}-{date.month}-{date.day}" + " " + word
+                res = cls.date(word.strip())
+            if res:
                 break
-            except ValueError:
-                res = None
-            line = ""
         return res
 
-    @staticmethod
-    def fntime(daystr):
+    @classmethod
+    def fntime(cls, daystr):
         "time from path."
         datestr = " ".join(daystr.split(os.sep)[-2:])
         datestr = datestr.replace("_", " ")
@@ -103,8 +102,8 @@ class Time:
             timd += float("." + rest)
         return float(timd)
 
-    @staticmethod
-    def today():
+    @classmethod
+    def today(cls):
         "start of the day."
         return str(datetime.datetime.today()).split()[0]
 
@@ -119,12 +118,12 @@ class Utils:
             return ""
         with open(path, "r", encoding="utf-8") as file:
             txt = file.read().encode("utf-8")
-            return hashlib.md5(txt).hexdigest()
+            return hashlib.md5(txt, usedforsecurity=False).hexdigest()  # pylint: disable=E1123
 
     @staticmethod
     def md5s(path):
         import hashlib
-        sums = hashlib.md5()
+        sums = hashlib.md5(usedforsecurity=False)  # pylint: disable=E1123
         for fnm in os.listdir(path):
             if fnm.startswith("_"):
                 continue
@@ -181,6 +180,10 @@ WantedBy=multi-user.target"""
 
 
 TIMES = [
+    "%a, %d %b %Y %H:%M:%S %z",
+    "%a, %d %b %Y %H:%M:%S",
+    "%a, %d %b %Y %T %z",
+    "%a, %d %b %Y %T",
     "%Y-%m-%d %H:%M:%S",
     "%Y-%m-%d %H:%M",
     "%Y-%m-%d %H:%M:%S",
