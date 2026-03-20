@@ -8,6 +8,7 @@ from bigtalk.command import Commands
 from bigtalk.defines import Main
 from bigtalk.encoder import Json
 from bigtalk.package import Mods
+from bigtalk.runtime import Runtime
 
 
 def cmd(event):
@@ -26,7 +27,8 @@ def mod(event):
 
 def tbl(event):
     "create table."
-    for name, module in Mods.all():
+    Mods.md5s = {}
+    for name, module in Mods.all(True):
         Commands.scan(module)
     event.reply("# This file is placed in the Pubic Domain.\n\n")
     event.reply('"tables"\n\n')
