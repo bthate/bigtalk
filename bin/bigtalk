@@ -1,1 +1,1 @@
-python3 -m bigtalk.runtime $* ;
+python3 -m bigtalk.console $* ;
