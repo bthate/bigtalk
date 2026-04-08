@@ -24,7 +24,7 @@ classifiers = [
 
 
 [project.scripts]
-"bigtalk" = "bigtalk.console:main"
+"bigtalk" = "bigtalk.runtime:main"
 
 
 [project.urls]

@@ -12,7 +12,6 @@ import os
 import queue
 import re
 import threading
-import time
 import urllib
 import urllib.parse
 import urllib.request
@@ -24,17 +23,16 @@ from urllib.error import HTTPError, URLError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.defines import Configuration
 from bigtalk.handler import Broker
-from bigtalk.objects import Data, Dict, Methods
-from bigtalk.persist import Disk, Locate, Main
+from bigtalk.objects import Configuration, Data, Methods, Object
+from bigtalk.persist import Cfg, Disk, Locate
+from bigtalk.runtime import Main
 from bigtalk.threads import Repeater, Thread
-from bigtalk.utility import Time, Utils
+from bigtalk.utility import Utils
 
 
-class Config(Configuration):
-
-    polltime = 300
+def configure():
+    Cfg.load(Config)
 
 
 def init():
@@ -45,6 +43,11 @@ def init():
 
 def shutdown():
     Run.fetcher.stop()
+
+
+class Config(Configuration):
+
+    polltime = 300
 
 
 class Feed(Data):
@@ -155,8 +158,8 @@ class Runner:
                     continue
                 counter += 1
                 fed = Feed()
-                Dict.update(fed, obj)
-                Dict.update(fed, feed)
+                Object.update(fed, obj)
+                Object.update(fed, feed)
                 url = urllib.parse.urlparse(fed.link)
                 if url.path and not url.path == "/":
                     uurl = f"{url.scheme}://{url.netloc}/{url.path}"
@@ -338,7 +341,7 @@ class Helpers:
     @staticmethod
     def attrs(obj, txt):
         "parse attribute into an object."
-        Dict.update(obj, *list(OPML.parse(txt)))
+        Object.update(obj, *list(OPML.parse(txt)))
 
     @staticmethod
     def cdata(line):
@@ -487,7 +490,7 @@ def dpl(event):
     setter = {"display_list": event.args[1]}
     for fnm, feed in Locate.find(Methods.fqn(Rss), {"rss": event.args[0]}):
         if feed:
-            Dict.update(feed, setter)
+            Object.update(feed, setter)
             Disk.write(feed, fnm)
     event.reply("ok")
 
@@ -501,7 +504,7 @@ def err(event):
         if event.rest and event.rest in obj.error:
             nre += 1
             feed = Rss()
-            Dict.update(feed, obj)
+            Object.update(feed, obj)
             feed.__deleted__ = False
             feed.error = ""
             Disk.write(feed, fnm)
@@ -515,6 +518,9 @@ def err(event):
         event.reply(f'{nre} feeds reset.')
 
 
+err.skip = "irc"
+
+
 def exp(event):
     with Run.importlock:
         event.reply(TEMPLATE)
@@ -522,13 +528,16 @@ def exp(event):
         for _fn, ooo in Locate.find(Methods.fqn(Rss)):
             nrs += 1
             obj = Rss()
-            Dict.update(obj, ooo)
+            Object.update(obj, ooo)
             name = f"url{nrs}"
             txt = f'<outline name="{name}" display_list="{obj.display_list}" xmlUrl="{obj.rss}"/>'
             event.reply(" " * 12 + txt)
         event.reply(" " * 8 + "</outline>")
         event.reply("    <body>")
         event.reply("</opml>")
+
+
+exp.skip = "irc"
 
 
 def imp(event):
@@ -560,7 +569,7 @@ def imp(event):
             feed = Rss()
             feed.rss = obj["xmlUrl"]
             del obj["xmlUrl"]
-            Dict.update(feed, obj)
+            Object.update(feed, obj)
             uri = urllib.parse.urlparse(feed.rss)
             if uri.netloc.count(".") >= 2:
                 feed.name = ".".join(uri.netloc.split('.')[1:-1])
@@ -575,6 +584,9 @@ def imp(event):
         event.reply(f"added {nrs} urls.")
 
 
+imp.skip = "irc"
+
+
 def nme(event):
     if len(event.args) != 2:
         event.reply("nme <stringinurl> <name>")
@@ -582,7 +594,7 @@ def nme(event):
     selector = {"rss": event.args[0]}
     for fnm, fed in Locate.find(Methods.fqn(Rss), selector):
         feed = Rss()
-        Dict.update(feed, fed)
+        Object.update(feed, fed)
         if feed:
             feed.name = str(event.args[1])
             Disk.write(feed, fnm)
@@ -595,7 +607,7 @@ def rem(event):
         return
     for fnm, fed in Locate.find(Methods.fqn(Rss)):
         feed = Rss()
-        Dict.update(feed, fed)
+        Object.update(feed, fed)
         if event.args[0] not in feed.rss:
             continue
         if feed:
@@ -612,7 +624,7 @@ def res(event):
     nrs = 0
     for fnm, fed in Locate.find(Methods.fqn(Rss), removed=True):
         feed = Rss()
-        Dict.update(feed, fed)
+        Object.update(feed, fed)
         if event.args[0] not in feed.rss:
             continue
         nrs += 1
@@ -623,16 +635,7 @@ def res(event):
 
 def rss(event):
     if not event.rest:
-        nrs = 0
-        for fnm, fed in Locate.find(Methods.fqn(Rss), event.gets):
-            if fed.skip:
-                continue
-            nrs += 1
-            elp = Time.elapsed(time.time() - Time.fntime(fnm))
-            txt = Methods.fmt(fed)
-            event.reply(f"{nrs} {txt} {elp}")
-        if not nrs:
-            event.reply("no feed found.")
+        event.reply("rss <url>")
         return
     url = event.args[0]
     if "http://" not in url and "https://" not in url:
@@ -644,7 +647,7 @@ def rss(event):
             return
     feed = Rss()
     feed.rss = event.args[0]
-    fnm = Disk.write(feed)
+    Disk.write(feed)
     event.reply("ok")
 
 
@@ -655,6 +658,9 @@ def syn(event):
     fetcher.start(False)
     nrs = fetcher.run(True)
     event.reply(f"{nrs} feeds synced")
+
+
+syn.skip = "irc"
 
 
 TEMPLATE = """<opml version="1.0">

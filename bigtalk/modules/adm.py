@@ -1,19 +1,24 @@
-# This file is placed in the Public Domain.
+#  This file is placed in the Public Domain.
 
 
 "administrator"
 
 
 from bigtalk.command import Commands
-from bigtalk.defines import Main
 from bigtalk.encoder import Json
 from bigtalk.package import Mods
-from bigtalk.runtime import Runtime
+from bigtalk.runtime import Main
+from bigtalk.persist import Workdir
+
+
+def configure():
+    tbl.skip = "irc"
+    wdr.skip = "irc"
 
 
 def cmd(event):
     "list available commands."
-    event.reply(",".join(sorted(Commands.names.keys() or Commands.cmds.keys())))
+    event.reply(",".join(sorted(Commands.commands(event.orig))))
 
 
 def mod(event):
@@ -39,3 +44,8 @@ def tbl(event):
 def ver(event):
     "show verson."
     event.reply(f"{Main.name.upper()} {Main.version}")
+
+
+def wdr(event):
+    "show working directory."
+    event.reply(Workdir.workdir())

@@ -13,9 +13,14 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.defines import Configuration, Main
-from bigtalk.objects import Object
+from bigtalk.objects import Configuration, Data
+from bigtalk.persist import Cfg
+from bigtalk.runtime import Main
 from bigtalk.threads import Thread
+
+
+def configure():
+    Cfg.load(Config)
 
 
 def init():
@@ -31,10 +36,10 @@ class Config(Configuration):
     port = 5500
 
 
-class UDP(Object):
+class UDP(Data):
 
     def __init__(self):
-        Object.__init__(self)
+        Data.__init__(self)
         self.stopped = False
         self._sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self._sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -116,3 +121,6 @@ def udp(event):
             toudp(Config.host, Config.port, txt)
         if stop:
             break
+
+
+udp.skip = "irc"

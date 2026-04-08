@@ -1,7 +1,7 @@
 # This file is placed in the Public Domain.
 
 
-"a clean namespace"
+"a function with the object as the first argument"
 
 
 import datetime
@@ -9,7 +9,7 @@ import os
 import types
 
 
-class Object:
+class Base:
 
     def __contains__(self, key):
         return key in dir(self)
@@ -24,13 +24,23 @@ class Object:
         return str(self.__dict__)
 
 
-class Data(Object):
+class Data(Base):
 
     def __getattr__(self, key):
         return self.__dict__.get(key, "")
 
 
-class Dict:
+class Configuration(Data):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__()
+        if args:
+            Object.update(self, args[0])
+        if kwargs:
+            Object.update(self, kwargs)
+
+
+class Object:
 
     @staticmethod
     def clear(obj):
@@ -43,19 +53,19 @@ class Dict:
         if args:
             val = args[0]
             if isinstance(val, zip):
-                Dict.update(obj, dict(val))
+                Object.update(obj, dict(val))
             elif isinstance(val, dict):
-                Dict.update(obj, val)
+                Object.update(obj, val)
             else:
-                Dict.update(obj, vars(val))
+                Object.update(obj, vars(val))
         if kwargs:
-            Dict.update(obj, kwargs)
+            Object.update(obj, kwargs)
 
     @staticmethod
     def copy(obj):
         "return shallow copy of the object."
         oobj = type(obj)()
-        Dict.update(oobj, obj.__dict__.copy())
+        Object.update(oobj, obj.__dict__.copy())
         return oobj
 
     @staticmethod
@@ -110,7 +120,7 @@ class Dict:
                     if value:
                         setattr(obj, key, value)
             else:
-                for key, value in Dict.items(data):
+                for key, value in Object.items(data):
                     setattr(obj, key, value)
         elif isinstance(obj, dict):
             obj.update(data)
@@ -152,7 +162,7 @@ class Methods:
     @staticmethod
     def edit(obj, setter={}, skip=False):
         "update object with dict."
-        for key, val in Dict.items(setter):
+        for key, val in Object.items(setter):
             if skip and val == "":
                 continue
             Methods.typed(obj, key, val)
@@ -202,10 +212,18 @@ class Methods:
 
     @staticmethod
     def merge(obj, obj2):
-        for key, value in Dict.items(obj2):
+        for key, value in Object.items(obj2):
             if not value and getattr(obj, key, False):
                 continue
             setattr(obj, key, value)
+
+    @staticmethod
+    def notset(obj, obj2):
+        for key, value in Object.items(obj2):
+            if getattr(obj, key, False):
+                continue
+            if value:
+                setattr(obj, key, value)
 
     @staticmethod
     def parse(obj, text):
@@ -263,7 +281,7 @@ class Methods:
     @staticmethod
     def reduce(obj):
         result = {}
-        for key, value in Dict.items(obj):
+        for key, value in Object.items(obj):
             if value:
                 result[key] = value
         return result
@@ -272,7 +290,7 @@ class Methods:
     def search(obj, selector={}, matching=False):
         "check whether object matches search criteria."
         res = False
-        for key, value in Dict.items(selector):
+        for key, value in Object.items(selector):
             val = getattr(obj, key, None)
             if not val:
                 res = False
@@ -289,42 +307,42 @@ class Methods:
     @staticmethod
     def skip(obj, chars="_"):
         "skip keys containing chars."
-        res = {}
-        for key, value in Dict.items(obj):
+        res = Data()
+        for key, value in Object.items(obj):
+            if isinstance(value, types.MethodType):
+                continue
             donext = False
             for char in chars:
                 if char in key:
                     donext = True
             if donext:
                 continue
-            res[key] = value
+            setattr(res, key, value)
         return res
 
     @staticmethod
     def typed(obj, key, val):
         "assign proper types."
-        try:
-            setattr(obj, key, int(val))
-            return
-        except ValueError:
-            pass
-        try:
-            setattr(obj, key, float(val))
-            return
-        except ValueError:
-            pass
         if val in ["True", "true", True]:
-            setattr(obj, key, True)
-        elif val in ["False", "false", False]:
-            setattr(obj, key, False)
-        else:
-            setattr(obj, key, val)
+            return setattr(obj, key, True)
+        if val in ["False", "false", False]:
+            return setattr(obj, key, False)
+        try:
+            return setattr(obj, key, int(val))
+        except ValueError:
+            pass
+        try:
+            return setattr(obj, key, float(val))
+        except ValueError:
+            pass
+        setattr(obj, key, val)
 
 
 def __dir__():
     return (
+        'Base',
+        'Configuration',
         'Data',
-        'Dict',
-        'Methods',
-        'Object'
+        'Object',
+        'Methods'
     )

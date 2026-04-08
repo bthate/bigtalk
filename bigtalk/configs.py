@@ -4,18 +4,8 @@
 "configuration"
 
 
-from .objects import Data, Dict, Methods
+from .objects import Methods
 from .utility import Utils
-
-
-class Configuration(Data):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-        if args:
-            Dict.update(self, args[0])
-        if kwargs:
-            Dict.update(self, kwargs)
 
 
 class MainConfig(type):
@@ -31,12 +21,12 @@ class MainConfig(type):
 
 class Main(metaclass=MainConfig):
 
-    name = Utils.pkgname(Configuration)
+    name = Utils.pkgname(MainConfig)
     wdr = f".{name}"
 
 
 def __dir__():
     return (
-        'Configuration',
+        'MainConfig',
         'Main'
     )

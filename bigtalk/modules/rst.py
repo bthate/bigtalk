@@ -13,9 +13,9 @@ import time
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
 
-from bigtalk.defines import Configuration, Main
-from bigtalk.objects import Object
+from bigtalk.objects import Configuration, Data
 from bigtalk.persist import Locate, Workdir
+from bigtalk.runtime import Main
 from bigtalk.threads import Thread
 
 
@@ -39,14 +39,14 @@ class Config(Configuration):
     port = 10102
 
 
-class REST(HTTPServer, Object):
+class REST(HTTPServer, Data):
 
     allow_reuse_address = True
     daemon_thread = True
 
     def __init__(self, *args, **kwargs):
         HTTPServer.__init__(self, *args, **kwargs)
-        Object.__init__(self)
+        Data.__init__(self)
         self.host = args[0]
         self._last = time.time()
         self._starttime = time.time()

@@ -122,16 +122,9 @@ class Utils:
             return hashlib.md5(txt, usedforsecurity=False).hexdigest()  # pylint: disable=E1123
 
     @staticmethod
-    def md5s(path):
-        import hashlib
-        sums = hashlib.md5(usedforsecurity=False)  # pylint: disable=E1123
-        for fnm in os.listdir(path):
-            if fnm.startswith("_"):
-                continue
-            pth = os.path.join(path, fnm)
-            with open(pth, "rb") as file:
-                sums.update(file.read())
-        return sums.hexdigest()
+    def modname(obj):
+        "return package name of an object."
+        return obj.__module__.split(".")[-1]
 
     @staticmethod
     def pkgname(obj):
@@ -168,15 +161,27 @@ class Utils:
 
 class Format(logging.Formatter):
 
+    size = 3
+
     def format(self, record):
         record.module = record.module.upper()
+        record.module = record.module[:Format.size]
         return logging.Formatter.format(self, record)
 
 
 class Log:
 
     datefmt = "%H:%M:%S"
-    format = "%(module).3s %(message)s"
+    format = "%(module)-3s %(message)s"
+
+    @staticmethod
+    def size(nr):
+        index = Log.format.find("-")+1
+        newformat = Log.format[:index]
+        newformat += str(nr)
+        newformat += Log.format[index+1:]
+        Log.format = newformat
+        Format.size = nr
 
     @staticmethod
     def level(loglevel):
@@ -189,6 +194,42 @@ class Log:
             handlers=[stream,],
             force=True
         )
+
+
+HELP = """%s [-c|d|h|s] [-a] [-b] [-n] [-r] [-u] [-v] [-w] [key=value] [key==value]
+
+options:
+
+-h       show this help message and exit
+-a       load all modules
+-b       read config on boot
+-c       start console
+-d       start background daemon
+-n       disable ignore
+-r       read modules on start
+-s       start service
+-u       use local mods directory
+-v       enable verbose
+-w       wait for services to start
+
+keys:
+
+default,ignore,init,level,mods,name,version,wdr
+
+example:
+
+%s -cvw level=debug mods=irc,rss"""
+
+
+LEVELS = {
+    "notset": logging.NOTSET,
+    "debug": logging.DEBUG,
+    "info": logging.INFO,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
+    "fatal": logging.FATAL
+}
 
 
 TIMES = [
@@ -208,7 +249,9 @@ TIMES = [
 
 def __dir__():
     return (
-        'SYSTEMD',
+        'HELP',
+        'LEVELS',
+        'TIMES',
         'Log',
         'NoDate',
         'Time',

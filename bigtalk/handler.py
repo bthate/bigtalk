@@ -31,6 +31,9 @@ class Event:
     def __str__(self):
         return str(self.__dict__)
 
+    def ok(self, txt=""):
+        self.reply(f"ok {txt}".strip())
+
     def ready(self):
         "flag message as ready."
         self._ready.set()
@@ -96,7 +99,7 @@ class Client(Handler):
         Handler.__init__(self)
         self.iqueue = queue.Queue()
         self.olock = threading.RLock()
-        self.silent = False
+        self.silent = True
         self.stopped = threading.Event()
         Broker.add(self)
 

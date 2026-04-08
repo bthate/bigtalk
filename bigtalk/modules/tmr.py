@@ -11,7 +11,7 @@ import time
 
 
 from bigtalk.brokers import Broker
-from bigtalk.objects import Dict, Methods, Object
+from bigtalk.objects import Data, Object, Methods
 from bigtalk.persist import Disk, Locate
 from bigtalk.threads import Thread, Timed
 from bigtalk.utility import Time
@@ -23,16 +23,15 @@ rand = random.SystemRandom()
 def init():
     Timers.path = Locate.last(Timers.timers) or Methods.ident(Timers.timers)
     remove = []
-    for tme, args in Dict.items(Timers.timers):
+    for tme, args in Object.items(Timers.timers):
         if not args:
             continue
         orig, channel, txt = args
-        for origin in Broker.like(orig):
+        for origin, bot in Broker.like(orig):
             if not origin:
                 continue
             diff = float(tme) - time.time()
             if diff > 0:
-                bot = Broker.get(origin)
                 timer = Timed(diff, bot.say, channel, txt)
                 timer.start()
             else:
@@ -44,12 +43,12 @@ def init():
     logging.warning("%s timers", len(Timers.timers))
 
 
-class Timer(Object):
+class Timer(Data):
 
     pass
 
 
-class Timers(Object):
+class Timers(Data):
 
     path = ""
     timers = Timer()
@@ -68,26 +67,19 @@ class Timers(Object):
 
 def tmr(event):
     if not event.rest:
-        nmr = 0
-        for tme, txt in Dict.items(Timers.timers):
-            lap = float(tme) - time.time()
-            if lap > 0:
-                event.reply(f'{nmr} {" ".join(txt)} {Time.elapsed(lap)}')
-                nmr += 1
-        if not nmr:
-            event.reply("no timers.")
+        event.reply("tmr <date> <txt>")
         return
-    target = Time.extract(event.rest)
-    if not target:
+    todo = Time.extract(event.rest)
+    if not todo:
         event.reply("can't determine time")
         return
-    target += rand.random()
-    if not target or time.time() > target:
+    todo += rand.random()
+    if not todo or time.time() > todo:
         event.reply("already passed given time.")
         return
-    diff = target - time.time()
+    diff = todo - time.time()
     txt = " ".join(event.args[1:])
-    Timers.add(target, event.orig, event.channel, txt)
+    Timers.add(todo, event.orig, event.channel, txt)
     Disk.write(Timers.timers, Timers.path or Methods.ident(Timers.timers))
     bot = Broker.get(event.orig)
     timer = Timed(diff, bot.say, event.channel, txt)

@@ -9,12 +9,12 @@ import os
 import time
 
 
-from bigtalk.objects import Dict, Methods, Object
+from bigtalk.objects import Data, Methods, Object
 from bigtalk.persist import Disk, Locate
 from bigtalk.utility import Time
 
 
-class Email(Object):
+class Email(Data):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,7 +35,7 @@ def eml(event):
     args = ["From", "Subject"]
     args.extend(event.args)
     if event.gets:
-        args.extend(Dict.keys(event.gets))
+        args.extend(Object.keys(event.gets))
     for key in event.silent:
         if key in args:
             args.remove(key)
@@ -59,6 +59,9 @@ def eml(event):
         event.reply("no emails found.")
 
 
+eml.skip = "irc"
+
+
 def mbx(event):
     if not event.args:
         event.reply("mbx <path>")
@@ -78,7 +81,7 @@ def mbx(event):
     nrs = 0
     for mail in thing:
         obj = Email()
-        Dict.update(obj, dict(mail._headers))
+        Object.update(obj, dict(mail._headers))
         obj.text = ""
         for payload in mail.walk():
             if payload.get_content_type() == 'text/plain':
@@ -88,3 +91,6 @@ def mbx(event):
         nrs += 1
     if nrs:
         event.reply("ok %s" % nrs)
+
+
+mbx.skip = "irc"

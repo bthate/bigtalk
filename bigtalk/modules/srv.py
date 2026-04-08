@@ -4,7 +4,7 @@
 "systemd service file"
 
 
-from bigtalk.defines import Main
+from bigtalk.runtime import Main
 
 
 def srv(event):
@@ -12,6 +12,9 @@ def srv(event):
     import getpass
     name = getpass.getuser()
     event.reply(SYSTEMD % (Main.name.upper(), name, name, name, Main.name))
+
+
+srv.skip = "irc"
 
 
 SYSTEMD = """[Unit]

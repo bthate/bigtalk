@@ -11,10 +11,10 @@ import pathlib
 import threading
 
 
-from .defines import Main
+from .configs import Main
 from .encoder import Json
-from .objects import Data, Dict, Methods
-from .utility import Time
+from .objects import Data, Methods, Object
+from .utility import Time, Utils
 
 
 class Cache:
@@ -35,9 +35,20 @@ class Cache:
     def sync(cls, path, obj):
         "update cached object."
         try:
-            Dict.update(cls.paths[path], obj)
+            Object.update(cls.paths[path], obj)
         except KeyError:
             cls.add(path, obj)
+
+
+class Cfg:
+
+    @classmethod
+    def load(cls, obj, name=""):
+        Disk.read(obj, name or Utils.modname(obj), "config")
+
+    @classmethod
+    def save(cls, obj, name=""):
+        Disk.write(obj, name or Utils.modname(obj), "config")
 
 
 class Disk:
@@ -57,23 +68,23 @@ class Disk:
     def read(cls, obj, path, base="store"):
         "read object from path."
         with cls.lock:
-            pth = os.path.join(Workdir.wdr, base, path)
+            pth = os.path.join(Main.wdr, base, path)
             if not os.path.exists(pth):
                 return
             with open(pth, "r", encoding="utf-8") as fpt:
                 try:
-                    Dict.update(obj, Json.load(fpt))
+                    Object.update(obj, Json.load(fpt))
                 except json.decoder.JSONDecodeError as ex:
                     logging.error("failed read at %s", pth)
                     raise ex
 
     @classmethod
-    def write(cls, obj, path="", base="store"):
+    def write(cls, obj, path="", base="store", skip=False):
         "write object to disk."
         with cls.lock:
             if path == "":
                 path = Methods.ident(obj)
-            pth = os.path.join(Workdir.wdr, base, path)
+            pth = os.path.join(Main.wdr, base, path)
             Disk.cdir(pth)
             with open(pth, "w", encoding="utf-8") as fpt:
                 Json.dump(obj, fpt, indent=4)
@@ -88,7 +99,7 @@ class Locate:
         "show attributes for kind of objects."
         result = []
         for pth, obj in Locate.find(kind, nritems=1):
-            result.extend(Dict.keys(obj))
+            result.extend(Object.keys(obj))
         return set(result)
 
     @classmethod
@@ -126,14 +137,14 @@ class Locate:
         res = ""
         if result:
             inp = result[0]
-            Dict.update(obj, inp[-1])
+            Object.update(obj, inp[-1])
             res = inp[0]
         return res
 
     @classmethod
     def fns(cls, kind):
         "file names by kind of object."
-        path = os.path.join(Workdir.wdr, "store", kind)
+        path = os.path.join(Main.wdr, "store", kind)
         for rootdir, dirs, _files in os.walk(path, topdown=True):
             for dname in dirs:
                 if dname.count("-") != 2:
@@ -152,7 +163,7 @@ class Locate:
         res = ""
         if result:
             inp = result[-1]
-            Dict.update(obj, inp[-1])
+            Object.update(obj, inp[-1])
             res = inp[0]
         return res
 
@@ -164,19 +175,10 @@ class Locate:
 
 class Workdir:
 
-    wdr = "." + Main.name
-
-    @classmethod
-    def setwd(cls, path):
-        "enable writing to disk."
-        Disk.cdir(path)
-        cls.wdr = path
-        cls.skel()
-
     @classmethod
     def kinds(cls):
         "show kind on objects in cache."
-        return os.listdir(os.path.join(cls.wdr, "store"))
+        return os.listdir(os.path.join(Main.wdr, "store"))
 
     @classmethod
     def long(cls, name):
@@ -192,38 +194,21 @@ class Workdir:
         return res
 
     @classmethod
-    def pidfile(cls, name):
-        "write pidfile."
-        filename = os.path.join(cls.wdr, f"{name}.pid")
-        if os.path.exists(filename):
-            os.unlink(filename)
-        path2 = pathlib.Path(filename)
-        path2.parent.mkdir(parents=True, exist_ok=True)
-        with open(filename, "w", encoding="utf-8") as fds:
-            fds.write(str(os.getpid()))
-
-    @classmethod
     def skel(cls):
         "create directories."
-        if not cls.wdr:
+        if not Main.wdr:
             return
-        if not os.path.exists(cls.wdr):
-            Disk.cdir(cls.wdr)
-        path = os.path.abspath(Workdir.wdr)
-        workpath = os.path.join(path, "store")
-        pth = pathlib.Path(workpath)
-        pth.mkdir(parents=True, exist_ok=True)
-        modpath = os.path.join(path, "mods")
-        pth = pathlib.Path(modpath)
-        pth.mkdir(parents=True, exist_ok=True)
-        filespath = os.path.join(path, "files")
-        pth = pathlib.Path(filespath)
-        pth.mkdir(parents=True, exist_ok=True)
+        if not os.path.exists(Main.wdr):
+            Disk.cdir(Main.wdr)
+        path = os.path.abspath(Main.wdr)
+        for wpth in ["config", "files", "logs", "mods", "store"]:
+            pth = pathlib.Path(os.path.join(path, wpth))
+            pth.mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def workdir(cls, path=""):
         "return workdir."
-        return os.path.join(cls.wdr, path)
+        return os.path.join(Main.wdr, path)
 
 
 def __dir__():

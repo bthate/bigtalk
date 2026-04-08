@@ -16,13 +16,13 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
+from bigtalk.booting import Boot
 from bigtalk.command import Commands
-from bigtalk.defines import Main
 from bigtalk.handler import Client, Event
 from bigtalk.objects import Data, Methods
 from bigtalk.package import Mods
 from bigtalk.persist import Workdir
-from bigtalk.runtime import Runtime
+from bigtalk.runtime import Main
 from bigtalk.threads import Thread
 from bigtalk.utility import Log, Time, Utils
 
@@ -45,7 +45,7 @@ Main.level = "info"
 Main.mods = ""
 Main.name = Utils.pkgname(Commands)
 Main.opts = Data()
-Main.version = 10
+Main.version = 453
 Main.wdr = ".test"
 
 
@@ -116,13 +116,13 @@ def main():
     if "p" not in Main.opts and os.path.exists(Main.wdr):
         shutil.rmtree(Main.wdr)
     Methods.parse(Main, " ".join(sys.argv[1:]))
-    Workdir.setwd(Main.wdr)
+    Workdir.skel()
     Log.level(Main.level)
     Mods.add("modules", MODS.__path__[0])
     if MODS2:
         Mods.add("mods", MODS2.__path__[0])
     Main.mods = Main.mods or Mods.list()
-    Runtime.scanner(Main)
+    Boot.scanner(Main)
     if "z" in Main.opts:
         Clients.init(os.cpu_count(), CLI)
     else:
@@ -145,7 +145,7 @@ def main():
     lap = Time.elapsed(endtime-starttime)
     percall = (endtime-starttime)/nrevents
     nrs = events.qsize()
-    Runtime.shutdown()
+    Boot.shutdown()
     if "v" in Main.opts:
         print(f"{Methods.fmt(Main, skip='otxt,txt')}")
         print(f"{nrs} events left.")
@@ -202,4 +202,4 @@ post = {
 
 
 if __name__ == "__main__":
-    Runtime.wrap(main)
+    Boot.wrap(main)
