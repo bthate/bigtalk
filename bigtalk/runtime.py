@@ -24,7 +24,7 @@ class Default:
 
     default = "irc,mdl,rss,wsd"
     txt = " ".join(sys.argv[1:])
-    version = 453
+    version = 11
 
 
 class Line(Console):
