@@ -1,1 +1,19 @@
-python3 -m bigtalk.runtime $* ;
+#!/usr/bin/env python3
+# This file is placed in the Public Domain.
+
+
+"stub"
+
+
+import os
+import sys
+
+
+sys.path.insert(0, os.getcwd())
+
+
+from bigtalk.runtime import main
+
+
+if __name__ == "__main__":
+    main()
