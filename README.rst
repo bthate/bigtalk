@@ -8,6 +8,7 @@
 
 Hello Office of the Prosecutor, 
 
+
 i write you in the context of communications and claims under art.15 of 
 the Rome Statute. i want to inform the prosecutor that the king of the 
 netherlands and his government are commiting 3 of the 5 crimes defined 
@@ -22,7 +23,7 @@ Both the chamber suggesting these laws to the king and the king himself
 have been informed about the fact the the substances administered under 
 these laws are proven to be poison.
  
-There is proof the medication used in forced treatments in the 
+There is proof the medication used in forced treatements in the 
 netherlands are poison, see copies of the ECHA <`European Chemical Agency`>
 website for:
 
@@ -46,8 +47,16 @@ on the following victim groups here in the Netherlands:
 (4) criminelen (criminials)
 (5) gehandicapten (handicapped)
 
-Since the members of the chamber and the king were aware that these medicine
-are poison at the time they voted for this law and the day the Wfz law took
-effect (1-1-2019), i ask the prosecutor to prosecute the king for making the
-commiting of the above mentioned crimes (killing, torture and impotent making)
-possible.
+
+Since the members of the :ref:`chamber <chamber>` and the :ref:`king <king>`
+were aware that these medicine are poison at the time they voted for this law
+and the day the Wfz law took effect (1-1-2019), i ask the prosecutor to
+prosecute the king for making the commiting of the above mentioned crimes
+(killing, torture and impotent making) possible.
+
+
+
+|
+
+* Since January 2026 the **ECHA** <European Chemical Agency> no longer shows a skull and bones when visited.
+
