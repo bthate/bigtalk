@@ -36,6 +36,7 @@ classifiers = [
 [tool.setuptools]
 packages = [
     'bigtalk',
+    'bigtalk.mirrors',
     'bigtalk.modules',
     'bigtalk.network',
     'bigtalk.network.pdf',
