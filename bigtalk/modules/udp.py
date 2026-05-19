@@ -12,7 +12,7 @@ import threading
 import time
 
 
-from bigtalk.defines import Base, Broker, Clients, Disk, Main, Thread
+from bigtalk.defines import Base, Clients, Disk, Main, Thread
 
 
 def init():

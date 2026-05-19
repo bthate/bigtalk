@@ -22,7 +22,7 @@ from urllib.error import HTTPError
 from urllib.parse import quote_plus, urlencode
 
 
-from bigtalk.defines import Base, Broker, Clients, Disk, Locate, Main, Object
+from bigtalk.defines import Base, Clients, Disk, Locate, Main, Object
 from bigtalk.defines import Repeater, Thread, Utils, i
 
 

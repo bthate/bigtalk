@@ -9,7 +9,7 @@ import logging
 import time
 
 
-from bigtalk.defines import Base, Broker, Clients, Event, Object, Repeater, Time
+from bigtalk.defines import Base, Clients, Event, Object, Repeater, Time
 
 
 def init():

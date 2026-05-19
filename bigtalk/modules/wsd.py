@@ -10,7 +10,7 @@ import logging
 from random import SystemRandom
 
 
-from bigtalk.defines import Broker, Clients, Disk, Event, Locate, Repeater
+from bigtalk.defines import Clients, Disk, Event, Locate, Repeater
 
 
 rand = SystemRandom()
