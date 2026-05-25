@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # This file is placed in the Public Domain.
 
 
@@ -12,11 +11,8 @@ import sys
 import time
 
 
-sys.path.insert(0, os.getcwd())
-
-
-from bigtalk.defines import Boot, Client, Commands, Disk, Event, Log
-from bigtalk.defines import Main, Mods, Object, Parse, Utils, Workdir
+from .defines import Boot, Client, Commands, Disk, Event, Log
+from .defines import Main, Mods, Object, Parse, Utils, Workdir
 
 
 class Arguments:
@@ -227,7 +223,3 @@ def main():
         Runs.wrap(Scripts.service)
     else:
         Runs.wrap(Scripts.control)
-
-
-if __name__ == "__main__":
-    main()
