@@ -17,7 +17,7 @@ sys.path.insert(0, os.getcwd())
 
 
 from bigtalk.defines import Boot, Buffer, Commands, Engine, Event, Log, Main
-from bigtalk.defines import Mods, Object, Parse, Thread, Time, Workdir, e
+from bigtalk.defines import Mods, Object, Parse, Thread, Time, Utils, Workdir, e
 
 
 Main.debug = True
@@ -25,6 +25,7 @@ Main.wdr = ".test"
 Main.user = True
 
 
+Mods.add("modules", Utils.moddir())
 Mods.add("mods", "mods")
 Mods.add("other", "other")
 
