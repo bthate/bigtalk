@@ -30,7 +30,13 @@ def init():
     except (KeyboardInterrupt, EOFError):
         _thread.interrupt_main()
     if irc.events.joined.is_set():
-        logging.warning("%s", Object.fmt(irc.cfg, skip=["ignore", "word"]))
+        logging.warning("%s", Object.fmt(irc.cfg, skip=[
+                                                        "ignore",
+                                                        "name",
+                                                        "sleep",
+                                                        "version",
+                                                        "word"
+                                                       ]))
     else:
         irc.stop()
     return irc
