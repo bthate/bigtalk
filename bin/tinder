@@ -16,13 +16,18 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.defines import Boot, Buffer, Commands, Engine, Event, Log, Main
-from bigtalk.defines import Mods, Object, Parse, Thread, Time, Utils, Workdir, e
+from bigtalk.defines import Boot, Buffer, Commands, Engine, Logging, Main, Message, Mods
+from bigtalk.defines import Object, Parse, Task, Thread, Time, Utils, Workdir, e
 
 
 Main.debug = True
+Main.name = "tinder"
 Main.wdr = ".test"
 Main.user = True
+
+
+Task.bork = True
+Workdir.wdr = Main.wdr
 
 
 Mods.add("modules", Utils.moddir())
@@ -30,17 +35,15 @@ Mods.add("mods", "mods")
 Mods.add("other", "other")
 
 
-Workdir.wdr = Main.wdr
-
-
-Log.level("debug")
+Logging.level("debug")
+Boot.scanner()
 
 
 class CLI(Engine, Buffer):
 
     def __init__(self):
-        Engine.__init__(self)
         Buffer.__init__(self)
+        Engine.__init__(self)
         self.register("command", Commands.command)
 
     def raw(self, text):
@@ -93,6 +96,20 @@ class Runs:
 
     nrs = 0
 
+    @classmethod
+    def banner(cls):
+        "hello"
+        tme = time.ctime(time.time()).replace("  ", " ")
+        txt = "%s %s since %s %s (%s)" % (
+            Main.name.upper(),
+            Main.version,
+            tme,
+            Main.level.upper() or "INFO",
+            Boot.core()
+        )
+        print(txt.replace("  ", " "))
+        sys.stdout.flush()
+
     @staticmethod
     def check(opts):
         "check for command line options."
@@ -108,7 +125,7 @@ class Runs:
     def payload(todo):
         for cmd, example in todo.items():
             for ex in example:
-                evt = Event()
+                evt = Message()
                 evt.kind = "command"
                 evt.text = f"{cmd} {ex}"
                 Clients.put(evt)
@@ -156,10 +173,10 @@ def main():
         shutil.rmtree(Main.wdr)
     if Runs.check("v"):
         Main.verbose = True
+        Runs.banner()
     if Runs.check("t"):
         Main.threaded = True
     Parse.parse(Main, " ".join(sys.argv[1:]))
-    Boot.scanner()
     if Main.threaded:
         Clients.init(os.cpu_count(), CLI)
     else:
@@ -190,18 +207,15 @@ def main():
 examples = {
     "cmd": [""],
     "dis": [""],
-    "dne": ["", "bla"],
-    "dpl": ["hnrss title,url", ""],
+    "dpl": ["", "tittle.link"],
     "eml": ["", "root@localhost"],
-    "fie": ["", "log", "todo"],
     "flt": ["", "0"],
-    "fnd": ["", "log", "rss", "config", "todo", 'timers'],
+    "fnd": ["", "log", "todo"],
+    "fie": ["", "log", "todo"],
     "lou": [""],
-    "man": ["", "genocide bigtalkniet@gmail.com Nixt Niet"],
-    "mbx": [""],
-    "mod": [""],
-    "mre": [""],
-    "nme": ["", "hnrss hackernews"],
+    "mbx": ["", "~/25-1-2013"],
+    "man": ["", "nixt nixtniet@gmail.com Nixt Niet"],
+    "nme": ["", "hnrss hn"],
     "now": [""],
     "pth": [""],
     "pwd": ["", "bla mekker"],
@@ -210,9 +224,10 @@ examples = {
     "sil": [""],
     "slg": [""],
     "srv": [""],
-    "thr": [""],
-    "upt": [""],
-    "wsd": [""]
+    "tbl": [""],
+    'thr': [""],
+    'upt': [""],
+    'ver': [""],
 }
 
 
@@ -239,14 +254,14 @@ pre = {
     "log": ["", "test"],
     "rss": ["", "http://hnrss.org/newest"],
     "tdo": ["", "test2"],
-    "tmr": ["", "22:00 test"],
+    "tmr": ["", "22:00 test"]
 }
 
 post = {
     "dbg": [""],
-    "dne": ["", "mekker"],
+    "dne": [""," mekker"],
     "exp": [""],
-    "rem": ["", "hnrss"]
+    "rem": ["", "rem hnrss"]
 }
 
 
