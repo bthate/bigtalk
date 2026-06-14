@@ -15,9 +15,6 @@ import time
 from bigtalk.defines import Base, Clients, Disk, Main, Thread
 
 
-whitelist = ['udp']
-
-
 def init():
     "initialize udp to irc relay."
     relay = UDP()

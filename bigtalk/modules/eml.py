@@ -12,9 +12,6 @@ import time
 from bigtalk.defines import Base, Disk, Locate, Object, Time, e
 
 
-whitelist = ['eml', 'mbx']
-
-
 class Email(Base):
 
     def __init__(self, *args, **kwargs):

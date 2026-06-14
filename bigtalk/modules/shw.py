@@ -8,16 +8,13 @@ import threading
 import time
 
 
-from bigtalk.defines import Broker, Commands, Locate, Main, Md5
+from bigtalk.defines import Broker, Locate, Main, Md5, Mods
 from bigtalk.defines import Object, Time, Workdir
-
-
-whitelist = ['cmd', 'fie', 'flt', 'thr', 'upt', 'ver']
 
 
 def cmd(event):
     "list available commands."
-    event.reply(",".join(sorted(Commands.cmds)))
+    event.reply(",".join(sorted(Mods.cmds)))
 
 
 def fie(event):
@@ -67,11 +64,7 @@ def thr(event):
             uptime = time.time() - thread.starttime
         else:
             uptime = time.time() - Time.starttime
-        if "." in thread.name:
-            name = thread.name.split('.')[-1]
-        else:
-            name = thread.name
-        result.append((uptime, name))
+        result.append((uptime, thread.name))
     res = []
     for uptime, txt in sorted(result, key=lambda x: x[0]):
         lap = Time.elapsed(uptime)

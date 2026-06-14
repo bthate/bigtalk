@@ -26,9 +26,6 @@ from bigtalk.defines import Base, Clients, Disk, Locate, Main, Object
 from bigtalk.defines import Repeater, Thread, Utils, i
 
 
-whitelist = ['atr', 'dpl', 'err', 'exp', 'imp', 'nme', 'rem', 'res', 'rss', 'syn']
-
-
 def init():
     "initialize rss module."
     Runners.init(1, Runner)

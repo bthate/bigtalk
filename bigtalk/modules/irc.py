@@ -14,11 +14,8 @@ import time
 import _thread
 
 
-from bigtalk.defines import Base, Broker, Buffered, Commands, Disk, Engine
-from bigtalk.defines import Main, Message, Mods, Object, Thread, Utils
-
-
-whitelist = ['pwd']
+from bigtalk.defines import Base, Broker, Buffered, Disk, Engine, Main
+from bigtalk.defines import Message, Mods, Object, Thread, Utils
 
 
 def init():

@@ -7,9 +7,6 @@
 from bigtalk.defines import d, e, j
 
 
-whitelist = ['pth']
-
-
 def pth(event):
     "create and show path to website."
     path = d(d(__file__))

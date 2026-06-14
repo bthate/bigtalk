@@ -7,9 +7,6 @@
 from bigtalk.defines import Base, Disk
 
 
-whitelist = ['log']
-
-
 class Log(Base):
 
     def __init__(self):
