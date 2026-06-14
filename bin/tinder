@@ -16,8 +16,8 @@ import time
 sys.path.insert(0, os.getcwd())
 
 
-from bigtalk.defines import Boot, Buffer, Commands, Engine, Logging, Main, Message, Mods
-from bigtalk.defines import Object, Parse, Task, Thread, Time, Utils, Workdir, e
+from bigtalk.defines import Boot, Buffer, Engine, Logging, Main, Message, Mods, Object
+from bigtalk.defines import Parse, Task, Thread, Time, Utils, Workdir, e
 
 
 Main.debug = True
@@ -30,9 +30,9 @@ Task.bork = True
 Workdir.wdr = Main.wdr
 
 
-Mods.add("modules", Utils.moddir())
-Mods.add("mods", "mods")
-Mods.add("other", "other")
+Mods.dir("modules", Utils.moddir())
+Mods.dir("mods", "mods")
+Mods.dir("other", "other")
 
 
 Logging.level("debug")
@@ -44,7 +44,7 @@ class CLI(Engine, Buffer):
     def __init__(self):
         Buffer.__init__(self)
         Engine.__init__(self)
-        self.register("command", Commands.command)
+        self.register("command", Mods.command)
 
     def raw(self, text):
         if Main.verbose:
