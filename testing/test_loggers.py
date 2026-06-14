@@ -7,10 +7,10 @@
 import unittest
 
 
-from bigtalk.defines import Log
+from bigtalk.defines import Logging
 
 
 class TestLoggers(unittest.TestCase):
 
     def test_dateformat(self):
-        self.assertTrue(Log.datefmt)
+        self.assertTrue(Logging.datefmt)

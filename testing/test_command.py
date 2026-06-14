@@ -7,7 +7,7 @@
 import unittest
 
 
-from bigtalk.defines import Commands, Event, Handler
+from bigtalk.defines import Commands, Message, Handler
 
 
 def cmnd(event):
@@ -26,12 +26,12 @@ class TestCommands(unittest.TestCase):
 
     def test_get(self):
         Commands.add(cmnd)
-        self.assertTrue(Commands.get("cmnd"))
+        self.assertTrue(Commands.cmds.get("cmnd"))
 
     def test_command(self):
         clt = Handler()
         Commands.add(cmnd)
-        evt = Event()
+        evt = Message()
         evt.text = "cmnd"
         evt.orig = repr(clt)
         Commands.command(evt)

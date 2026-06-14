@@ -7,7 +7,7 @@
 import unittest
 
 
-from bigtalk.defines import Event, Engine
+from bigtalk.defines import Message, Engine
 
 
 buffer = []
@@ -30,7 +30,7 @@ class TestEngine(unittest.TestCase):
         self.hdl.stop()
 
     def test_callback(self):
-        evt = Event()
+        evt = Message()
         evt.kind = "hello"
         evt.text = "hello"
         self.hdl.callback(evt)
@@ -38,7 +38,7 @@ class TestEngine(unittest.TestCase):
         self.assertTrue("hello" in evt.result)
 
     def test_loop(self):
-        evt = Event()
+        evt = Message()
         evt.kind = "hello"
         evt.text = "hello"
         self.hdl.put(evt)
@@ -46,7 +46,7 @@ class TestEngine(unittest.TestCase):
         self.assertTrue(evt._ready.is_set())
 
     def test_loop2(self):
-        evt = Event()
+        evt = Message()
         evt.kind = "hello"
         evt.text = "hello bot"
         self.hdl.put(evt)
@@ -55,7 +55,7 @@ class TestEngine(unittest.TestCase):
 
     def test_put(self):
         hdl = Engine()
-        evt = Event()
+        evt = Message()
         evt.kind = "hello"
         hdl.put(evt)
         event = hdl.queue.get()
