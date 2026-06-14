@@ -5,7 +5,6 @@
 
 
 import argparse
-import inspect
 import logging
 import os
 import readline
@@ -14,8 +13,8 @@ import time
 import _thread
 
 
-from .defines import Boot, Client, Commands, Logging, Main, Message
-from .defines import Mods, Md5, Object, Utils, Thread, Workdir, j
+from .defines import Boot, Client, Commands, Main, Message
+from .defines import Mods, Object, Utils, Workdir
 
 
 Main.name = Utils.pkgname(Commands)

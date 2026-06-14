@@ -99,11 +99,11 @@ class Runs:
     @classmethod
     def banner(cls):
         "hello"
-        tme = time.ctime(time.time()).replace("  ", " ")
+        tmr = time.ctime(time.time()).replace("  ", " ")
         txt = "%s %s since %s %s (%s)" % (
             Main.name.upper(),
             Main.version,
-            tme,
+            tmr,
             Main.level.upper() or "INFO",
             Boot.core()
         )
@@ -259,7 +259,7 @@ pre = {
 
 post = {
     "dbg": [""],
-    "dne": [""," mekker"],
+    "dne": ["", "mekker"],
     "exp": [""],
     "rem": ["", "rem hnrss"]
 }

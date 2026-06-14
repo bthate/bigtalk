@@ -7,7 +7,7 @@
 import logging
 
 
-from .defines import Md5, Thread, Utils, e, j
+from .defines import Md5, Utils, e, j
 
 
 class Mods:
@@ -37,7 +37,7 @@ class Mods:
                 md5 = Md5.md5(fnm)
                 md5s = cls.md5s.get(name)
                 if md5s and md5 != md5s:
-                    logging.warn("mismatch %s", modname)
+                    logging.warning("mismatch %s", modname)
                 else:
                     logging.debug("no md5 for %s", modname)
             return cls.importer(modname, fnm)
