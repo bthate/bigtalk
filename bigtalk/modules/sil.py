@@ -1,0 +1,30 @@
+# This file is placed in the Public Domain.
+
+
+"silence"
+
+
+from bigtalk.defines import Broker
+
+
+whitelist = ['lou', 'sil']
+
+
+def lou(event):
+    "enable silent mode."
+    bot = Broker.get(event.orig)
+    if not bot:
+        event.reply("no bot in fleet.")
+        return
+    bot.silent = True
+    event.reply("ok")
+
+
+def sil(event):
+    "disable silent mode."
+    bot = Broker.get(event.orig)
+    if not bot:
+        event.reply("no bot in fleet.")
+        return
+    bot.silent = False
+    event.reply("ok")
