@@ -7,13 +7,13 @@
 import os
 
 
-from .defines import Logging, Md5, Thread, Utils, j
-
-
 from .command import Commands
 from .configs import Main
+from .loggers import Logging
 from .package import Mods
 from .persist import Workdir
+from .threads import Thread
+from .utility import Md5, Utils, j
 
 
 class Boot:
