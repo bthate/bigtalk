@@ -19,6 +19,8 @@ def main():
         if os.path.isdir(path):
             os.chdir(path)
             popen("./bin/clean")
+            if "-c" in sys.argv:
+                continue
             popen("./bin/docs")
             os.chdir("..")
 
