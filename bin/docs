@@ -5,3 +5,27 @@
 "loop mirrors and create docs"
 
 
+import os
+import sys
+
+
+PATH = os.path.join(os.getcwd(), "bigtalk", "mirrors")
+SKIP = []
+
+
+def main():
+    for name in os.listdir(PATH):
+        path = os.path.abspath(os.path.join(PATH, name))
+        if os.path.isdir(path):
+            os.chdir(path)
+            popen("./bin/clean")
+            popen("./bin/docs")
+            os.chdir("..")
+
+def popen(txt):
+    for line in os.popen(txt).readlines():
+        print(line.rstrip())
+        sys.stdout.flush()
+
+
+main()
